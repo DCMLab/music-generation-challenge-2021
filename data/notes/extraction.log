@@ -1,0 +1,728 @@
+(ms3) [hentsche@DCMLPC3 MS3]$ ms3 extract -N
+WARNING  Polonäs_i_Dm_efter_Daniel_Danielsson_07e0c3:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 8 (timesig 3/4, act_dur 5/8) is completed by 1 incorrect duration (expected: 1/8):
+	{1: Fraction(7, 8), 9: Fraction(1, 8)}
+WARNING  Polonäs_i_Dm_efter_Daniel_Danielsson_07e0c3:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 9 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	7   8   8     5/8         0        <NA>              <NA>
+	8   9   9     1/8       5/8        <NA>              <NA>
+	9  10  10     3/4         0        <NA>              <NA>
+WARNING  Polska_efter_Wesslén_7ed2a0:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 10, the 1st measure of a 2nd volta, should have MN 9, not MN 10.
+WARNING  9283067d35d8ccf26bfcaa6876170ab2:MeasureList -- bs4_measures.py (line 374) start_section():
+	The startRepeat in MC 9 is missing its endRepeat.
+	For correction, MC 13 is interpreted as such because it precedes the next startRepeat.
+WARNING  9283067d35d8ccf26bfcaa6876170ab2:MeasureList -- bs4_measures.py (line 374) start_section():
+	The startRepeat in MC 22 is missing its endRepeat.
+	For correction, MC 29 is interpreted as such because it precedes the next startRepeat.
+WARNING  Polonäs_i_Gm_efter_Baumgarten_e8ce25:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 6 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+	4   5   5     5/8         0        <NA>              <NA>
+	5   6   6     1/8       5/8        <NA>              <NA>
+	6   7   7     3/4         0        <NA>              <NA>
+WARNING  Pollonesse_183256_adcf61:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 10, the 1st measure of a 2nd volta, should have MN 9, not MN 10.
+WARNING  Pollonesse_183256_adcf61:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 19, the 1st measure of a 2nd volta, should have MN 18, not MN 19.
+WARNING  Pollonesse_183256_adcf61:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/4       1/2        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Polonäs_ur_Lars_Larssons_notbok_b6b8db:MeasureList -- bs4_measures.py (line 288) get_marker_mc():
+	MC 24 is supposed to jump to label segno but there are 2 of them: [5, 24]. Picking the first one.
+WARNING  Polska_efter_Johan_Lundin_cfd459:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 5, the 1st measure of a 2nd volta, should have MN 4, not MN 5.
+WARNING  Polska_efter_Johan_Lundin_cfd459:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 10, the 1st measure of a 2nd volta, should have MN 9, not MN 10.
+WARNING  Polska_efter_Anders_Gustaf_Andersson_465c5a:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 5, the 1st measure of a 2nd volta, should have MN 4, not MN 5.
+WARNING  Polska_efter_Anders_Gustaf_Andersson_465c5a:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 11, the 1st measure of a 2nd volta, should have MN 10, not MN 11.
+WARNING  Polska_efter_Anders_Gustaf_Andersson_465c5a:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 6 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	4   5   5     5/8         0        <NA>              <NA>
+	5   6   6     1/8       5/8        <NA>              <NA>
+	6   7   7     3/4         0        <NA>              <NA>
+WARNING  Polska_efter_Ida_i_Rye_4b4d84:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 6 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+	4   5   5     5/8         0        <NA>              <NA>
+	5   6   6     1/8       5/8        <NA>              <NA>
+	6   7   7     3/4         0        <NA>              <NA>
+ERROR    Polska_efter_ByssKalle_nr_42_3f261d:MeasureList -- bs4_measures.py (line 417) end_section():
+	No starting point for the repeatEnd in MC 19 could be determined. It is being ignored.
+WARNING  Polska_efter_ByssKalle_nr_42_3f261d:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 19, the 1st measure of a 2nd volta, should have MN 18, not MN 19.
+WARNING  Magdalenapolskan_efter_Carl_Gustav_Åstrand_db2b06:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Pollonesse_183209_d6a6be:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 5, the 1st measure of a 2nd volta, should have MN 4, not MN 5.
+WARNING  Pollonesse_183209_d6a6be:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 10, the 1st measure of a 2nd volta, should have MN 9, not MN 10.
+WARNING  Näckapolska_efter_Anders_Bredal_c55b3d:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Polska_efter_Anders_Gustaf_Andersson_a6976d:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 10, the 1st measure of a 2nd volta, should have MN 9, not MN 10.
+WARNING  Polska_efter_Anders_Gustaf_Andersson_a6976d:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 19, the 1st measure of a 2nd volta, should have MN 18, not MN 19.
+WARNING  Polska_efter_Anders_Gustaf_Andersson_a6976d:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+INFO     Polonäs_efter_Andreas_Grevelius_nr_18_690f3a:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 24 is missing its startRepeat.
+	For correction, MC 17 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polonäs_efter_Andreas_Grevelius_nr_18_690f3a:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 38 is missing its endRepeat.
+	For correction, MC 41 is interpreted as such because it is the last bar of the piece..
+WARNING  Polonäs_sexdregasamlingen_del_3_nr_27_ff1c20:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 10 (timesig 3/4, act_dur 19/32) is completed by 1 incorrect duration (expected: 5/32):
+	{11: Fraction(3, 4)}
+WARNING  Polonäs_sexdregasamlingen_del_3_nr_27_ff1c20:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 12 (timesig 3/4, act_dur 19/32) is completed by 1 incorrect duration (expected: 5/32):
+	{13: Fraction(3, 4)}
+WARNING  Polska_af_Böss_Calle__23075f:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 10 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	    mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0    1   1     1/8       5/8        <NA>              <NA>
+	1    2   2     3/4         0        <NA>              <NA>
+	8    9   9     5/8         0        <NA>              <NA>
+	9   10  10     1/8       5/8        <NA>              <NA>
+	10  11  11     3/4         0        <NA>              <NA>
+INFO     Polska_efter_ByssKalle_nr_32_5e25b2:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 16 is missing its startRepeat.
+	For correction, MC 9 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polska_efter_Wesslén_8cb9d2:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 10 (timesig 3/4, act_dur 1/2) is completed by 1 incorrect duration (expected: 1/4):
+	{1: Fraction(3, 4), 11: Fraction(1, 4)}
+WARNING  Polska_efter_Wesslén_8cb9d2:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 20, the 1st measure of a 2nd volta, should have MN 19, not MN 20.
+INFO     Östgötasverpen_83557c:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 16 is missing its startRepeat.
+	For correction, MC 9 is interpreted as such because it is the first bar after the previous endRepeat.
+INFO     Östgötasverpen_83557c:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 24 is missing its startRepeat.
+	For correction, MC 17 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polska_efter_Wesslén_8cb9d2:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 11 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	    mc  mn act_dur mc_offset  dont_count  numbering_offset
+	9   10  10     1/2         0        <NA>              <NA>
+	10  11  11     1/4       1/2        <NA>              <NA>
+	11  12  12     3/4         0        <NA>              <NA>
+WARNING  Polonäs_ur_Lars_Larssons_notbok_c05e54:MeasureList -- bs4_measures.py (line 288) get_marker_mc():
+	MC 10 is supposed to jump to label segno but there are 2 of them: [2, 10]. Picking the first one.
+WARNING  Polonäs_ur_Lars_Larssons_notbok_c05e54:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 7 is missing its endRepeat.
+	For correction, MC 10 is interpreted as such because it is the last bar of the piece..
+WARNING  Pollonesse_183214_20959a:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 9, the 1st measure of a 2nd volta, should have MN 8, not MN 9.
+WARNING  Polonäs_efter_Sam_Wåhlberg_Gm_675071:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 11 is missing its endRepeat.
+	For correction, MC 14 is interpreted as such because it is the last bar of the piece..
+WARNING  Polonäs_ba0e60:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 6 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+	4   5   5     5/8         0        <NA>              <NA>
+	5   6   6     1/8       5/8        <NA>              <NA>
+	6   7   7     3/4         0        <NA>              <NA>
+WARNING  Pollonesse_183261_b882f7:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 17, the 1st measure of a 2nd volta, should have MN 16, not MN 17.
+WARNING  Pollonesse_183207_14fe10:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 8, the 1st measure of a 2nd volta, should have MN 7, not MN 8.
+WARNING  Pollonesse_183207_14fe10:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 13, the 1st measure of a 2nd volta, should have MN 12, not MN 13.
+INFO     När_som_flickorna_de_gifta_sig_79c0f9:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 10 is missing its startRepeat.
+	For correction, MC 5 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Pollonesse_183207_14fe10:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Polonäs_3a2fff:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 11 is missing its endRepeat.
+	For correction, MC 29 is interpreted as such because it is the last bar of the piece..
+WARNING  Polonäs_9ddddb:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 9 is missing its endRepeat.
+	For correction, MC 12 is interpreted as such because it is the last bar of the piece..
+WARNING  Polonäs_ur_Lars_Larssons_notbok_2a67f3:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 6 (timesig 3/4, act_dur 11/16) is completed by 1 incorrect duration (expected: 1/16):
+	{7: Fraction(3, 4)}
+WARNING  Polonäs_efter_Gustaf_Weslien_f784e4:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 6, the 1st measure of a 2nd volta, should have MN 5, not MN 6.
+WARNING  Polonäs_efter_Gustaf_Weslien_679c3c:MeasureList -- bs4_measures.py (line 258) __init__():
+	Piece has a Fine but the last MC is missing a repeat sign or a D.C. (da capo) or D.S. (dal segno). Ignoring Fine.
+WARNING  Polonäs_efter_Gustaf_Weslien_679c3c:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 9 is missing its endRepeat.
+	For correction, MC 12 is interpreted as such because it is the last bar of the piece..
+WARNING  Polska_i_G_dur_efter_Alfred_Pettersson_Svl_292_626b41:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Polska_efter_Anders_Gustaf_Andersson_56bac5:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 11 (timesig 3/4, act_dur 11/16) is completed by 1 incorrect duration (expected: 1/16):
+	{12: Fraction(3, 4)}
+WARNING  Polska_efter_Anders_Gustaf_Andersson_057f04:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 5, the 1st measure of a 2nd volta, should have MN 4, not MN 5.
+INFO     Polska_från_Tuna_466e69:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 12 is missing its startRepeat.
+	For correction, MC 5 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polska_från_Tuna_466e69:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 2 (timesig 3/4, act_dur 11/16) is completed by 1 incorrect duration (expected: 1/16):
+	{3: Fraction(3, 4)}
+WARNING  Polonäs_efter_Gustaf_Weslien_b4d13d:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 6 (timesig 3/4, act_dur 1/4) is completed by 1 incorrect duration (expected: 1/2):
+	{7: Fraction(3, 4)}
+WARNING  Pollonesse_ur_Andreas_Dahlgrens_notbok_no_84_f2a90d:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Polonäs_efter_Pehr_Andersson_Bild_05_nr_13_711bf4:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 16 (timesig 3/4, act_dur 1/2) is completed by 1 incorrect duration (expected: 1/4):
+	{9: Fraction(1, 1)}
+INFO     Polonäs_ur_NilsJohan_Nybergs_notbok_25527a:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 16 is missing its startRepeat.
+	For correction, MC 9 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polonäs_ur_Anders_PlanMarcks_notbok_nr_19_5f2601:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 13 (timesig 3/4, act_dur 1/4) is completed by 1 incorrect duration (expected: 1/2):
+	{1: Fraction(3, 4)}
+WARNING  Pollonesse_183251_c23962:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 11, the 1st measure of a 2nd volta, should have MN 10, not MN 11.
+WARNING  Pollonesse_183251_c23962:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 21, the 1st measure of a 2nd volta, should have MN 20, not MN 21.
+WARNING  Pollonesse_183220_42e06f:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 6, the 1st measure of a 2nd volta, should have MN 5, not MN 6.
+WARNING  Pollonesse_183220_42e06f:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 11, the 1st measure of a 2nd volta, should have MN 10, not MN 11.
+WARNING  Pollonesse_183220_42e06f:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Polonäs_i_D_ur_AP_Roos_notbok_128ae2:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 5, the 1st measure of a 2nd volta, should have MN 4, not MN 5.
+WARNING  En_sup_till__polska_efter_Jan_Erik_Hammarberg_9d21b6:MeasureList -- bs4_measures.py (line 258) __init__():
+	Piece has a Fine but the last MC is missing a repeat sign or a D.C. (da capo) or D.S. (dal segno). Ignoring Fine.
+WARNING  En_sup_till__polska_efter_Jan_Erik_Hammarberg_9d21b6:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 9 is missing its endRepeat.
+	For correction, MC 12 is interpreted as such because it is the last bar of the piece..
+WARNING  Polonoise_92b598:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 21 (timesig 3/4, act_dur 1/8) is completed by 1 incorrect duration (expected: 5/8):
+	{22: Fraction(3, 4)}
+WARNING  Pollonesse_183216_28c0df:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 17, the 1st measure of a 2nd volta, should have MN 16, not MN 17.
+WARNING  Pollonesse_183216_28c0df:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 26, the 1st measure of a 2nd volta, should have MN 25, not MN 26.
+INFO     Polska_efter_Anders_Fredrik_Andersson_074d62:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 12 is missing its startRepeat.
+	For correction, MC 5 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polska_efter_Johan_Lundin_0f35db:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 13, the 1st measure of a 2nd volta, should have MN 12, not MN 13.
+WARNING  Polonäs_efter_Pehr_Andersson_Bild_13_nr_36_d862a4:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 9 is missing its endRepeat.
+	For correction, MC 16 is interpreted as such because it is the last bar of the piece..
+WARNING  Groddamors_polska__aef958:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 10 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	    mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0    1   1     1/8       5/8        <NA>              <NA>
+	1    2   2     3/4         0        <NA>              <NA>
+	8    9   9     5/8         0        <NA>              <NA>
+	9   10  10     1/8       5/8        <NA>              <NA>
+	10  11  11     3/4         0        <NA>              <NA>
+WARNING  Polska_efter_Lorens_Brolin_9d9b34:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 25, the 1st measure of a 2nd volta, should have MN 24, not MN 25.
+INFO     Polonäs_i_F_efter_Johan_Eric_Blomgren_86bdea:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 27 is missing its startRepeat.
+	For correction, MC 16 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polonäs_i_F_efter_Johan_Eric_Blomgren_86bdea:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 16 (timesig 3/4, act_dur 1/4) is completed by 1 incorrect duration (expected: 1/2):
+	{17: Fraction(3, 4)}
+WARNING  Polonäs_i_F_efter_Johan_Eric_Blomgren_86bdea:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MC 1 seems to be offset from the MN's beginning but has not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/4       1/2        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+WARNING  Polonäs_efter_Pehr_Andersson_Bild_05_nr_11_e39451:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 6 is missing its endRepeat.
+	For correction, MC 11 is interpreted as such because it is the last bar of the piece..
+INFO     Isbrytaren_polska_efter_ByssKalle_nr_24_f34e23:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 18 is missing its startRepeat.
+	For correction, MC 10 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Isbrytaren_polska_efter_ByssKalle_nr_24_f34e23:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 10, 19 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	    mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0    1   1     1/8       5/8        <NA>              <NA>
+	1    2   2     3/4         0        <NA>              <NA>
+	8    9   9     5/8         0        <NA>              <NA>
+	9   10  10     1/8       5/8        <NA>              <NA>
+	10  11  11     3/4         0        <NA>              <NA>
+	17  18  18     5/8         0        <NA>              <NA>
+	18  19  19     1/8       5/8        <NA>              <NA>
+	19  20  20     3/4         0        <NA>              <NA>
+WARNING  Polska_efter_Wesslén__d6fe3a:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 10, 19 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	    mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0    1   1     1/8       5/8        <NA>              <NA>
+	1    2   2     3/4         0        <NA>              <NA>
+	8    9   9     5/8         0        <NA>              <NA>
+	9   10  10     1/8       5/8        <NA>              <NA>
+	10  11  11     3/4         0        <NA>              <NA>
+	17  18  18     5/8         0        <NA>              <NA>
+	18  19  19     1/8       5/8        <NA>              <NA>
+	19  20  20     3/4         0        <NA>              <NA>
+WARNING  Polonäs_fc3131:MeasureList -- bs4_measures.py (line 197) check_measure_numbers():
+	MCs 1, 6 seem to be offset from the MN's beginning but have not been excluded from barcount. Context:
+	   mc  mn act_dur mc_offset  dont_count  numbering_offset
+	0   1   1     1/8       5/8        <NA>              <NA>
+	1   2   2     3/4         0        <NA>              <NA>
+	4   5   5     5/8         0        <NA>              <NA>
+	5   6   6     1/8       5/8        <NA>              <NA>
+	6   7   7     3/4         0        <NA>              <NA>
+WARNING  Polonesse_in_D_Dur_No_38_09d641:MeasureList -- bs4_measures.py (line 678) make_offset_col():
+	The incomplete MC 4 (timesig 3/4, act_dur 1/2) is completed by 2 incorrect durations (expected: 1/4):
+	{1: Fraction(3, 4), 5: Fraction(3, 4)}
+WARNING  Pollonesse_183226_232502:MeasureList -- bs4_measures.py (line 186) check_measure_numbers():
+	MC 9, the 1st measure of a 2nd volta, should have MN 8, not MN 9.
+INFO     Lackströms_polska_a36e55:MeasureList -- bs4_measures.py (line 400) end_section():
+	The endRepeat in MC 16 is missing its startRepeat.
+	For correction, MC 9 is interpreted as such because it is the first bar after the previous endRepeat.
+WARNING  Polonäs_efter_Gustaf_Weslien_ff8993:MeasureList -- bs4_measures.py (line 379) start_section():
+	The startRepeat in MC 9 is missing its endRepeat.
+	For correction, MC 22 is interpreted as such because it is the last bar of the piece..
+INFO     Parse -- parse.py (line 1652) parse_mscx():
+	All 412 files have been parsed successfully.
+INFO     Parse -- parse.py (line 1801) store_lists():
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén_28eb34.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Moll_no_4_ur_Anders_Larssons_notbok_900ea5.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_från_Småland__f0077d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén_fc5278.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_F_Dur_No_1__d6147c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Magdalenapolskan_efter_Carl_Gustav_Åstrand_db2b06.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_0ca591.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_A_efter_Baumgarten_04690b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_D_b7abb0.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_f1b5c8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/6a7d307d1f0712090e4043a6b4637efa.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_eeeb2d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_b6b8db.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_av_Carl_Viktor_Rulin_8f5827.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_G__Fru_Häggs_polska_e3a874.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183209_d6a6be.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Am_ur_NilsJohan_Nybergs_notbok_0cd8bd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_22_ur_Anders_Larssons_notbok_392104.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_2981d4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_18_ur_Anders_Larssons_notbok_1cda48.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/3679c385a618c89f00d159f418022b39.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_d9343d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_NilsJohan_Nybergs_notbok_61baf2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Andreas_Grevelius_nr_9_13f10a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Erik_Eriksson_6142ca.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Dur_No_6_9fd125.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_e47024.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_G__Svanpolska_7a3cc8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_44_ca7c7f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183225_4a8509.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_efter_Olof_Larsson_2f914f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Ida_i_Rye_4b4d84.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Cm_efter_Johan_Eric_Blomgren_eadc33.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_31_73d80b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183221_9c2a5c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Andreas_Grevelius_nr_18_690f3a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/9283067d35d8ccf26bfcaa6876170ab2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183256_adcf61.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_38a932.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Bb_efter_Johan_Eric_Blomgren_331a4e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Dur_No_8_c43a76.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_6b9196.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_6a4e6f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_21_nr_58_e6a9af.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_24_nr_69_9c4e57.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_i_Dm_5419f9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_e2593d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_C_bcd23b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Johan_Lundin_cfd459.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Erland_Hanssons_notbok_f665a4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_ac3754.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Erland_Hansson_f937d9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Lackströms_Polska_87dd0f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_20234a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_31_nr_92_e48cef.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_fbb2b7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183210_e91ef9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_e58d23.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_1044eb.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Alfred_Anderssons_notbok_453338.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/a0e1af6a94ac4663c193e7d6d9818189.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_B_Dur_e80987.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_c381fe.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_C_efter_Johan_Eric_Blomgren_d29bc6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Vevliretvåan_148520.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_ur_Sven_Donats_notbok_899f79.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_August_Nyholm_SvL_Hälsingland_255_ca6ac5.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_D_efter_Ruben_Thollin__6fabaa.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183246_17ff05.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_acd258.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Dahl_polska_efter_Ola_Olsson_bf94a6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Näckapolska_efter_Anders_Bredal_c55b3d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_07e0c3.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183227_7f7f8e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Johan_August_Ericsson_e2eb54.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_465c5a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Ridmarsch_efter_ByssKalle_nr_37_fde696.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_56_ecb57d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Magnus_Segerhammar_b7058d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_a6976d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Sam_Wåhlberg_d6dcad.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén_7ed2a0.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_efter_Baumgarten_e8ce25.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Petter_Ola_ed899c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Mårten_Blank_6b5a9f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_ByssKalle_nr_42_3f261d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/32a7f688d6c7ffc643473e7067ab5945.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_c4b3ff.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_från_Torna_Hällestad_d2f7e4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_55_7586c6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ecec28.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_6584f0.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_11_nr_30_c8b8af.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_99e46c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_4ab444.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_2_ur_Anders_Larssons_notbok_34cc1a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_fr_Slimminge_60b292.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_D__Bröllopspolska_63bc14.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_13_014a76.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_18cb0b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Ridmarsch_efter_ByssKalle_428d28.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_db0e5c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Sam_Wåhlberg_03bbef.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_efter_Baumgarten_414887.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_efter_Jöns_Persson_175554.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Andreas_Grevelius_nr_78_e47e5a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Bb_efter_Johan_Eric_Blomgren_44e150.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_från_England_78f69b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_16_ur_Anders_Larssons_notbok_c400c0.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183252_fc7514.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_sexdregasamlingen_del_3_nr_27_ff1c20.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Dur_No_2_6cd304.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_ur_Sven_Donats_notbok_6cab1d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_f451a8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_e85531.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Nils_slängpolska_d7c5f9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_28_5d2406.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_SpelJocke_bcbccb.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_af_Böss_Calle__23075f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_39e8b8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Ninas_slängpolska_316123.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Östgötasverpen_83557c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_ur_Trästadssamlingen_9496e6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183231_54a1b9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_495fe7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_14_nr_39_1d4a7a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_G_efter_Johan_Eric_Blomgren_46c6b0.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_G_efter_Johan_Eric_Blomgren_84f3e9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/8c6965e3c831e8cb769e578423c12d1e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_ur_Jeppa_Nilssons_notbok_85e6d7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_8c35b6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_8_ur_Anders_Larssons_notbok_09edac.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_ur_Hans_Nielsen_Balteruds_notbok_8c32cc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Sam_Wåhlberg_Gm_675071.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Sam_Wåhlberg_4a9dd8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183217_15e73c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_efter_Johan_Eric_Blomgren_f18df1.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Erland_Hanssons_notbok_e996c7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén_df2320.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_sexdregasamlingen_del_2_nr_80_ed87de.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_04_nr_09_cbaefc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Johan_Eric_Blomgren_fe46e9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/När_som_flickorna_de_gifta_sig_79c0f9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_2a67f3.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Ruben_Thollin__0559e9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Vetlanda_f2ada9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_11_940fe2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183232_778e53.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Bb_efter_Johan_Eric_Blomgren_cd110f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Rondahl_i_A_85a926.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Östra_Ryd_c349f1.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_d10d31.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonisse_258390.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Vrigstad_c46508.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_ByssKalle_nr_32_5e25b2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonoise_No_30_ur_Stakels_notsamling_90c44f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_69_62fc00.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_9b212c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_3a2fff.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_679c3c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_15_b3ef5f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_32c37e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183211_f62f63.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén_bec4ac.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Petter_Dufva_7e6155.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_c74084.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_25_0b522c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_i_G_dur_efter_Alfred_Pettersson_Svl_292_626b41.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Sam_Wåhlberg_7f8d63.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_2bd093.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_NilsJohan_Nybergs_notbok_25527a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_229504.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Poloness__5ab3e9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183214_20959a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183218_09096d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_från_England__stämma_a30e1b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_G_efter_Johan_Eric_Blomgren_a1eff9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Glada_Ryd_1cb655.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_b4d13d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_af_Hagbyen_af_Etelhem_socken_å_Gotland_50736e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_13_nr_37_bf3c6c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_c05e54.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_sexdregasamlingen_del_3_nr_1_d8c3dc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_95f90c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Bengt_Håkansson_b405db.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_8bf2ac.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_31_nr_93_Dm_06fac4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_84_f2a90d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Moll_no_1_ur_Anders_Larssons_notbok_83b1de.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén_8cb9d2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_G_efter_Jean_E_Blomgren_282b9e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Helfvetets_trapper_ce62ce.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Andreas_Grevelius_nr_75_f9aa6c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska__0e3f18.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Alfred_Pettersson_68b46f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_05_nr_13_711bf4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Johan_Eric_Blomgren_c35e09.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_D_Måll_No_2_Compo_af_Olof_Styrlander_b82ca3.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_be5f8c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ba0e60.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Am_ur_NilsJohan_Nybergs_notbok_232819.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183207_14fe10.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_f784e4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_de6b05.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Tuna_466e69.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_a39d56.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska__ea7739.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_av_Forssén_f59468.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183261_b882f7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Poloness_ur_Andreas_Hööks_notbok_cae293.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_9ddddb.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_56bac5.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183257_0abdf9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_195a42.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_7982b4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Anders_PlanMarcks_notbok_nr_19_5f2601.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_NilsJohan_Nybergs_notbok_132d01.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_057f04.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_NilsJohan_Nybergs_notbok_d3aba8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Johan_Eric_Blomgren_e27c35.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183215_0d6fcb.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_F_efter_Jean_E_Blomgren_7f81ba.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_John_Enninger_efd180.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_df6833.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Jean_E_Blomgren_615fdd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Sam_Wåhlberg_Gm_f73f36.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Nils_Larsson_1cc00b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_0962ad.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_fb0f02.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183230_d1e68b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_F_efter_Johan_Eric_Blomgren_048a81.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183220_42e06f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_ur_AP_Roos_notbok_13ba8d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_30_nr_90_d06dcf.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_C_688990.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_i_Gm_f788c8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_i_Dm__cafbff.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_17_ur_Anders_Larssons_notbok_13aa5c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Andreas_Dahlgrens_notbok_nr_77_7255ca.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_19_nr_52_3733f9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_13_ur_Anders_Larssons_notbok_615715.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_D_ur_AP_Roos_notbok_128ae2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_5_67e161.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_20_ur_Anders_Larssons_notbok_81e2d6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Am_efter_Johan_Eric_Blomgren_ddd91c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_a3d1fc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Västergötland_4b64d8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_e2b185.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_b235dc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183234_d82d0f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_1b1fc3.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_7_ur_Anders_Larssons_notbok_902035.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Dur_No_1_1b2359.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_G_f0dcd6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183212_de27a4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_2b42ff.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_45_8e189b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonoise_92b598.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Johan_Eric_Blomgren_7431d1.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_0ac736.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Ninas_slängpolska_20240b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Poloness_nr_93_efter_Gustaf_Blidström_70a0a1.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Am_efter_Johan_Eric_Blomgren_6da07c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Klöfving_b0a52f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_i_Adur_efter_Ola_i_Skarup_2_207dd7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Andreas_Dahlgrens_notbok_nr_1_b129a2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Måll_no_1_Compo_af_Lackström_6d9cdd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Hör_du_lilla_såta_hvarför_skall_du_gråta_f10dc7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_G_efter_Jean_E_Blomgren_d0a8da.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Andreas_Dahlgrens_notbok_nr_53_e5bbfe.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_D_6b27b9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_15_ur_Anders_Larssons_notbok_7fa231.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Rondahl_i_Dm_f2ec99.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polones_ce6fef.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Dur_No_4_cc831f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_i_Dm_ur_Pontus_Schwalbes_notbok_b74009.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_efter_Appelkvist_3f94c8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Magnus_Theorin_260_26890b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_ur_kantor_P_A_Isséns_samling_0514fe.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183251_c23962.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_fd6cd9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_8a2474.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_i_Amoll_5abbb6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Zakris_Jönsson_5e7b0b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_709151.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_DDm_efter_Ruben_Thollin__8db463.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183224_d3aca3.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_70_318d5a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183213_f9b0ec.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_08_nr_23_61dc2d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_G_efter_Baumgarten_c1c8c8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_eb66bb.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_F_efter_Johan_Eric_Blomgren_78500a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_D_ur_Carl_Råmelius_notbok_73d480.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_efter_Magnus_Justus_Trolle_627ac5.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183248_273ebe.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_C_efter_Johan_Eric_Blomgren_61e3af.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_efter_Jean_E_Blomgren_8f361f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_bcee75.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183208_7b42e6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_21_ur_Anders_Larssons_notbok_903fde.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Johan_Lundin_07a32a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ef2d61.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_i_Gm_4cef2e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_19_7f2f91.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183222_a615fd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183223_93b57b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183233_bcfc00.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183249_c40cdc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_6_ur_Anders_Larssons_notbok_45e24c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_28d9ad.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_be0132.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183260_23ed36.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_e9d136.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_9c99ae.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/En_sup_till__polska_efter_Jan_Erik_Hammarberg_9d21b6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_c9e52a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183216_28c0df.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_19_ur_Anders_Larssons_notbok_b9f251.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Fredrik_Andersson_074d62.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Johan_Lundin_0f35db.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Bb_efter_Johan_Eric_Blomgren_d30af3.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_e98a1f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_4_ur_Anders_Larssons_notbok_f9bbcd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_7d3f88.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_14_f4faf1.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_A_efter_Johan_Eric_Blomgren_241be5.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183228_24e1d5.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Groddamors_polska__aef958.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Elias_Annells_notbok_721f04.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Jean_E_Blomgren_ef5e22.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_10_ur_Anders_Larssons_notbok_242fbc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Petter_Olas_Anna_ee21bc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Slängpolska_efter_AG_Andersson_24d50d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_1d723c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_13_nr_36_d862a4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_F_efter_Johan_Eric_Blomgren_86bdea.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_05_nr_11_e39451.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Karl_Andersson_Sv_L_Sm_19_3027ba.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_08_nr_24_b1602b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183226_232502.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_f23bb8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Gustav_Landins_notbok_nr_14_d723be.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén_ce0449.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Lorens_Brolin_9d9b34.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_47_d1b389.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_efter_Jean_E_Blomgren_920035.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Brotorp_d795cd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_083be4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Glada_Ryd_ca8c3c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_09_nr_25_8a875e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Anders_Gustaf_Andersson_e1e8d7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_i_Ddur_efter_Ola_i_Skarup_70a78c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_847fbf.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Vrigstad_034e2a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ef3c04.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Andreas_Dahlgrens_notbok_nr_52_7a2bcd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183258_83ff95.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_43_a11680.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_D_Dur_No_38_09d641.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_5575cc.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_ur_Carl_Råmelius_notbok_47fa84.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Isbrytaren_polska_efter_ByssKalle_nr_24_f34e23.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_14_ur_Anders_Larssons_notbok_6634ac.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Menuett_i_Gm_efter_Johan_Eric_Blomgren_2a2c94.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183247_b51235.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Gustaf_Weslien_ff8993.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Pehr_Andersson_Bild_20_nr_56_20b592.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Johan_Eric_Blomgren_0f973d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/60ae81952628613e03d563b0dae8bbc2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_a1d1a8.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_0b8dfd.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183204_118db9.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Sam_Wåhlberg_af7175.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Gm_efter_Baumgarten_e55a9b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_fc3131.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_efter_Andreas_Grevelius_nr_76_37a872.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Sydjämtsk_slängpolska_efter_JohnErik_Mattsson_2a0874.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_8fb54d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_1_ur_Anders_Larssons_notbok_ddd78c.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_ur_kantor_P_A_Isséns_samling_f1d0d4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_a7d328.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Flickornas_Michaelidans_0ae676.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183259_eca7f2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_04a34b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_dd1c8e.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_Dm_efter_Daniel_Danielsson_8414f4.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183255_6103d2.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Brännvinspolonäs_efter_Rondahl_i_C_f67b5f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_från_Västergötland_ed9ac7.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_12_c058ad.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_8935ac.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Lackströms_polska_a36e55.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183250_a86e6b.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Mikaelidansen_a7e723.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_nr_46_6515fe.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183253_5eadfa.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Andreas_Dahlgrens_notbok_nr_62_0a2727.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_i_Dm_71df47.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_183229_d6da88.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_i_A_efter_Johan_Eric_Blomgren_94a60f.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_07bb09.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ab479a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_ur_Carl_Johan_Johanssons_notbok_dbb8bb.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Vevlireettan_f5db41.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Dur_No_9_f45d1d.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polska_efter_Wesslén__d6fe3a.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Pollonesse_ur_Andreas_Dahlgrens_notbok_no_10_d81ffb.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonäs_ur_Lars_Larssons_notbok_i_Cm_fd7499.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_G_Dur_no_3_ur_Anders_Larssons_notbok_276cb6.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonoise_ur_Johannes_Malkus_Petterssons_notbok_680107.tsv.
+	notes have been stored as /home/hentsche/music-generation-challenge-2021/data/notes/Polonesse_in_A_Dur_No_10_0f8d72.tsv.
+	
+	All 412 have been written.
+(ms3) [hentsche@DCMLPC3 MS3]$ 
