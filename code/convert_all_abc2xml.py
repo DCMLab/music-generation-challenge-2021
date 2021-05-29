@@ -1,48 +1,37 @@
 #!/usr/bin/env python
 #coding=utf-8
 
-
-
 import argparse, os
 from abc2xml_231.abc2xml import getXmlScores
 
-
-def abc2xml(abc):
-    return abc
 
 def read_abc(path):
     with open(path, 'r', encoding='utf-8') as f:
         abc = f.read()
     return abc
 
+def write_xml(xml, path):
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(xml)
+
 def main(args):
     for subdir, _, files in os.walk(args.DIR):
         for file in files:
-            print(file.decode('utf-8','replace'))
+            print("\n\n" + file)
             fname, fext = os.path.splitext(file)
             if fext != '.abc':
                 continue
             src = os.path.join(subdir, file)
-            tgt = os.path.join(subdir, fname + '.xml')
-            try:
-                print(f"{src} => {tgt}")
-            except:
-                print(subdir)
-                print(file)
+            abc = read_abc(src)
+            xml = getXmlScores(abc)
+            if len(xml) == 1:
+                tgt = os.path.join(args.TARGET_DIR, fname + '.xml')
+                write_xml(xml[0], tgt)
+            else:
+                for i, x in enumerate(xml, 1):
+                    tgt = os.path.join(args.TARGET_DIR, f"{fname}{i:02d}.xml")
+                    write_xml(x, tgt)
 
-
-# f = '../data/abc/_1814_698087.abc'
-# read_abc(f)
-#
-# from abc2xml_231.abc2xml import readfile, getXmlScores
-# t = readfile(f)
-# xml = getXmlScores(read_abc(f))
-#
-# def write_xml(xml, path):
-#     with open(path, 'w', encoding='utf-8') as f:
-#         f.write(xml)
-#
-# write_xml(xml[0], '../data/xml/_1814_698087.xml')
 
 
 def check_dir(d):
