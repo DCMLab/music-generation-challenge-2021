@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #coding=utf-8
 
+
+
 import argparse, os
 from abc2xml_231.abc2xml import getXmlScores
 
@@ -16,7 +18,7 @@ def read_abc(path):
 def main(args):
     for subdir, _, files in os.walk(args.DIR):
         for file in files:
-            print(file.encode('utf-8','surrogatepass').decode('utf-8'))
+            print(file.decode('utf-8','replace'))
             fname, fext = os.path.splitext(file)
             if fext != '.abc':
                 continue
@@ -27,6 +29,7 @@ def main(args):
             except:
                 print(subdir)
                 print(file)
+
 
 # f = '../data/abc/_1814_698087.abc'
 # read_abc(f)
