@@ -25,11 +25,11 @@ def main(args):
             abc = read_abc(src)
             xml = getXmlScores(abc)
             if len(xml) == 1:
-                tgt = os.path.join(args.TARGET_DIR, fname + '.xml')
+                tgt = os.path.join(args.TARGET_DIR, fname + 'generated_template_for_polyphony.xml')
                 write_xml(xml[0], tgt)
             else:
                 for i, x in enumerate(xml, 1):
-                    tgt = os.path.join(args.TARGET_DIR, f"{fname}{i:02d}.xml")
+                    tgt = os.path.join(args.TARGET_DIR, f"{fname}{i:02d}generated_template_for_polyphony.xml")
                     write_xml(x, tgt)
 
 

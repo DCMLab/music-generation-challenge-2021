@@ -2082,7 +2082,7 @@ def fixDoctype (elem):
 
 def xml2mxl (pad, fnm, data):   # write xml data to compressed .mxl file
     from zipfile import ZipFile, ZIP_DEFLATED
-    fnmext = fnm + '.xml'       # file name with extension, relative to the root within the archive
+    fnmext = fnm + 'generated_template_for_polyphony.xml'       # file name with extension, relative to the root within the archive
     outfile = os.path.join (pad, fnm + '.mxl')
     meta  = '%s\n<container><rootfiles>\n' % xmlVersion
     meta += '<rootfile full-path="%s" media-type="application/vnd.recordare.musicxml+xml"/>\n' % fnmext
@@ -2103,7 +2103,7 @@ def writefile (pad, fnm, xmldoc, mxlOpt, tOpt=False):
     if tOpt: ifnm = mxm.title.split ('\n')[0].replace (',','_').replace ("'",'_').replace ('?','_')
     if pad:
         if not mxlOpt or mxlOpt in ['a', 'add']:
-            outfnm = os.path.join (pad, ifnm + '.xml')  # joined with path from -o option
+            outfnm = os.path.join (pad, ifnm + 'generated_template_for_polyphony.xml')  # joined with path from -o option
             outfile = open (outfnm, 'w')
             outfile.write (xmldoc)
             outfile.close ()

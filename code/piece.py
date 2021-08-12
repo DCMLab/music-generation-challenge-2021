@@ -144,23 +144,30 @@ class GuideTone(Word):
 def node_grow(tree: Tree, level):
     """tree is suppose to have no children"""
     if level == 'Top':
-        # start Form, start Key, start Harmony
+        # start Form, start Key, start & distribute Harmony,start Rhythm
+        primary_component_expansion = tree.data.form.start().symbols
+        n_partition = len(primary_component_expansion)
         tree.data.key = tree.data.key.start()
-        for symbol in tree.data.form.start().symbols:
+        tree.data.harmony = tree.data.harmony.start()
+        harmony_expansion_partition = tree.data.harmony.expand_and_distribute(n=n_partition)
+        rhythm_expansion_partition = tree.data.rhythm.expand_and_distribute(n=n_partition)
+        for symbol,harmony,rhythm in zip(primary_component_expansion,harmony_expansion_partition,rhythm_expansion_partition):
             child = Tree()
             child.data = copy.deepcopy(tree.data)
             child.data.level = 'Section'
             child.data.form = Form(symbols=[symbol])
-            child.data.harmony = child.data.harmony.start()
+            child.data.rhythm = rhythm
+            child.data.harmony = harmony
             tree.children.append(child)
 
     elif level == 'Section':
-        # *expand Form, expand & distribute Harmony, start Contour, start Rhythm
+        # *expand Form, expand & distribute Harmony, start Contour, expand and distribute Rhythm
         for section in tree.children:
             primary_component_expansion = section.data.form.expand().symbols
             n_partition = len(primary_component_expansion)
             harmony_expansion_partition = section.data.harmony.expand_and_distribute(n=n_partition)
-            for symbol,harmony in zip(primary_component_expansion,harmony_expansion_partition):
+            rhythm_expansion_partition = section.data.rhythm.expand_and_distribute(n=n_partition)
+            for symbol,harmony,rhythm in zip(primary_component_expansion,harmony_expansion_partition,rhythm_expansion_partition):
 
                 child = Tree()
                 child.data = copy.deepcopy(section.data)
@@ -168,24 +175,24 @@ def node_grow(tree: Tree, level):
                 child.data.form = Form(symbols=[symbol])
                 child.data.harmony = harmony
                 child.data.contour = child.data.contour.start()
-                child.data.rhythm = child.data.rhythm.start()
+                child.data.rhythm = rhythm
                 section.children.append(child)
 
     elif level == 'Phrase':
-        # phrase level: *expand Form, distribute Harmony, expand & distribute Contour, distribute Rhythm, start GuideTone
+        # phrase level: *expand Form, expand & distribute Harmony, expand & distribute Contour, expand & distribute Rhythm, start GuideTone
         for section in tree.children:
             for phrase in section.children:
                 primary_component_expansion = phrase.data.form.expand().symbols
                 n_partition = len(primary_component_expansion)
-                harmony_expansion_partition = phrase.data.harmony.distribute(n=n_partition)
+                harmony_expansion_partition = phrase.data.harmony.expand_and_distribute(n=n_partition)
                 contour_expansion_partition = phrase.data.contour.expand_and_distribute(n=n_partition)
-                rhythm_expansion_partition = phrase.data.rhythm.distribute(n=n_partition)
+                rhythm_expansion_partition = phrase.data.rhythm.expand_and_distribute(n=n_partition)
 
                 for form, harmony, contour,rhythm in zip(primary_component_expansion, harmony_expansion_partition,
                                                   contour_expansion_partition,rhythm_expansion_partition):
                     child = Tree()
                     child.data = copy.deepcopy(phrase.data)
-                    child.data.level = 'Bar'
+                    child.data.level = 'Subphrase'
                     child.data.form = Form(symbols=[form])
                     child.data.harmony = harmony
                     child.data.contour = contour
@@ -193,42 +200,68 @@ def node_grow(tree: Tree, level):
                     child.data.guide_tone = child.data.guide_tone.start()
                     phrase.children.append(child)
 
-    elif level == 'Bar':
-        # bar level: *expand Rhythm, Expand & Distribute Harmony, Expand & Distribute Contour
+    elif level == 'Subphrase':
+        # Subphrase level: expand Rhythm expand_distribute Form, expand & distribute Harmony, expand & distribute Contour,
         for section in tree.children:
             for phrase in section.children:
-                for bar in phrase.children:
-                    primary_component_expansion = bar.data.rhythm.expand().symbols
+                for subphrase in phrase.children:
+                    primary_component_expansion = subphrase.data.rhythm.expand().symbols
                     n_partition = len(primary_component_expansion)
-                    harmony_expansion_partition = bar.data.harmony.expand_and_distribute(n=n_partition)
-                    contour_expansion_partition = bar.data.contour.expand_and_distribute(n=n_partition)
-                    for rhythm, harmony, contour in zip(primary_component_expansion,
-                                                        harmony_expansion_partition,
-                                                        contour_expansion_partition):
+                    harmony_expansion_partition = subphrase.data.harmony.expand_and_distribute(n=n_partition)
+                    contour_expansion_partition = subphrase.data.contour.expand_and_distribute(n=n_partition)
+                    form_expansion_partition = subphrase.data.form.expand_and_distribute(n=n_partition)
+                    #print(form_expansion_partition)
+                    for rhythm, harmony, contour, form in zip(primary_component_expansion, harmony_expansion_partition,
+                                                              contour_expansion_partition, form_expansion_partition):
                         child = Tree()
-                        child.data = copy.deepcopy(bar.data)
-                        child.data.level = 'Beat'
+                        child.data = copy.deepcopy(subphrase.data)
+                        child.data.level = 'Bar'
                         child.data.rhythm = Rhythm(symbols=[rhythm])
                         child.data.harmony = harmony
                         child.data.contour = contour
-                        bar.children.append(child)
+                        child.data.form = form
+                        subphrase.children.append(child)
+
+
+
+    elif level == 'Bar':
+        # bar level: *expand Rhythm, Distribute Harmony, Expand & Distribute Contour
+        for section in tree.children:
+            for phrase in section.children:
+                for subphrase in phrase.children:
+                    for bar in subphrase.children:
+                        primary_component_expansion = bar.data.rhythm.expand().symbols
+                        n_partition = len(primary_component_expansion)
+                        harmony_expansion_partition = bar.data.harmony.distribute(n=n_partition)
+                        contour_expansion_partition = bar.data.contour.expand_and_distribute(n=n_partition)
+                        for rhythm, harmony, contour in zip(primary_component_expansion,
+                                                            harmony_expansion_partition,
+                                                            contour_expansion_partition):
+                            child = Tree()
+                            child.data = copy.deepcopy(bar.data)
+                            child.data.level = 'Beat'
+                            child.data.rhythm = Rhythm(symbols=[rhythm])
+                            child.data.harmony = harmony
+                            child.data.contour = contour
+                            bar.children.append(child)
 
     elif level == 'Beat':
         # beat level: *expand rhythm, expand & distribute contour
         for section in tree.children:
             for phrase in section.children:
-                for bar in phrase.children:
-                    for beat in bar.children:
-                        primary_component_expansion = beat.data.rhythm.expand().symbols
-                        n_partition = len(primary_component_expansion)
-                        contour_expansion_partition = beat.data.contour.expand_and_distribute(n=n_partition)
-                        for rhythm, contour in zip(primary_component_expansion, contour_expansion_partition):
-                            child = Tree()
-                            child.data = copy.deepcopy(beat.data)
-                            child.data.level = 'Note'
-                            child.data.rhythm = Rhythm(symbols=[rhythm])
-                            child.data.contour = contour
-                            beat.children.append(child)
+                for subphrase in phrase.children:
+                    for bar in subphrase.children:
+                        for beat in bar.children:
+                            primary_component_expansion = beat.data.rhythm.expand().symbols
+                            n_partition = len(primary_component_expansion)
+                            contour_expansion_partition = beat.data.contour.expand_and_distribute(n=n_partition)
+                            for rhythm, contour in zip(primary_component_expansion, contour_expansion_partition):
+                                child = Tree()
+                                child.data = copy.deepcopy(beat.data)
+                                child.data.level = 'Note'
+                                child.data.rhythm = Rhythm(symbols=[rhythm])
+                                child.data.contour = contour
+                                beat.children.append(child)
 
     elif level == 'Note':
         # note level: determine note
@@ -237,8 +270,17 @@ def node_grow(tree: Tree, level):
 
 
 if __name__ == '__main__':
-    test_list = ['a', 'b', 'c', 'd','e','f','g']
-    test_list = ['|I', 'V(HC)']
-    test_list = ['e', 'e','q','e','e','l','k']
-    print(chunks(test_list,n=3))
+    test_tree = Tree()
+
+    node_grow(tree=test_tree, level='Top')
+    node_grow(tree=test_tree, level='Section')
+    node_grow(tree=test_tree, level='Phrase')
+    node_grow(tree=test_tree, level='Subphrase')
+    node_grow(tree=test_tree, level='Bar')
+    node_grow(tree=test_tree, level='Beat')
+    print(test_tree)
+    from tree_to_xml import tree_to_stream_powerful
+
+    stream = tree_to_stream_powerful(test_tree)
+    stream.show()
 
