@@ -1,4 +1,3 @@
-import collections
 import random
 import sys
 
@@ -39,6 +38,11 @@ all_measures = sum(pieces, [])
 twelve_bar_pieces = [x for x in pieces if len(x) == 8]
 
 assert len(twelve_bar_pieces) > 0
+Mode = {
+    'major': [0, 2, 4, 5, 7, 9, 11],
+    'minor': [0, 2, 3, 5, 7, 8, 9, 10, 11],
+    'dorian': [0, 2, 3, 5, 7, 9, 10],
+}
 
 
 class BarPatternFeatures:
@@ -100,6 +104,24 @@ class BarPatternFeatures:
                 duration = int(note[2] * 4)
                 grid[index + 1:index + duration + 1] = '-'
         return grid
+
+    @staticmethod
+    def rhythm_incremental(measure: music21.stream.Measure, key: music21.key.KeySignature,
+                              n_beat) -> np.ndarray:
+        rhythm_grid = BarPatternFeatures.rhythm_sixteenth_grid(measure, key,
+                              n_beat)
+        indices_4 = 4*np.concatenate(np.tile([0, 1, 2], (4, 1)).T)
+        rhythm_4 = rhythm_grid[indices_4]
+        rhythm_4[np.concatenate([np.array([1,2,3])+4*i for i in range(3)])]='-'
+
+        indices_8 = 2 * np.concatenate(np.tile([0, 1, 2,3,4,5], (2, 1)).T)
+        rhythm_8 = rhythm_grid[indices_8]
+        rhythm_8[np.concatenate([np.array([1, 3]) + 4 * i for i in range(3)])] = '-'
+
+        rhythm_16 = rhythm_grid
+
+        rhythms = [rhythm_4,rhythm_8,rhythm_16]
+        return rhythms
 
     @staticmethod
     def contour_sixteenth_grid(measure: music21.stream.Measure, key: music21.key.KeySignature,
@@ -180,6 +202,32 @@ class BarPatternFeatures:
         dct = scipy.fftpack.dct(contour_grid_downbeat, norm='forward')
         dct = dct[:25]
         return dct
+
+    @staticmethod
+    def texture_contour_diff(measure: (m21.stream.Measure,m21.key.KeySignature,m21.meter.TimeSignature)):
+        contour_detailed_16th = BarPatternFeatures.contour_cosine(measure[0], key=measure[1],
+                                                                  n_beat=measure[2].numerator)
+
+        contour_downbeat = BarPatternFeatures.contour_cosine_downbeat(measure[0], key=measure[1],
+                                                                      n_beat=measure[2].numerator)
+        contour_detailed_8th = BarPatternFeatures.contour_cosine_eighth(measure[0], key=measure[1],
+                                                                        n_beat=measure[2].numerator)
+
+        pitches = BarPatternFeatures.contour_sixteenth_grid(measure[0], key=measure[1],
+                                                            n_beat=measure[2].numerator, n_grid=300)
+        contour_coe_diff_4_8 = contour_detailed_8th - contour_downbeat
+        contour_coe_diff_16_8 = contour_detailed_16th - contour_detailed_8th
+
+        contour_approxs_16th = scipy.fftpack.idct(contour_detailed_16th, norm='backward', n=300)
+        contour_approxs_downbeat = scipy.fftpack.idct(contour_downbeat, norm='backward', n=300)
+        contour_approxs_8th = scipy.fftpack.idct(contour_detailed_8th, norm='backward', n=300)
+        contour_diff_4_8 = contour_approxs_8th - contour_approxs_downbeat
+        contour_diff_16_8 = contour_approxs_16th - contour_approxs_8th
+
+        contour = [contour_approxs_downbeat, contour_diff_4_8, contour_diff_16_8]
+        coeff = [contour_downbeat, contour_coe_diff_4_8, contour_coe_diff_16_8]
+
+        return pitches, contour, coeff
 
 
 class DistanceFunction:
@@ -492,7 +540,7 @@ class Plot:
         fig.write_html(file_name + '.html')
 
     @staticmethod
-    def draw_heatmap(distance_matrix):
+    def draw_heatmap(distance_matrix,measure_feature):
         plotly.io.templates.default = "plotly_white"
 
         fig = plotly.subplots.make_subplots(rows=1, cols=1,
@@ -503,7 +551,7 @@ class Plot:
         for yi, yy in enumerate(display_array):
             hovertext.append(list())
             for xi, xx in enumerate(display_array):
-                hovertext[-1].append('bar 1: {}<br />bar 2: {}<br />distance: {}'.format(xx, yy, Levenshtein[yi][xi]))
+                hovertext[-1].append('bar 1: {}<br />bar 2: {}<br />distance: {}'.format(xx, yy, distance_matrix[yi][xi]))
         fig.add_trace(
             go.Heatmap(z=distance_matrix, hovertemplate='%{text}<extra></extra>', text=hovertext, showscale=False),
             row=1, col=1
@@ -537,13 +585,6 @@ class Plot:
         plt.show()
 
 
-Mode = {
-    'major': [0, 2, 4, 5, 7, 9, 11],
-    'minor': [0, 2, 3, 5, 7, 8, 9, 10, 11],
-    'dorian': [0, 2, 3, 5, 7, 9, 10],
-}
-
-
 class MelodySynthesis:
     @staticmethod
     def naive_combine_contour_rhythm_vl(contour_coeffs, rhythm_grid, vl, sample_point_size, mode=Mode['major']):
@@ -568,35 +609,51 @@ class MelodySynthesis:
         return pitch_grid
 
     @staticmethod
-    def combine_contour_rhythm_vl(contour_coeffs, rhythm_grid, vl, sample_point_size, pc_distribution_grid):
+    def combine_contour_rhythm_vl(contour_coeffs, rhythm_grid, vl, sample_point_size, pc_distribution_grid,type='coeff'):
         """use harmonic content ended in pc_distribution_grid, which has shape=(12,12), meaning (#16th-notes,#pc)"""
-        approx_contour = scipy.fftpack.idct(contour_coeffs, norm='backward', n=sample_point_size)
-        print('approx_contour: ', approx_contour)
+        if type == 'coeff':
+            approx_contour = scipy.fftpack.idct(contour_coeffs, norm='backward', n=sample_point_size)
+        if type == 'approx':
+            approx_contour = contour_coeffs
+
+        #print('approx_contour: ', approx_contour)
         pc_distribution_grid = pc_distribution_grid + 0.1
+        #print('pc_distribution_grid: ',pc_distribution_grid)
+        #pc_distribution_grid = np.array([1])+0.1
+        #pc_distribution_grid = np.tile(pc_distribution_grid,(12,12))
         pitch_grid = []
         for i, x in enumerate(rhythm_grid):
             if x == 'x':
-                print('pc_distribution_grid.shape:', pc_distribution_grid.shape)
-                tiled_pc_distribution_grid = np.tile(pc_distribution_grid[i], 3)  # shape = (3*12,)
-                print('tiled_pc_distribution_grid: ', tiled_pc_distribution_grid)
-                print('tiled_pc_distribution_grid.shape:', tiled_pc_distribution_grid.shape)
+                #print('pc_distribution_grid.shape:', pc_distribution_grid.shape)
+                tiled_pc_distribution_grid = np.tile(pc_distribution_grid[i], 4)  # shape = (3*12,)
+                #print('tiled_pc_distribution_grid: ', tiled_pc_distribution_grid)
+                #print('tiled_pc_distribution_grid.shape:', tiled_pc_distribution_grid.shape)
                 xs = np.linspace(0, 11, num=sample_point_size)
+                lower_index = np.argmin(np.abs(xs - (i + 0)))
+                upper_index = max(np.argmin(np.abs(xs - (i + 0.25))),lower_index+1)
+                #print(lower_index,upper_index)
                 approx_contour_16_grid = np.average(
-                    approx_contour[np.argmin(np.abs(xs - (i + 0))):np.argmin(np.abs(xs - (i + 0.25)))])  # shape = (,)
-                print('approx_contour_16_grid.shape:', approx_contour_16_grid.shape)
-                print('approx_contour_16_grid:', approx_contour_16_grid)
+                    approx_contour[lower_index:upper_index])  # shape = (,)
+                assert np.all(1 - np.isnan(approx_contour_16_grid))
+                #print('approx_contour_16_grid.shape:', approx_contour_16_grid.shape)
+                #print('approx_contour_16_grid:', approx_contour_16_grid)
                 tiled_pitches = np.arange(tiled_pc_distribution_grid.shape[0]) - 12  # shape = (3*12,)
-                print('tiled_pitches:', tiled_pitches)
-                print('tiled_pitches.shape:', tiled_pitches.shape)
+                #print('tiled_pitches:', tiled_pitches)
+                #print('tiled_pitches.shape:', tiled_pitches.shape)
                 diff = np.abs(tiled_pitches - approx_contour_16_grid)  # shape = (3*12,1)
-                print('diff.shape:', diff.shape)
-                force = np.power(tiled_pc_distribution_grid, 2) / (diff + 1e-5)  # shape = (3*12,1)
-                print('diff:', diff)
-                print('np.power(tiled_pc_distribution_grid[i],2): ', np.power(tiled_pc_distribution_grid[i], 2))
-                print('force:', force)
-                print('force.shape:', force.shape)
+
+                #print('diff.shape:', diff.shape)
+                force = np.power(tiled_pc_distribution_grid, 2) / (np.abs(diff) + 1e-5)  # shape = (3*12,1)
+                assert np.all(1-np.isnan(force))
+                #print('diff:', diff)
+                #print('np.power(tiled_pc_distribution_grid[i],2): ', np.power(tiled_pc_distribution_grid[i], 2))
+                #print('force:', force)
+                #print('force.shape:', force.shape)
                 argmax = np.argmax(force)  # shape = (,)
-                print('argmax.shape:', argmax.shape)
+                if argmax == 0:
+                    print('argmax == 0, force == '+str(force))
+
+                #print('argmax.shape:', argmax.shape)
                 pitch = tiled_pitches[argmax]
             elif x == '-':
                 pitch = pitch_grid[i - 1]
@@ -605,32 +662,52 @@ class MelodySynthesis:
             pitch_grid.append(pitch)
         return pitch_grid
 
+class StreamBuilder:
+    @staticmethod
+    def pitch_grid_rhythm_grid_to_stream(pitch_grid: list, rhythm_grid: list,
+                                         key: m21.key.KeySignature) -> m21.stream.Measure:
+        stream = m21.stream.Measure()
+        stream.duration = m21.duration.Duration(quarterLength=3)
+        note_list = []
+        for i, x in enumerate(rhythm_grid):
 
-def pitch_grid_rhythm_grid_to_stream(pitch_grid: list, rhythm_grid: list,
-                                     key: m21.key.KeySignature) -> m21.stream.Measure:
-    stream = m21.stream.Measure()
-    stream.duration = m21.duration.Duration(quarterLength=3)
-    note_list = []
-    for i, x in enumerate(rhythm_grid):
+            if x == 'x':
+                note = m21.note.Note(key.tonic.midi + pitch_grid[i], quarterLength=0.25)
+                note_list.append(note)
+            elif x == '_':
+                note = m21.note.Rest(quarterLength=0.25)
+                note_list.append(note)
+            elif x == '-':
+                note_list[-1].duration.quarterLength += 0.25
 
-        if x == 'x':
-            note = m21.note.Note(key.tonic.midi + pitch_grid[i], quarterLength=0.25)
-            note_list.append(note)
-        elif x == '_':
-            note = m21.note.Rest(quarterLength=0.25)
-            note_list.append(note)
-        elif x == '-':
-            note_list[-1].duration.quarterLength += 0.25
-
-    for note in note_list:
-        stream.append(note)
-    return stream
+        for note in note_list:
+            stream.append(note)
+        return stream
 
 
 class Experiment:
     mode_pc_onehot = {
         'major': np.tile([1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1], (12, 1)),
         'minor': np.tile([1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1], (12, 1)),
+        'dorian': np.tile([1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0], (12, 1))
+    }
+
+    chord_pc_onehot = {
+        'I': np.tile([1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], (12, 1)),
+        'ii': np.tile([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0], (12, 1)),
+        'iii': np.tile([0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0], (12, 1)),
+        'IV': np.tile([1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0], (12, 1)),
+        'V': np.tile([0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1], (12, 1)),
+        'vi': np.tile([1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], (12, 1)),
+        'vii': np.tile([0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1], (12, 1)),
+
+        'i': np.tile([1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0], (12, 1)),
+        'iio': np.tile([0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0], (12, 1)),
+        'III': np.tile([0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0], (12, 1)),
+        'iv': np.tile([1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0], (12, 1)),
+        #'V': np.tile([0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1], (12, 1)),
+        'VI': np.tile([1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0], (12, 1)),
+        #'vii': np.tile([0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1], (12, 1)),
     }
 
     @staticmethod
@@ -657,7 +734,7 @@ class Experiment:
                                                                            rhythm_grid=test_rhythm, vl=None,
                                                                            sample_point_size=300,
                                                                            pc_distribution_grid=pc_distribution_grid)
-            constructed_stream = pitch_grid_rhythm_grid_to_stream(constructed_melody, test_rhythm, key=key)
+            constructed_stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody, test_rhythm, key=key)
             print(constructed_melody)
             print(test_rhythm)
             constructed_melodies.append(constructed_melody)
@@ -669,8 +746,61 @@ class Experiment:
         sys.exit()
 
     @staticmethod
-    def mix_match_rhythm_contour(first_piece_measures: list[m21.stream.Measure],
-                                 second_piece_measures: list[m21.stream.Measure]):
+    def recover_measures_with_diffrent_pc_distribution(measures: list[m21.stream.Measure]):
+
+        constructed_melodies = []
+        stream = m21.stream.Stream()
+        stream.append(m21.metadata.Metadata(title='original'))
+        stream_constructed_melodies = m21.stream.Stream()
+        stream_constructed_melodies.append(m21.metadata.Metadata(title='reconstructed'))
+        stream_constructed_melodies.append(m21.meter.TimeSignature('3/4'))
+        key = measures[0][1]
+        stream_constructed_melodies.append(key)
+        Mm = key.mode
+
+        pc_distribution_grid = Experiment.mode_pc_onehot[Mm]
+        piece_pc_distribution_grid = np.tile(pc_distribution_grid,(len(measures),1,1))
+        chord_sequence_for_M = ['I', 'ii', 'V', 'vi', 'I', 'ii', 'V', 'I']
+        chord_sequence_for_m = ['i', 'iio', 'V', 'VI', 'i', 'iv', 'V', 'i']
+        chord_sequence_for_dorian = ['i', 'ii', 'V', 'i', 'i', 'IV', 'V', 'i']
+        if Mm == 'major':
+            chord_sequence = chord_sequence_for_M
+        if Mm == 'minor':
+            chord_sequence = chord_sequence_for_m
+        if Mm == 'dorian':
+            chord_sequence = chord_sequence_for_dorian
+        else:
+            print(Mm)
+
+        chord_preference_grid = np.array([Experiment.chord_pc_onehot[x] for x in chord_sequence])
+        piece_pc_distribution_grid = piece_pc_distribution_grid+3*chord_preference_grid
+
+        for i,measure in enumerate(measures):
+            print(piece_pc_distribution_grid[i])
+            stream.append(measure[0])
+            test_contour = BarPatternFeatures.contour_cosine(measure[0], key=key,
+                                                             n_beat=measure[2].numerator)
+            test_rhythm = BarPatternFeatures.rhythm_sixteenth_grid(measure[0], key=key,
+                                                                   n_beat=measure[2].numerator)
+            constructed_melody = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=test_contour,
+                                                                           rhythm_grid=test_rhythm, vl=None,
+                                                                           sample_point_size=300,
+                                                                           pc_distribution_grid=piece_pc_distribution_grid[i])
+            constructed_stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody, test_rhythm,
+                                                                                key=key)
+            print(constructed_melody)
+            print(test_rhythm)
+            constructed_melodies.append(constructed_melody)
+            stream_constructed_melodies.append(constructed_stream)
+
+        print(constructed_melodies)
+        stream.show()
+        stream_constructed_melodies.show()
+        sys.exit()
+
+    @staticmethod
+    def mix_match_rhythm_contour(first_piece_measures: list[(m21.stream.Measure,m21.key.KeySignature,m21.meter.TimeSignature)],
+                                 second_piece_measures: list[(m21.stream.Measure,m21.key.KeySignature,m21.meter.TimeSignature)]):
 
         constructed_melodies = []
         stream1 = m21.stream.Stream()
@@ -721,9 +851,9 @@ class Experiment:
                                                                             sample_point_size=300,
                                                                             pc_distribution_grid=pc_distribution_grid2)
 
-            constructed_stream1 = pitch_grid_rhythm_grid_to_stream(constructed_melody1, rhythm2, key=key1)
+            constructed_stream1 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody1, rhythm2, key=key1)
 
-            constructed_stream2 = pitch_grid_rhythm_grid_to_stream(constructed_melody2, rhythm1, key=key2)
+            constructed_stream2 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody2, rhythm1, key=key2)
 
             # print(constructed_melody)
             # print(rhythm)
@@ -739,37 +869,139 @@ class Experiment:
         sys.exit()
 
     @staticmethod
-    def texture_contour_diff(all_measures: list[m21.stream.Measure]):
-
+    def batch_texture_contour_diff(all_measures: list[m21.stream.Measure]):
         all_pitches = []
         all_contour = []
         all_coeff = []
-        print('len(first_piece_measures): ', len(all_measures))
         for measure in all_measures:
-            contour_detailed_16th = BarPatternFeatures.contour_cosine(measure[0], key=measure[1],
-                                                                      n_beat=measure[2].numerator)
+            pitches, contour, coeff = BarPatternFeatures.texture_contour_diff(measure)
 
-            contour_downbeat = BarPatternFeatures.contour_cosine_downbeat(measure[0], key=measure[1],
-                                                                          n_beat=measure[2].numerator)
-            contour_detailed_8th = BarPatternFeatures.contour_cosine_eighth(measure[0], key=measure[1],
-                                                                            n_beat=measure[2].numerator)
-
-            pitches = BarPatternFeatures.contour_sixteenth_grid(measure[0], key=measure[1],
-                                                                n_beat=measure[2].numerator, n_grid=300)
-            contour_coe_diff_4_8 = contour_detailed_8th - contour_downbeat
-            contour_coe_diff_16_8 = contour_detailed_16th - contour_detailed_8th
-
-            contour_approxs_16th = scipy.fftpack.idct(contour_detailed_16th, norm='backward', n=300)
-            contour_approxs_downbeat = scipy.fftpack.idct(contour_downbeat, norm='backward', n=300)
-            contour_approxs_8th = scipy.fftpack.idct(contour_detailed_8th, norm='backward', n=300)
-            contour_diff_4_8 = contour_approxs_8th - contour_approxs_downbeat
-            contour_diff_16_8 = contour_approxs_16th - contour_approxs_8th
-            all_contour.append([contour_approxs_downbeat, contour_diff_4_8, contour_diff_16_8])
-            all_coeff.append([contour_downbeat, contour_coe_diff_4_8, contour_coe_diff_16_8])
+            contour = np.array(contour)
+            print('contour: ', contour)
+            contour = np.array([np.sum(contour[0:i+1], axis=0) for i, x in enumerate(contour)])
+            print('accu_contour: ',contour)
+            all_contour.append(contour)
+            all_coeff.append(coeff)
             all_pitches.append(pitches)
-        # draw_contour(all_pitches,all_contour,n_sample_points=300)
+
+
+        Plot.draw_contour(all_pitches,all_contour,300)
         return all_pitches, all_contour, all_coeff
 
+    @staticmethod
+    def recovering_with_varying_contour_hierarchy(piece_measures: list[(m21.stream.Measure,m21.key.KeySignature,m21.meter.TimeSignature)]):
+        stream = m21.stream.Stream()
+        stream.append(m21.metadata.Metadata(title='original'))
+        for measure in piece_measures:
+            stream.append(measure[0])
+
+        for i,level in enumerate(['4','8','16']):
+            constructed_melodies = []
+            stream_constructed_melodies = m21.stream.Stream()
+            stream_constructed_melodies.append(m21.metadata.Metadata(title='reconstructed level = '+level))
+            stream_constructed_melodies.append(m21.meter.TimeSignature('3/4'))
+            key = piece_measures[0][1]
+            stream_constructed_melodies.append(key)
+            Mm = key.mode
+            pc_distribution_grid = Experiment.mode_pc_onehot[Mm]
+            for measure in piece_measures:
+                pitches, contours, coeff = BarPatternFeatures.texture_contour_diff(measure)
+                contours = np.array(contours)
+                contour = np.sum(contours[0:i+1], axis=0)
+                #print('this_level_contour.shape: ',contour.shape)
+                rhythms = BarPatternFeatures.rhythm_incremental(measure[0], key=key,
+                                                                       n_beat=measure[2].numerator)
+                rhythm = BarPatternFeatures.rhythm_sixteenth_grid(measure[0], key=key,
+                                                                       n_beat=measure[2].numerator)
+                rhythm=rhythms[i]
+
+                constructed_melody = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=contour,
+                                                                               rhythm_grid=rhythm, vl=None,
+                                                                               sample_point_size=300,
+                                                                               pc_distribution_grid=pc_distribution_grid,type='approx')
+                #print(constructed_melody)
+                constructed_stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody, rhythm,
+                                                                                    key=key)
+                constructed_melodies.append(constructed_melody)
+                stream_constructed_melodies.append(constructed_stream)
+
+            stream_constructed_melodies.show()
+        stream.show()
+        sys.exit()
+
+    @staticmethod
+    def mix_match_contour_surface(first_piece_measures: list[(m21.stream.Measure,m21.key.KeySignature,m21.meter.TimeSignature)],
+                                 second_piece_measures: list[(m21.stream.Measure,m21.key.KeySignature,m21.meter.TimeSignature)]):
+        constructed_melodies = []
+        stream1 = m21.stream.Stream()
+        stream1.append(m21.metadata.Metadata(title='Original 1 (provide contour and key)'))
+        stream2 = m21.stream.Stream()
+        stream2.append(m21.metadata.Metadata(title='Original 2 (provide rhythm)'))
+        stream_constructed_melodies1 = m21.stream.Stream()
+        stream_constructed_melodies1.append(m21.metadata.Metadata(title='Reconstructed 1'))
+        stream_constructed_melodies1.append(m21.meter.TimeSignature('3/4'))
+        stream_constructed_melodies2 = m21.stream.Stream()
+        stream_constructed_melodies2.append(m21.metadata.Metadata(title='Reconstructed 2'))
+        stream_constructed_melodies2.append(m21.meter.TimeSignature('3/4'))
+
+        key1 = first_piece_measures[0][1]
+        key2 = second_piece_measures[0][1]
+
+        Mm1 = key1.mode
+        Mm2 = key2.mode
+        print('Mm: ', Mm1, Mm2)
+        pc_distribution_grid1 = Experiment.mode_pc_onehot[Mm1]
+        pc_distribution_grid2 = Experiment.mode_pc_onehot[Mm2]
+
+        stream_constructed_melodies1.append(key1)
+        stream_constructed_melodies2.append(key2)
+
+
+        for first_piece_measure, second_piece_measure in zip(first_piece_measures, second_piece_measures):
+            stream1.append(first_piece_measure[0])
+            stream2.append(second_piece_measure[0])
+
+            pitches1, contours1, coeff1 = BarPatternFeatures.texture_contour_diff(first_piece_measure)
+            pitches2, contours2, coeff2 = BarPatternFeatures.texture_contour_diff(second_piece_measure)
+
+            rhythms1 = BarPatternFeatures.rhythm_incremental(first_piece_measure[0], key=key2, n_beat=first_piece_measure[2].numerator)
+            rhythms2 = BarPatternFeatures.rhythm_incremental(second_piece_measure[0], key=key2, n_beat=second_piece_measure[2].numerator)
+
+            contour1 = contours1[0]+contours2[1]+contours2[2]
+            contour2 = contours2[0] + contours1[1] + contours1[2]
+
+
+            rhythm1 = rhythms2[2]
+            rhythm2 = rhythms1[2]
+
+
+            constructed_melody1 = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=contour1,
+                                                                            rhythm_grid=rhythm2,
+                                                                            vl=None,
+                                                                            sample_point_size=300,
+                                                                            pc_distribution_grid=pc_distribution_grid1,type='approx')
+            constructed_melody2 = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=contour2,
+                                                                            rhythm_grid=rhythm1,
+                                                                            vl=None,
+                                                                            sample_point_size=300,
+                                                                            pc_distribution_grid=pc_distribution_grid2,type='approx')
+
+            constructed_stream1 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody1, rhythm2, key=key1)
+
+            constructed_stream2 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody2, rhythm1, key=key2)
+
+            # print(constructed_melody)
+            # print(rhythm)
+            constructed_melodies.append(constructed_melody1)
+            stream_constructed_melodies1.append(constructed_stream1)
+            stream_constructed_melodies2.append(constructed_stream2)
+
+        # print(constructed_melodies)
+        stream1.show()
+        stream2.show()
+        stream_constructed_melodies1.show()
+        stream_constructed_melodies2.show()
+        sys.exit()
     @staticmethod
     def clustering_contour_diff(all_measures):
         all_pitches = [BarPatternFeatures.contour_sixteenth_grid(measure[0], key=measure[1],
@@ -798,7 +1030,7 @@ class Experiment:
         model.fit(D)
         text_array = all_pitches
 
-        draw_scatter(distance_matrix=D, text_arrays=text_array, file_name='contour metrical', model=model)
+        Plot.draw_scatter(distance_matrix=D, text_arrays=text_array, file_name='contour metrical', model=model)
         sys.exit()
 
     @staticmethod
@@ -833,10 +1065,15 @@ class Experiment:
                            for
                            x in measure_feature]
         print(measure_feature)
-        draw_scatter(distance_matrix=Levenshtein, text_arrays=text_array, file_name='contour')
+        Plot.draw_scatter(distance_matrix=Levenshtein, text_arrays=text_array, file_name='contour')
 
 
 if __name__ == '__main__':
     # Experiment.recover_measures(measures=twelve_bar_pieces[1])
     # Experiment.mix_match_rhythm_contour(twelve_bar_pieces[2], twelve_bar_pieces[3])
-    Experiment.clustering_contour_diff(all_measures)
+    # Experiment.clustering_contour_diff(all_measures)
+
+    # Experiment.recovering_with_varying_contour_hierarchy(twelve_bar_pieces[2])
+    # Experiment.batch_texture_contour_diff(twelve_bar_pieces[2])
+    # Experiment.mix_match_contour_surface(twelve_bar_pieces[2], twelve_bar_pieces[3])
+    Experiment.recover_measures_with_diffrent_pc_distribution(twelve_bar_pieces[2])
