@@ -1,3 +1,5 @@
+import collections
+import itertools
 import random
 import sys
 
@@ -19,7 +21,7 @@ from ipywidgets import HTML, HBox, VBox
 xml_files = ['../data/xml/' + file_name for file_name in
              filter(lambda x: x.endswith('.xml'), sorted(os.listdir('../data/xml')))]
 pieces = []
-samples = random.sample(xml_files, k=200)
+samples = random.sample(xml_files, k=500)
 
 specific_sample = ['../data/xml/Polonäs_6b9196.xml',
                    '../data/xml/_Polska_efter_Petter_Dufva_75c046.xml',
@@ -30,14 +32,15 @@ for xml_file in samples:
     voice = test_piece.getElementsByClass(m21.stream.Part)[0]
     measures = voice.getElementsByClass(m21.stream.Measure)
     key_signature = test_piece.flat.getKeySignatures()[0]
-    time_signature = test_piece.flat.getTimeSignatures()[0]
-    measures_with_piece_info = [(m, key_signature, time_signature) for m in measures]
-    pieces.append(measures_with_piece_info)
-    if len(measures_with_piece_info) == 8:
-        print(xml_file)
+    if key_signature == m21.key.Key('D'):
+        time_signature = test_piece.flat.getTimeSignatures()[0]
+        measures_with_piece_info = [(m, key_signature, time_signature,xml_file) for m in measures]
+        pieces.append(measures_with_piece_info)
+        if len(measures_with_piece_info) == 8:
+            print(xml_file)
 all_measures = sum(pieces, [])
 
-twelve_bar_pieces = [x for x in pieces if len(x) == 8]
+twelve_bar_pieces = [x for x in pieces if len(x) in [8]]
 
 assert len(twelve_bar_pieces) > 0
 Mode = {
@@ -59,7 +62,7 @@ class BarPatternFeatures:
     def scale_degree_and_onset(measure: music21.stream.Measure, key: music21.key.KeySignature, n_beat) -> np.ndarray:
         # array = np.zeros(shape=(n_beat,4,1,1))
         notes = list(measure.getElementsByClass(m21.note.Note))
-        notes = [[note.pitch.pitchClass - key.tonic.pitchClass, note.beat] for note in notes]
+        notes = [[note.pitch.pitchClass - key.tonic.pitchClass, note.offset] for note in notes]
         return notes
 
     @staticmethod
@@ -253,6 +256,17 @@ class BarPatternFeatures:
         all_pitches = np.array(all_pitches)
         return all_pitches, all_contour, all_coeff
 
+class PieceFeatures:
+    @staticmethod
+    def get_location_contour_rhythm_dict(piece:list[(object,object,object)]):
+        list_of_feature_dict = []
+        for i,(measure,key_signature,time_signature,file_name) in enumerate(piece):
+            location = i
+            contour = BarPatternFeatures.contour_cosine(measure,key_signature,n_beat=time_signature.numerator)
+            rhythm = BarPatternFeatures.rhythm_sixteenth_grid(measure,key_signature,n_beat=time_signature.numerator)
+            feature = {'location':location,'contour':contour,'rhythm':rhythm,'key':key_signature,'source':file_name}
+            list_of_feature_dict.append(feature)
+        return list_of_feature_dict
 
 class DistanceFunction:
     @staticmethod
@@ -485,6 +499,43 @@ class DistanceFunction:
                     )
         return matrix[size_x - 1, size_y - 1]
 
+class Combination:
+    @staticmethod
+    def rhythm_intersection(rhythm1,rhythm2):
+        """take the common onset"""
+        assert  len(rhythm1)==len(rhythm2)
+        new_rhythm = []
+        for i,(r1,r2) in enumerate(zip(rhythm1,rhythm2)):
+            set_of_char = {r1,r2}
+            if r1==r2:
+                new_rhythm.append(r1)
+            elif '_' in set_of_char:
+                new_rhythm.append('_')
+            elif '-' in set_of_char:
+                new_rhythm.append('-')
+            else:
+                print('something wrong during rhythm_intersection',rhythm1,rhythm2)
+        return new_rhythm
+
+    @staticmethod
+    def rhythm_union(rhythm1, rhythm2):
+        """take the common onset"""
+        assert len(rhythm1) == len(rhythm2)
+        new_rhythm = []
+        for i, (r1, r2) in enumerate(zip(rhythm1, rhythm2)):
+            set_of_char = {r1, r2}
+            if r1 == r2:
+                new_rhythm.append(r1)
+            elif 'x' in set_of_char:
+                new_rhythm.append('x')
+            elif '-' in set_of_char:
+                new_rhythm.append('-')
+            else:
+                print('something wrong during rhythm_intersection', rhythm1, rhythm2)
+        print('rhythm1: ',rhythm1)
+        print('rhythm2: ',rhythm2)
+        print(new_rhythm)
+        return new_rhythm
 
 class Plot:
     @staticmethod
@@ -518,7 +569,7 @@ class Plot:
                                        size=8,
                                        color=model.labels_,  # set color to an array/list of desired values
                                        colorscale='Phase',
-                                       symbol='diamond',
+                                       symbol='circle',
                                        opacity=0.4
                                    ), hovertemplate='%{text}',
                                    text=text_list, textfont=dict({'family': 'Roboto Mono'}))
@@ -624,6 +675,57 @@ class Plot:
         ax.plot(np.average(np.abs(dcts), axis=0))
         plt.show()
 
+class FeatureEvaluation:
+    contour_distance_func = lambda x,y: np.linalg.norm(x-y)
+    rhythm_distance_func = DistanceFunction.rhythm_grid_distance
+    def __init__(self,joint_distribution_of_features: list[dict],contour_distance_func: callable = contour_distance_func,rhythm_distance_func: callable = rhythm_distance_func, ):
+        self.contour_distance_func = contour_distance_func
+        self.rhythm_distance_func = rhythm_distance_func
+        self.joint_distribution_of_features = joint_distribution_of_features
+
+    def location_match(self,features,current_location):
+
+        rhythm = features['rhythm']
+        contour = features['contour']
+        locations_of_this_rhythm = [d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['rhythm'],rhythm)]
+        locations_of_this_contour = [d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['contour'],contour)]
+
+        min_rhythm_location_distance = np.min(np.abs(np.array(locations_of_this_rhythm) - current_location))
+        min_contour_location_distance = np.min(np.abs(np.array(locations_of_this_contour) - current_location))
+        total_distance = np.linalg.norm(np.array([min_contour_location_distance,min_rhythm_location_distance]),ord=2)
+        plausibility = 1 / (1 + total_distance)
+        return plausibility
+
+    def internal_match(self,features):
+        rhythm = features['rhythm']
+        contour = features['contour']
+
+        rhythms_contour = [d['rhythm'] for d in self.joint_distribution_of_features if np.array_equal(d['contour'],contour)]
+        contours_rhythm = [d['contour'] for d in self.joint_distribution_of_features if np.array_equal(d['rhythm'],rhythm)]
+
+        min_distance_contour = np.min(np.abs([self.contour_distance_func(contour_rhythm, contour) for contour_rhythm in contours_rhythm]))
+        min_distance_rhythm = np.min(np.abs([self.rhythm_distance_func(rhythm_contour, rhythm) for rhythm_contour in rhythms_contour]))
+
+        total_distance = np.linalg.norm(np.array([min_distance_contour,min_distance_rhythm]),ord=2)
+        plausibility = 1/(1+total_distance)
+        return plausibility
+
+
+    def match_with_latent(self,features,latent_features):
+        if latent_features == None:
+            return 1
+        rhythm = features['rhythm']
+        contour = features['contour']
+
+        latent_rhythm = latent_features['rhythm']
+        latent_contour = latent_features['contour']
+
+        distance_rhythm = self.rhythm_distance_func(rhythm,latent_rhythm)
+        distance_contour = self.contour_distance_func(contour,latent_contour)
+
+        total_distance = np.linalg.norm(np.array([distance_contour,distance_rhythm]),ord=2)
+        plausibility = 1 / (1 + total_distance)
+        return plausibility
 
 class MelodySynthesis:
     @staticmethod
@@ -658,7 +760,8 @@ class MelodySynthesis:
             approx_contour = contour_coeffs
 
         # print('approx_contour: ', approx_contour)
-        pc_distribution_grid = pc_distribution_grid + 0.1
+
+        pc_distribution_grid = pc_distribution_grid + 0
         # print('pc_distribution_grid: ',pc_distribution_grid)
         # pc_distribution_grid = np.array([1])+0.1
         # pc_distribution_grid = np.tile(pc_distribution_grid,(12,12))
@@ -672,8 +775,8 @@ class MelodySynthesis:
                 xs = np.linspace(0, 11, num=sample_point_size)
                 lower_index = np.argmin(np.abs(xs - (i + 0)))
                 upper_index = max(np.argmin(np.abs(xs - (i + 0.25))), lower_index + 1)
-                print('lower_index,upper_index: ', lower_index, upper_index)
-                print('approx_contour.shape: ', approx_contour.shape)
+                #print('lower_index,upper_index: ', lower_index, upper_index)
+                #print('approx_contour.shape: ', approx_contour.shape)
                 approx_contour_16_grid = np.average(
                     approx_contour[lower_index:upper_index])  # shape = (,)
                 assert np.all(1 - np.isnan(approx_contour_16_grid)), approx_contour_16_grid
@@ -732,7 +835,8 @@ class Experiment:
     mode_pc_onehot = {
         'major': np.tile([1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1], (12, 1)),
         'minor': np.tile([1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1], (12, 1)),
-        'dorian': np.tile([1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0], (12, 1))
+        'dorian': np.tile([1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0], (12, 1)),
+        'chromatic': np.tile([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],(12, 1))
     }
 
     chord_pc_onehot = {
@@ -765,6 +869,8 @@ class Experiment:
         key = measures[0][1]
         stream_constructed_melodies.append(key)
         Mm = key.mode
+        Mm = 'chromatic'
+        print('Mm: ',Mm)
 
         pc_distribution_grid = Experiment.mode_pc_onehot[Mm]
         for test_measure in measures:
@@ -779,15 +885,14 @@ class Experiment:
                                                                            pc_distribution_grid=pc_distribution_grid)
             constructed_stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody, test_rhythm,
                                                                                 key=key)
-            print(constructed_melody)
-            print(test_rhythm)
+
             constructed_melodies.append(constructed_melody)
             stream_constructed_melodies.append(constructed_stream)
 
-        print(constructed_melodies)
+
         stream.show()
         stream_constructed_melodies.show()
-        sys.exit()
+        #sys.exit()
 
     @staticmethod
     def recover_measures_with_diffrent_pc_distribution(measures: list[m21.stream.Measure]):
@@ -841,7 +946,7 @@ class Experiment:
         print(constructed_melodies)
         stream.show()
         stream_constructed_melodies.show()
-        sys.exit()
+        #sys.exit()
 
     @staticmethod
     def mix_match_rhythm_contour(
@@ -897,9 +1002,12 @@ class Experiment:
                                                                             sample_point_size=300,
                                                                             pc_distribution_grid=pc_distribution_grid2)
 
-            constructed_stream1 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody1, rhythm2, key=key1)
+            rhythm_intersection = Combination.rhythm_intersection(rhythm1,rhythm2)
+            rhythm_union = Combination.rhythm_union(rhythm1,rhythm2)
 
-            constructed_stream2 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody2, rhythm1, key=key2)
+            constructed_stream1 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody1, rhythm_union, key=key1)
+
+            constructed_stream2 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody2, rhythm_union, key=key2)
 
             # print(constructed_melody)
             # print(rhythm)
@@ -977,6 +1085,8 @@ class Experiment:
 
         Mm1 = key1.mode
         Mm2 = key2.mode
+        #Mm1 = 'chromatic'
+        #Mm2 = 'chromatic'
         print('Mm: ', Mm1, Mm2)
         pc_distribution_grid1 = Experiment.mode_pc_onehot[Mm1]
         pc_distribution_grid2 = Experiment.mode_pc_onehot[Mm2]
@@ -996,24 +1106,28 @@ class Experiment:
             rhythms2 = BarPatternFeatures.rhythm_incremental(second_piece_measure[0], key=key2,
                                                              n_beat=second_piece_measure[2].numerator)
 
-            contour1 = contours1[0] + contours2[1] + contours2[2]
-            contour2 = contours2[0] + contours1[1] + contours1[2]
+            coeff1 = coeff1[0] + coeff1[1] + coeff1[2]
+            coeff2 = coeff2[0] + coeff2[1] + coeff2[2]
+            boundary_index = int(coeff1.shape[0]*2/3)
+            print('coeff1.shape: ',coeff1.shape,'boundary_index: ',boundary_index)
+            new_ceoff1 = np.concatenate([coeff1[:boundary_index],coeff2[boundary_index:]])
+            new_ceoff2 = np.concatenate([coeff2[:boundary_index],coeff1[boundary_index:]])
 
             rhythm1 = rhythms2[2]
             rhythm2 = rhythms1[2]
 
-            constructed_melody1 = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=contour1,
+            constructed_melody1 = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=new_ceoff1,
                                                                             rhythm_grid=rhythm2,
                                                                             vl=None,
                                                                             sample_point_size=300,
                                                                             pc_distribution_grid=pc_distribution_grid1,
-                                                                            type='approx')
-            constructed_melody2 = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=contour2,
+                                                                            type='coeff')
+            constructed_melody2 = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=new_ceoff2,
                                                                             rhythm_grid=rhythm1,
                                                                             vl=None,
                                                                             sample_point_size=300,
                                                                             pc_distribution_grid=pc_distribution_grid2,
-                                                                            type='approx')
+                                                                            type='coeff')
 
             constructed_stream1 = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody1, rhythm2, key=key1)
 
@@ -1142,13 +1256,266 @@ class Experiment:
         print(measure_feature)
         Plot.draw_scatter(distance_matrix=Levenshtein, text_arrays=text_array, file_name='contour')
 
+    @staticmethod
+    def generate_measure(measure, pc_distribution_grid:np.ndarray = None,contour_coeff = None):
+        import piece
+        print('measure: ',measure)
+        tree = piece.Tree()
+        piece.node_grow(tree=tree, level='Top')
+        piece.node_grow(tree=tree, level='Section')
+        piece.node_grow(tree=tree, level='Phrase')
+        piece.node_grow(tree=tree, level='Subphrase')
+        piece.node_grow(tree=tree, level='Bar')
+        piece.node_grow(tree=tree, level='Beat')
+        test_bar = tree.children[0].children[0].children[0].children[0]
+        #print(test_bar)
+        contour_coeff = BarPatternFeatures.contour_cosine(measure[0],measure[1],n_beat=measure[2])
+        pc_grid = test_bar.get_pc_grid()
+        #print('pc_grid: ',pc_grid)
 
+        rhythm_grid = test_bar.get_rhythm_grid()
+        #print('rhythm_grid: ', rhythm_grid)
+        pc_distribution_grid = None
+        pitch_grid = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=contour_coeff,rhythm_grid=rhythm_grid,pc_distribution_grid=pc_grid,sample_point_size=300,vl=None,type='coeff')
+        stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(pitch_grid,rhythm_grid,key=measure[1])
+        stream.show()
+
+    @staticmethod
+    def generate_piece_from_tree(contour_coeff_dict):
+        import piece
+        tree = piece.Tree()
+        piece.node_grow(tree=tree, level='Top')
+        piece.node_grow(tree=tree, level='Section')
+        piece.node_grow(tree=tree, level='Phrase')
+        piece.node_grow(tree=tree, level='Subphrase')
+        piece.node_grow(tree=tree, level='Bar')
+        piece.node_grow(tree=tree, level='Beat')
+        from tree_to_xml import tree_to_stream_powerful
+        tree_to_stream_powerful(tree).show()
+        bars = [bar for section in tree.children for phrase in section.children for subphrase in phrase.children for bar in subphrase.children]
+
+        stream = m21.stream.Stream()
+        stream.append(m21.meter.TimeSignature('3/4'))
+        key_of_tree = tree.data.key.symbols[0].char
+
+        key_of_tree = m21.key.Key(key_of_tree)
+        scale_M = Experiment.mode_pc_onehot['major'][0]
+
+
+        form_contour_dict = dict()
+
+        opening_phrase_contour = contour_coeff_dict['opening'][:2]
+        ending_phrase_contour = contour_coeff_dict['ending'][:2]
+        middle_phrase_contour = contour_coeff_dict['middle'][:2]
+
+        def rotate(l, n):
+            return l[n:] + l[:n]
+
+        for i,bar in enumerate(bars):
+            current_form = bar.data.form.symbols[0].char
+            if i < 4:
+                contour_coeff = opening_phrase_contour[0]
+                opening_phrase_contour = rotate(opening_phrase_contour,1)
+            elif i >= len(bars)-2:
+                contour_coeff = ending_phrase_contour[0]
+                ending_phrase_contour = rotate(ending_phrase_contour, 1)
+            else:
+                contour_coeff = middle_phrase_contour[0]
+                middle_phrase_contour = rotate(middle_phrase_contour,1)
+            form_contour_dict[current_form]=contour_coeff
+
+
+            rhythm_grid = bar.get_rhythm_grid()
+            #print('rhythm_grid: ', rhythm_grid)
+            final_pc_grid = bar.get_pc_grid() + scale_M
+
+            #print('final_pc_grid: ',final_pc_grid)
+
+            pitch_grid = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=contour_coeff, rhythm_grid=rhythm_grid,
+                                                                   pc_distribution_grid=final_pc_grid, sample_point_size=300,
+                                                                   vl=None, type='coeff')
+
+            constructed_stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(pitch_grid, rhythm_grid, key=key_of_tree)
+            stream.append(constructed_stream)
+
+        stream.show()
+    @staticmethod
+    def contour_self_similarity(measures):
+        Experiment.recover_measures(measures)
+        n=len(measures)
+        contours = np.array([BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2])[1:] for x in measures])
+
+        scale_degree_and_onset_and_duration = np.array([BarPatternFeatures.scale_degree_and_onset_and_duration(measure=x[0],key=x[1],n_beat=x[2]) for x in measures])
+        _levenstein_distance = scipy.spatial.distance.pdist(scale_degree_and_onset_and_duration.reshape(-1,1),DistanceFunction.levenshtein_with_operation_cost)
+        levenstein_distance = scipy.spatial.distance.squareform(_levenstein_distance)
+        diff = np.expand_dims(contours,axis=0)-np.expand_dims(contours,axis=1)
+        distance = np.linalg.norm(diff,ord=2,axis=-1)
+
+
+
+        pitches = np.array([BarPatternFeatures.texture_contour_diff(measure=x)[0] for x in measures])
+        pc_dist = pitches.reshape(pitches.shape[0],-1,1)
+        pc_dist = np.sum(np.equal(pc_dist,np.arange(24)),axis=1)
+        pc_dist = pc_dist[:,:12]+pc_dist[:,12:]
+        print(pc_dist.shape)
+        pc_dist = np.array(pc_dist>0,dtype=int)
+
+        dictance_pc_dist = np.linalg.norm(np.expand_dims(pc_dist,axis=0)-np.expand_dims(pc_dist,axis=1),ord=2,axis=-1)
+
+        fig = plt.figure()
+        gs = plt.GridSpec(2,4,figure=fig)
+
+        contour_D_matrix = 1-distance/np.max(distance)
+        levenstein_D_matrix = 1-levenstein_distance/np.max(levenstein_distance)
+        pc_dict_D_matrix = 1-dictance_pc_dist/np.max(dictance_pc_dist)
+
+        alpha = 0.9
+        background_matrix = np.zeros(shape=(n,n))
+        levenstein_D_matrix = np.stack([levenstein_D_matrix,background_matrix,background_matrix],axis=-1)
+        ax_levenstein_D = fig.add_subplot(gs[0, 0])
+        ax_levenstein_D.set_title('(degree,onset,duration) self-similarity')
+        ax_levenstein_D.set_xticks(np.arange(1,n+1))
+        ax_levenstein_D.set_yticks(np.arange(1,n+1))
+        ax_levenstein_D.imshow(levenstein_D_matrix,extent=[1,n+1,n+1,1],alpha=alpha)
+
+        contour_D_matrix = np.stack([background_matrix,contour_D_matrix,background_matrix],axis=-1)
+        ax_contour_d = fig.add_subplot(gs[0,1])
+        ax_contour_d.set_title('contour (bar) self-similarity')
+        ax_contour_d.set_xticks(np.arange(1,n+1))
+        ax_contour_d.set_yticks(np.arange(1,n+1))
+        ax_contour_d.imshow(contour_D_matrix, extent=[1,n+1,n+1,1], alpha=alpha)
+
+        pc_dict_D_matrix = np.stack([background_matrix,background_matrix,pc_dict_D_matrix],axis=-1)
+        ax_pc_dist = fig.add_subplot(gs[0, 2])
+        ax_pc_dist.set_title('pc distribution self-similarity')
+        ax_pc_dist.set_xticks(np.arange(1,n+1))
+        ax_pc_dist.set_yticks(np.arange(1,n+1))
+        ax_pc_dist.imshow(pc_dict_D_matrix, extent=[1,n+1,n+1,1], alpha=alpha)
+
+        ax_combined_D = fig.add_subplot(gs[0,3])
+        ax_combined_D.set_title('combined self-similarity')
+        #ax_combined_D.imshow(np.maximum(contour_D_matrix,levenstein_D_matrix,pc_dict_D_matrix),extent=[1,n,n,1])
+        ax_combined_D.set_xticks(np.arange(1,n+1))
+        ax_combined_D.set_yticks(np.arange(1,n+1))
+        sumed_matrix = contour_D_matrix + levenstein_D_matrix + pc_dict_D_matrix
+        ax_combined_D.imshow(sumed_matrix, extent=[1,n+1,n+1,1])
+
+        ax_pitches = fig.add_subplot(gs[1,:])
+        ax_pitches.scatter(np.linspace(1,len(pitches),300*len(pitches)),pitches,marker='s', c='grey', s=5)
+        ax_pitches.set_xticks(np.arange(n))
+        plt.show()
+
+    @staticmethod
+    def feature_evaluation_at_work(pieces):
+
+        # configuring feature evaluator
+        feature_distribution = sum([PieceFeatures.get_location_contour_rhythm_dict(piece) for piece in pieces], [])
+        feature_evaluator = FeatureEvaluation(joint_distribution_of_features=feature_distribution)
+
+        contour_distribution = [feature['contour'] for feature in feature_distribution]
+        rhythm_distribution = [feature['rhythm'] for feature in feature_distribution]
+        location_distribution = [feature['location'] for feature in feature_distribution]
+
+        # make unique
+        contour_distribution = list({str(i): i for i in contour_distribution}.values())
+        rhythm_distribution = list({str(i): i for i in rhythm_distribution}.values())
+        location_distribution = list({str(i): i for i in location_distribution}.values())
+
+        print('len(contour_distribution): ',len(contour_distribution))
+        print('len(rhythm_distribution): ', len(rhythm_distribution))
+        print('len(location_distribution): ', len(location_distribution))
+
+        list_of_latent_features = [None,None] + [None,None]
+
+
+
+
+        # construct search space for features
+        seen_combinations = [(y['contour'].tolist(),y['rhythm'].tolist()) for y in feature_distribution]
+
+        print('len(seen_combinations): ',len(seen_combinations))
+
+        unseen_combinations = [(x,y) for x,y in itertools.product(contour_distribution,rhythm_distribution) if (x.tolist(),y.tolist()) not in seen_combinations]
+        print('len(unseen_combinations): ',len(unseen_combinations))
+        random_features = [{'contour':contour, 'rhythm': rhythm,'key':m21.key.Key('D'),} for contour,rhythm in unseen_combinations]
+        random_features = list({str(i):i for i in random_features}.values())
+
+
+
+        # evaluating search space and find best candidate features
+        best_features_for_first_8_bar = []
+        second_best_features_for_first_8_bar = []
+        third_best_features_for_first_8_bar = []
+        features_for_first_8_bars = []
+        for position in range(8):
+            total_scores = []
+            for random_feature in random_features:
+                location_fit = feature_evaluator.location_match(features=random_feature,current_location=position)
+                internal_match_fit = feature_evaluator.internal_match(features=random_feature)
+                latent_match_fit = feature_evaluator.match_with_latent(features=random_feature,latent_features= list_of_latent_features[position%len(list_of_latent_features)])
+                total_score = (location_fit)*(latent_match_fit)*internal_match_fit
+                total_scores.append(total_score)
+            total_scores = np.array(total_scores)
+            arg_sort = np.argsort(-total_scores)
+            random_features = np.array(random_features)
+            top_ten_features = random_features[arg_sort[:10]]
+
+            best_features = top_ten_features[0]
+            best_features_for_first_8_bar.append(best_features)
+            second_best_features_for_first_8_bar.append(top_ten_features[1])
+            third_best_features_for_first_8_bar.append(top_ten_features[2])
+
+        #print(best_features_for_first_8_bar)
+        #print(second_best_features_for_first_8_bar)
+
+        # generate melody based on  candidate features
+        stream = m21.stream.Stream()
+        stream.append(m21.metadata.Metadata(title='best'))
+        pitch_grids = [MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=feature['contour'],rhythm_grid=feature['rhythm'],sample_point_size=300,vl=None,pc_distribution_grid=Experiment.mode_pc_onehot['major']) for feature in best_features_for_first_8_bar]
+        streams = [StreamBuilder.pitch_grid_rhythm_grid_to_stream(pitch_grid=pitch_grid,rhythm_grid=feature['rhythm'],key=feature['key']) for pitch_grid,feature in zip(pitch_grids,best_features_for_first_8_bar)]
+        stream.append(streams)
+        stream.show()
+
+        stream = m21.stream.Stream()
+        stream.append(m21.metadata.Metadata(title='second best'))
+        pitch_grids = [
+            MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=feature['contour'], rhythm_grid=feature['rhythm'],
+                                                      sample_point_size=300, vl=None,
+                                                      pc_distribution_grid=Experiment.mode_pc_onehot['major']) for
+            feature in second_best_features_for_first_8_bar]
+        streams = [StreamBuilder.pitch_grid_rhythm_grid_to_stream(pitch_grid=pitch_grid, rhythm_grid=feature['rhythm'],
+                                                                  key=feature['key']) for pitch_grid, feature in
+                   zip(pitch_grids, second_best_features_for_first_8_bar)]
+        stream.append(streams)
+        stream.show()
+
+
+        stream = m21.stream.Stream()
+        stream.append(m21.metadata.Metadata(title='third best'))
+        pitch_grids = [
+            MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=feature['contour'], rhythm_grid=feature['rhythm'],
+                                                      sample_point_size=300, vl=None,
+                                                      pc_distribution_grid=Experiment.mode_pc_onehot['major']) for
+            feature in third_best_features_for_first_8_bar]
+        streams = [StreamBuilder.pitch_grid_rhythm_grid_to_stream(pitch_grid=pitch_grid, rhythm_grid=feature['rhythm'],
+                                                                  key=feature['key']) for pitch_grid, feature in
+                   zip(pitch_grids, third_best_features_for_first_8_bar)]
+        stream.append(streams)
+        stream.show()
 if __name__ == '__main__':
-    # Experiment.recover_measures(measures=twelve_bar_pieces[1])
+    # Experiment.recover_measures(measures=twelve_bar_pieces[2])
     # Experiment.mix_match_rhythm_contour(twelve_bar_pieces[2], twelve_bar_pieces[3])
-    Experiment.clustering_contour_diff(all_measures)
+    # Experiment.clustering_contour_diff(all_measures)
+    # Experiment.recovering_with_varying_contour_hierarchy(twelve_bar_pieces[2])
+    # Experiment.mix_match_contour_surface(twelve_bar_pieces[2], twelve_bar_pieces[3])
+    # Experiment.recover_measures_with_diffrent_pc_distribution(twelve_bar_pieces[2])
+    # Experiment.generate_measure(twelve_bar_pieces[0][0])
 
-# Experiment.recovering_with_varying_contour_hierarchy(twelve_bar_pieces[2])
-# Experiment.batch_texture_contour_diff(twelve_bar_pieces[2])
-# Experiment.mix_match_contour_surface(twelve_bar_pieces[2], twelve_bar_pieces[3])
-# Experiment.recover_measures_with_diffrent_pc_distribution(twelve_bar_pieces[2])
+    #all_contours = [BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2]) for x in all_measures]
+    #ending_contours = [BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2]) for y in pieces for x in y[-2:]]
+    #opening_contours = [BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2]) for y in pieces for x in y[0:2]]
+    #middle_contours = [BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2]) for y in pieces for x in y[5:7]]
+
+    #Experiment.generate_piece_from_tree(contour_coeff_dict={'opening': opening_contours, 'ending': ending_contours, 'middle':middle_contours })
+    #Experiment.contour_self_similarity(pieces[0])
+    Experiment.feature_evaluation_at_work(pieces=twelve_bar_pieces)

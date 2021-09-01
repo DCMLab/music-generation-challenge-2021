@@ -5,7 +5,7 @@ class Grammar:
     """Symbol -> Word (or list of Words)"""
     form = {
         # top
-        '$': [['A', 'B']],
+        '$': [['A']],
         # section
         'A': [['presentation', 'continuation']],
         'B': [['antecedent', 'consequent']],
@@ -73,7 +73,7 @@ class Grammar:
 
     Rhythm = {
         # top
-        '$': [['A', 'B'], ],
+        '$': [['B'], ],
         # section
         'A': [['presentation', 'continuation']],
         'B': [['antecedent', 'consequent']],
@@ -92,8 +92,10 @@ class Grammar:
         # bar
         'bi_bar': [
             [['e', 'e'], ['e','e'], ['e', 'e']],
-            [['s','s','s','s'],['e', 'e'],['e', 'e']],
-            [['s', 's', 's', 's'], ['s', 's', 's', 's'], ['s', 's', 's', 's']],
+            [['s', 's', 's', 's'], ['e', 'e'], ['e', 'e']],
+            [['e', 'e'], ['e', 'e'],['s', 's', 's', 's']],
+            #[['s','s','s','s'],['e', 'e'],['e', 'e']],
+            #[['s', 's', 's', 's'], ['s', 's', 's', 's'], ['s', 's', 's', 's']],
         ],
         'cont_bar': [[['e', 'e'], ['e', 'e'], ['e', 'e'], ],
                      [['s', 's', 's', 's'], ['s', 's', 's', 's'], ['s', 's', 's', 's']]],

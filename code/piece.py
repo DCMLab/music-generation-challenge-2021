@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 from templates import Grammar
 
 
@@ -7,20 +8,22 @@ def chunks(lst, n):
     remainder = len(lst) % n
     if n > len(lst):
 
-        tiled_list = sum([[ele for _ in range(n // len(lst)+1) ]for ele in lst],[])
+        tiled_list = sum([[ele for _ in range(n // len(lst) + 1)] for ele in lst], [])
 
-        distributed_lst = chunks(tiled_list,n)
+        distributed_lst = chunks(tiled_list, n)
     elif remainder == 0:
-        distributed_lst = [lst[i*l:(i+1)*l] for i in range(n)]
+        distributed_lst = [lst[i * l:(i + 1) * l] for i in range(n)]
 
     else:
         ## remainder * size l+1 + (n-remainder) of size l
-        longer_part = [lst[i*(l+1):(i+1)*(l+1)] for i in range(remainder)]
-        shorter_part = [lst[remainder*(l+1)+i*l:remainder*(l+1)+(i+1)*l] for i in range(n-remainder)]
+        longer_part = [lst[i * (l + 1):(i + 1) * (l + 1)] for i in range(remainder)]
+        shorter_part = [lst[remainder * (l + 1) + i * l:remainder * (l + 1) + (i + 1) * l] for i in
+                        range(n - remainder)]
         distributed_lst = longer_part + shorter_part
-    assert len(distributed_lst) == n, (lst,distributed_lst)
+    assert len(distributed_lst) == n, (lst, distributed_lst)
 
     return distributed_lst
+
 
 class Tree:
     def __init__(self):
@@ -35,6 +38,42 @@ class Tree:
 
     def __repr__(self):
         return '<tree node representation>'
+
+    def get_pc_grid(self):
+        if self.data.level == 'Note':
+            return Harmony.conversion[self.data.harmony.symbols[0].char]
+        if self.data.level == 'Beat':
+            pc_dist_grid = []
+
+            for child in self.children:
+                pc_vector = child.get_pc_grid()
+                rhythmic_conversion = child.get_rhythm_grid()
+                #print('rhythmic_conversion: ',rhythmic_conversion)
+                pc_grid = np.tile(pc_vector,(len(rhythmic_conversion),1))
+                pc_dist_grid.extend(pc_grid)
+                #print(rhythmic_conversion)
+
+            pc_dist_grid = np.array(pc_dist_grid)
+            if pc_dist_grid.size < 12:
+                print(pc_dist_grid.shape)
+                print(pc_dist_grid)
+            pc_dist_grid = pc_dist_grid.reshape((-1,12))
+            #print('Beat level  pc_dist_grid: ', pc_dist_grid)
+            return pc_dist_grid
+        if self.data.level == 'Bar':
+            pc_dist_grid = np.concatenate([child.get_pc_grid() for child in self.children])
+            #print('Bar level  pc_dist_grid: ', pc_dist_grid)
+            return pc_dist_grid
+
+    def get_rhythm_grid(self):
+        if self.data.level == 'Note':
+            return Rhythm.conversion[self.data.rhythm.symbols[0].char]
+        if self.data.level == 'Beat':
+            converted_rhythm_symbols = [child.get_rhythm_grid() for child in self.children]
+            return sum(converted_rhythm_symbols,[])
+        if self.data.level == 'Bar':
+            rhythm_grids = np.array([child.get_rhythm_grid() for child in self.children]).reshape((12,))
+            return rhythm_grids
 
 
 class SectionInfo:
@@ -84,12 +123,13 @@ class Word:
     def expand(self):
         """[s1,s2,s3]->[[s11,s12],[s21,s22,s23],[s31]]->[s11,s12,s21,s22,s23,s31]"""
 
-        assert all([isinstance(x,Symbol) for x in self.symbols])
-        expansion= [symbol.expand(grammar_dict=self.grammar_dict)
-                               for symbol in self.symbols]
+        assert all([isinstance(x, Symbol) for x in self.symbols])
+        expansion = [symbol.expand(grammar_dict=self.grammar_dict)
+                     for symbol in self.symbols]
         expansions_flat = sum(expansion, [])
-        assert all([isinstance(x,Symbol) for x in expansions_flat])
-        expansions_word = Word(symbols=expansions_flat, grammar_dict=self.grammar_dict)
+        assert all([isinstance(x, Symbol) for x in expansions_flat])
+
+        expansions_word = type(self)(symbols=expansions_flat, grammar_dict=self.grammar_dict)
 
         return expansions_word
 
@@ -98,9 +138,9 @@ class Word:
         expansions = self.expand()
         return expansions
 
-    def distribute(self,n):
+    def distribute(self, n):
         partition = chunks(self.symbols, n)
-        partition = [Word(symbols=x,grammar_dict=self.grammar_dict) for x in partition]
+        partition = [type(self)(symbols=x, grammar_dict=self.grammar_dict) for x in partition]
         return partition
 
     def expand_and_distribute(self, n):
@@ -108,7 +148,7 @@ class Word:
         partition the expanded word (after joining) into n subwords"""
         expansions = self.expand()
         partition = chunks(expansions.symbols, n)
-        partition = [Word(symbols=x,grammar_dict=self.grammar_dict) for x in partition]
+        partition = [type(self)(symbols=x, grammar_dict=self.grammar_dict) for x in partition]
         return partition
 
     def __repr__(self):
@@ -116,29 +156,70 @@ class Word:
 
 
 class Form(Word):
-    def __init__(self,symbols=None,chars=None):
-        super().__init__(symbols,grammar_dict=Grammar.form,chars=chars)
+    def __init__(self, symbols=None,grammar_dict=None, chars=None):
+        super().__init__(symbols, grammar_dict=Grammar.form, chars=chars)
 
 
 class Harmony(Word):
-    def __init__(self,symbols=None,chars=None):
-        super().__init__(symbols,grammar_dict=Grammar.Harmony,chars=chars)
+    conversion = {
+        'I': [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+        'ii': [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+        'iii': [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0],
+        'IV': [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        'V': [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        'vi': [1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+        'vii': [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+
+        'i': [1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+        'iio': [0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+        'III': [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0],
+        'iv': [1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+        # 'V': [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+        'VI': [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+        # 'vii': [0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+
+        '|I': [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+        '|IV': [1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        'I(AC)': [1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+        'V(HC)': [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+
+    }
+
+    def __init__(self, symbols=None, grammar_dict=None, chars=None):
+        super().__init__(symbols, grammar_dict=Grammar.Harmony, chars=chars)
+
+
+
 
 class Contour(Word):
-    def __init__(self,symbols=None,chars=None):
-        super().__init__(symbols,grammar_dict=Grammar.Contour,chars=chars)
+    def __init__(self, symbols=None,grammar_dict=None, chars=None):
+        super().__init__(symbols, grammar_dict=Grammar.Contour, chars=chars)
+
 
 class Rhythm(Word):
-    def __init__(self,symbols=None,chars=None):
-        super().__init__(symbols,grammar_dict=Grammar.Rhythm,chars=chars)
+    conversion = {
+        'h': ['x', '-', '-', '-', '-', '-', '-', '-'],
+        'q': ['x', '-', '-', '-'],
+        'e': ['x', '-'],
+        'r_q': ['_', '-', '-', '-'],
+        # 'edot':[['edot']],
+        's': ['x']
+    }
+
+    def __init__(self, symbols=None, grammar_dict=None, chars=None):
+        super().__init__(symbols, grammar_dict=Grammar.Rhythm, chars=chars)
+
+
+
 
 class Key(Word):
-    def __init__(self,symbols=None,chars=None):
-        super().__init__(symbols,grammar_dict=Grammar.Key,chars=chars)
+    def __init__(self, symbols=None,grammar_dict=None, chars=None):
+        super().__init__(symbols, grammar_dict=Grammar.Key, chars=chars)
+
 
 class GuideTone(Word):
-    def __init__(self,symbols=None,chars=None):
-        super().__init__(symbols,grammar_dict=Grammar.GuideTone,chars=chars)
+    def __init__(self, symbols=None,grammar_dict=None, chars=None):
+        super().__init__(symbols, grammar_dict=Grammar.GuideTone, chars=chars)
 
 
 def node_grow(tree: Tree, level):
@@ -151,7 +232,8 @@ def node_grow(tree: Tree, level):
         tree.data.harmony = tree.data.harmony.start()
         harmony_expansion_partition = tree.data.harmony.expand_and_distribute(n=n_partition)
         rhythm_expansion_partition = tree.data.rhythm.expand_and_distribute(n=n_partition)
-        for symbol,harmony,rhythm in zip(primary_component_expansion,harmony_expansion_partition,rhythm_expansion_partition):
+        for symbol, harmony, rhythm in zip(primary_component_expansion, harmony_expansion_partition,
+                                           rhythm_expansion_partition):
             child = Tree()
             child.data = copy.deepcopy(tree.data)
             child.data.level = 'Section'
@@ -167,8 +249,8 @@ def node_grow(tree: Tree, level):
             n_partition = len(primary_component_expansion)
             harmony_expansion_partition = section.data.harmony.expand_and_distribute(n=n_partition)
             rhythm_expansion_partition = section.data.rhythm.expand_and_distribute(n=n_partition)
-            for symbol,harmony,rhythm in zip(primary_component_expansion,harmony_expansion_partition,rhythm_expansion_partition):
-
+            for symbol, harmony, rhythm in zip(primary_component_expansion, harmony_expansion_partition,
+                                               rhythm_expansion_partition):
                 child = Tree()
                 child.data = copy.deepcopy(section.data)
                 child.data.level = 'Phrase'
@@ -188,8 +270,8 @@ def node_grow(tree: Tree, level):
                 contour_expansion_partition = phrase.data.contour.expand_and_distribute(n=n_partition)
                 rhythm_expansion_partition = phrase.data.rhythm.expand_and_distribute(n=n_partition)
 
-                for form, harmony, contour,rhythm in zip(primary_component_expansion, harmony_expansion_partition,
-                                                  contour_expansion_partition,rhythm_expansion_partition):
+                for form, harmony, contour, rhythm in zip(primary_component_expansion, harmony_expansion_partition,
+                                                          contour_expansion_partition, rhythm_expansion_partition):
                     child = Tree()
                     child.data = copy.deepcopy(phrase.data)
                     child.data.level = 'Subphrase'
@@ -210,7 +292,7 @@ def node_grow(tree: Tree, level):
                     harmony_expansion_partition = subphrase.data.harmony.expand_and_distribute(n=n_partition)
                     contour_expansion_partition = subphrase.data.contour.expand_and_distribute(n=n_partition)
                     form_expansion_partition = subphrase.data.form.expand_and_distribute(n=n_partition)
-                    #print(form_expansion_partition)
+                    # print(form_expansion_partition)
                     for rhythm, harmony, contour, form in zip(primary_component_expansion, harmony_expansion_partition,
                                                               contour_expansion_partition, form_expansion_partition):
                         child = Tree()
@@ -268,7 +350,6 @@ def node_grow(tree: Tree, level):
         pass
 
 
-
 if __name__ == '__main__':
     test_tree = Tree()
 
@@ -279,8 +360,9 @@ if __name__ == '__main__':
     node_grow(tree=test_tree, level='Bar')
     node_grow(tree=test_tree, level='Beat')
     print(test_tree)
+    test_tree.get_rhythm_grid()
+    test_tree.get_pc_grid()
     from tree_to_xml import tree_to_stream_powerful
 
     stream = tree_to_stream_powerful(test_tree)
     stream.show()
-
