@@ -1,4 +1,5 @@
 import collections
+import copy
 import itertools
 import random
 import sys
@@ -21,7 +22,7 @@ from ipywidgets import HTML, HBox, VBox
 xml_files = ['../data/xml/' + file_name for file_name in
              filter(lambda x: x.endswith('.xml'), sorted(os.listdir('../data/xml')))]
 pieces = []
-samples = random.sample(xml_files, k=500)
+samples = random.sample(xml_files, k=200)
 
 specific_sample = ['../data/xml/Polonäs_6b9196.xml',
                    '../data/xml/_Polska_efter_Petter_Dufva_75c046.xml',
@@ -41,6 +42,16 @@ for xml_file in samples:
 all_measures = sum(pieces, [])
 
 twelve_bar_pieces = [x for x in pieces if len(x) in [8]]
+
+def measure_contain_end_repeat(m:m21.stream.Measure)-> bool:
+    repeat_marks = list(m.getElementsByClass(m21.repeat.RepeatMark))
+    repeat_marks = [x for x in repeat_marks if hasattr(x,'direction')]
+    end_repeat_marks = [x for x in repeat_marks if x.direction == 'end']
+    return end_repeat_marks != []
+measure_with_repeat_end = [x for x in all_measures if measure_contain_end_repeat(x[0])]
+cadential_measures = list(set([x[-1] for x in pieces] + [x[3] for x in twelve_bar_pieces] +measure_with_repeat_end))
+print('len(measure_with_repeat_end): ',len(measure_with_repeat_end))
+print('len(cadential_measures): ',len(cadential_measures))
 
 assert len(twelve_bar_pieces) > 0
 Mode = {
@@ -102,7 +113,7 @@ class BarPatternFeatures:
         for i, note in enumerate(notes):
             index = int(note[1] * 4)
             if index >= 12:
-                print('encountered a non 3/4 bar')
+                #print('encountered a non 3/4 bar')
                 pass
             else:
                 grid[index] = 'x'
@@ -147,7 +158,7 @@ class BarPatternFeatures:
                 note = event
                 notes.append(note)
             else:
-                print('encountered neither chord or note: ', type(event), 'disgard event')
+                #print('encountered neither chord or note: ', type(event), 'disgard event')
                 pass
 
         notes = [[note.pitch.midi - key.tonic.midi, note.offset, note.duration.quarterLength] for i, note in
@@ -156,7 +167,7 @@ class BarPatternFeatures:
         for i, note in enumerate(notes):
             index = int(note[1] * 4)
             if index >= 12:
-                print('encountered a non 3/4 bar, disgard')
+                #print('encountered a non 3/4 bar, disgard')
                 pass
             else:
                 refined_index = int(index * n_grid / 12)
@@ -171,8 +182,8 @@ class BarPatternFeatures:
             if np.alltrue(grid == 999):
                 pass
             else:
-                print('encountered rest in grid: ', grid)
-
+                #print('encountered rest in grid: ', grid)
+                pass
         return grid
 
     @staticmethod
@@ -257,16 +268,73 @@ class BarPatternFeatures:
         return all_pitches, all_contour, all_coeff
 
 class PieceFeatures:
+
     @staticmethod
-    def get_location_contour_rhythm_dict(piece:list[(object,object,object)]):
+    def get_location_contour_rhythm_dict(piece:list[(object,object,object,object)],feature_evaluator):
         list_of_feature_dict = []
+        cadence_locations = PieceFeatures.cadence_detector(piece,feature_evaluator)
+        #print('cadence_locations: ',cadence_locations)
+        partition_by_cadence = np.diff(np.concatenate([[0],cadence_locations+1]))
+        print('partition_by_cadence: ', partition_by_cadence)
+        location_numerator = 0
+        cadence_passed = 0
         for i,(measure,key_signature,time_signature,file_name) in enumerate(piece):
-            location = i
+            if i in cadence_locations+1:
+                cadence_passed = cadence_passed + 1
+                location_numerator = 0
+            else:
+                if i == 0:
+                    location_numerator = 0
+                else:
+                    location_numerator = location_numerator+1
+
+
+            location_denominator = partition_by_cadence[cadence_passed]
+            #print('location_numerator: ', location_numerator, 'location_denominator: ', location_denominator)
+            location = [location_numerator,location_denominator]
             contour = BarPatternFeatures.contour_cosine(measure,key_signature,n_beat=time_signature.numerator)
             rhythm = BarPatternFeatures.rhythm_sixteenth_grid(measure,key_signature,n_beat=time_signature.numerator)
             feature = {'location':location,'contour':contour,'rhythm':rhythm,'key':key_signature,'source':file_name}
             list_of_feature_dict.append(feature)
         return list_of_feature_dict
+
+    @staticmethod
+    def get_contour_rhythm_dict(piece:list[(object,object,object,object)]):
+        list_of_feature_dict = []
+
+        for i,(measure,key_signature,time_signature,file_name) in enumerate(piece):
+            contour = BarPatternFeatures.contour_cosine(measure,key_signature,n_beat=time_signature.numerator)
+            rhythm = BarPatternFeatures.rhythm_sixteenth_grid(measure,key_signature,n_beat=time_signature.numerator)
+            feature = {'contour':contour,'rhythm':rhythm,'key':key_signature,'source':file_name}
+            list_of_feature_dict.append(feature)
+        return list_of_feature_dict
+
+    @staticmethod
+    def cadence_detector(piece:list[(object,object,object,object)],feature_evaluator):
+        cadence_matchness = []
+        for i,(measure,key_signature,time_signature,file_name) in enumerate(piece):
+            contour = BarPatternFeatures.contour_cosine(measure,key_signature,n_beat=time_signature.numerator)
+            rhythm = BarPatternFeatures.rhythm_sixteenth_grid(measure,key_signature,n_beat=time_signature.numerator)
+            feature = {'contour': contour, 'rhythm': rhythm}
+            cadence_features = PieceFeatures.get_contour_rhythm_dict(cadential_measures)
+            cadences_match = np.max([feature_evaluator.match_with_latent(feature,cadence_feature) for cadence_feature in cadence_features])
+            cadence_matchness.append(cadences_match)
+        cadence_matchness = np.array(cadence_matchness)
+        exp_cadence_matchness = np.exp(cadence_matchness)
+        softmax_cadence_matchness = exp_cadence_matchness/np.sum(exp_cadence_matchness)
+        #print(softmax_cadence_matchness)
+        candidate_cadence_location = np.where(cadence_matchness>0.5)[0]
+        return candidate_cadence_location
+
+        #xs = np.arange(len(softmax_cadence_matchness))+1
+        #plt.plot(xs,softmax_cadence_matchness,marker='o')
+        #plt.title('cadence-like of each measure')
+        #plt.xticks(xs)
+        #print(cadence_matchness)
+        #print(np.argsort(-cadence_matchness))
+        #print(np.where(cadence_matchness>0.5))
+        #StreamBuilder.measures_to_stream(piece)
+        #plt.show()
 
 class DistanceFunction:
     @staticmethod
@@ -682,16 +750,75 @@ class FeatureEvaluation:
         self.contour_distance_func = contour_distance_func
         self.rhythm_distance_func = rhythm_distance_func
         self.joint_distribution_of_features = joint_distribution_of_features
+        self.locations_of_all_rhythms = None
+        self.locations_of_all_contours = None
+
+    def get_locations_of_all_rhythms(self):
+
+        locations_of_all_rhythms = dict()
+
+        for d in self.joint_distribution_of_features:
+            rhythm = d['rhythm']
+            location = d['location']
+            if str(rhythm) not in locations_of_all_rhythms.keys():
+                locations_of_all_rhythms.update({str(rhythm):[location]})
+            else:
+                locations_of_all_rhythms[str(rhythm)].append(location)
+
+        return locations_of_all_rhythms
+
+    def get_locations_of_all_contours(self):
+        locations_of_all_contours = dict()
+        for d in self.joint_distribution_of_features:
+            contour = d['contour']
+            location = d['location']
+            if str(contour) not in locations_of_all_contours.keys():
+                locations_of_all_contours.update({str(contour):[location]})
+            else:
+                locations_of_all_contours[str(contour)].append(location)
+
+        return locations_of_all_contours
 
     def location_match(self,features,current_location):
+        if self.locations_of_all_rhythms == None:
+            self.locations_of_all_rhythms = self.get_locations_of_all_rhythms()
+        if self.locations_of_all_contours == None:
+            self.locations_of_all_contours = self.get_locations_of_all_contours()
 
         rhythm = features['rhythm']
         contour = features['contour']
-        locations_of_this_rhythm = [d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['rhythm'],rhythm)]
-        locations_of_this_contour = [d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['contour'],contour)]
+        locations_of_this_rhythm = np.array(self.locations_of_all_rhythms[str(rhythm)])
+        locations_of_this_contour = np.array(self.locations_of_all_contours[str(contour)])
+        # locations_of_this_rhythm = np.array([d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['rhythm'],rhythm)])
+        # locations_of_this_contour = np.array([d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['contour'],contour)])
+        #print('locations_of_this_rhythm: ',locations_of_this_rhythm)
+        #print('locations_of_this_contour: ',locations_of_this_contour)
+        #print('current_location: ',current_location)
+        rhythm_location_distances = np.sum(np.abs(locations_of_this_rhythm - current_location),axis=-1)
+        contour_location_distances = np.sum(np.abs(locations_of_this_contour - current_location),axis=-1)
+        #print('np.array(locations_of_this_rhythm): ',np.array(locations_of_this_rhythm))
+        #print('rhythm_location_distances: ',np.abs(np.array(locations_of_this_rhythm) - np.array(current_location)))
+        min_rhythm_location_distance = np.min(rhythm_location_distances)
+        min_contour_location_distance = np.min(contour_location_distances)
+        total_distance = np.linalg.norm(np.array([min_contour_location_distance,min_rhythm_location_distance]),ord=2)
+        plausibility = 1 / (1 + total_distance)
+        return plausibility
 
-        min_rhythm_location_distance = np.min(np.abs(np.array(locations_of_this_rhythm) - current_location))
-        min_contour_location_distance = np.min(np.abs(np.array(locations_of_this_contour) - current_location))
+    def batch_location_match(self,features,current_location):
+
+        rhythm = features['rhythm']
+        contour = features['contour']
+        locations_of_this_rhythm = np.array([d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['rhythm'],rhythm)])
+        locations_of_this_contour = np.array([d['location'] for d in self.joint_distribution_of_features if np.array_equal(d['contour'],contour)])
+        #print('locations_of_this_rhythm: ',locations_of_this_rhythm)
+        #print('locations_of_this_contour: ',locations_of_this_contour)
+        #print('current_location: ',current_location)
+        rhythm_location_distances = np.sum(np.abs(locations_of_this_rhythm - current_location),axis=-1)
+        contour_location_distances = np.sum(np.abs(locations_of_this_contour - current_location),axis=-1)
+        #print('np.array(locations_of_this_rhythm): ',np.array(locations_of_this_rhythm))
+        #print('rhythm_location_distances: ',np.abs(np.array(locations_of_this_rhythm) - np.array(current_location)))
+        min_rhythm_location_distance = np.min(rhythm_location_distances)
+        min_contour_location_distance = np.min(contour_location_distances)
         total_distance = np.linalg.norm(np.array([min_contour_location_distance,min_rhythm_location_distance]),ord=2)
         plausibility = 1 / (1 + total_distance)
         return plausibility
@@ -700,8 +827,9 @@ class FeatureEvaluation:
         rhythm = features['rhythm']
         contour = features['contour']
 
-        rhythms_contour = [d['rhythm'] for d in self.joint_distribution_of_features if np.array_equal(d['contour'],contour)]
-        contours_rhythm = [d['contour'] for d in self.joint_distribution_of_features if np.array_equal(d['rhythm'],rhythm)]
+        rhythms_contour = np.array([d['rhythm'] for d in self.joint_distribution_of_features if np.array_equal(d['contour'],contour)])
+        contours_rhythm = np.array([d['contour'] for d in self.joint_distribution_of_features if np.array_equal(d['rhythm'],rhythm)])
+
 
         min_distance_contour = np.min(np.abs([self.contour_distance_func(contour_rhythm, contour) for contour_rhythm in contours_rhythm]))
         min_distance_rhythm = np.min(np.abs([self.rhythm_distance_func(rhythm_contour, rhythm) for rhythm_contour in rhythms_contour]))
@@ -809,6 +937,25 @@ class MelodySynthesis:
 
 
 class StreamBuilder:
+    @staticmethod
+    def measures_to_stream(measures: list[(object,object,object,object)],ignore_offset = False):
+
+
+        stream = m21.stream.Stream()
+        stream.append(m21.metadata.Metadata(title='original'))
+        key = measures[0][1]
+        Mm = key.mode
+
+        for i,test_measure in enumerate(measures):
+            m21_measure = copy.deepcopy(test_measure[0])
+
+
+            stream.append(m21_measure)
+
+
+        stream.show()
+
+        # sys.exit()
     @staticmethod
     def pitch_grid_rhythm_grid_to_stream(pitch_grid: list, rhythm_grid: list,
                                          key: m21.key.KeySignature) -> m21.stream.Measure:
@@ -1409,12 +1556,18 @@ class Experiment:
     def feature_evaluation_at_work(pieces):
 
         # configuring feature evaluator
-        feature_distribution = sum([PieceFeatures.get_location_contour_rhythm_dict(piece) for piece in pieces], [])
+        print('-------- Begin experiment --------')
+        _feature_distribution = sum([PieceFeatures.get_contour_rhythm_dict(piece) for piece in pieces], [])
+        _feature_evaluator = FeatureEvaluation(joint_distribution_of_features=_feature_distribution)
+
+        feature_distribution = sum([PieceFeatures.get_location_contour_rhythm_dict(piece,_feature_evaluator) for piece in pieces], [])
         feature_evaluator = FeatureEvaluation(joint_distribution_of_features=feature_distribution)
 
-        contour_distribution = [feature['contour'] for feature in feature_distribution]
-        rhythm_distribution = [feature['rhythm'] for feature in feature_distribution]
-        location_distribution = [feature['location'] for feature in feature_distribution]
+
+
+        contour_distribution = [{'contour':feature['contour'],'source':feature['source'],'location':feature['location']} for feature in feature_distribution]
+        rhythm_distribution = [{'rhythm':feature['rhythm'],'source':feature['source'],'location':feature['location']} for feature in feature_distribution]
+        location_distribution = [{'location':feature['location'],'source':feature['source']} for feature in feature_distribution]
 
         # make unique
         contour_distribution = list({str(i): i for i in contour_distribution}.values())
@@ -1428,16 +1581,19 @@ class Experiment:
         list_of_latent_features = [None,None] + [None,None]
 
 
-
-
         # construct search space for features
-        seen_combinations = [(y['contour'].tolist(),y['rhythm'].tolist()) for y in feature_distribution]
+        seen_combinations = [(str(y['contour']),str(y['rhythm'])) for y in feature_distribution]
 
         print('len(seen_combinations): ',len(seen_combinations))
+        print(seen_combinations)
 
-        unseen_combinations = [(x,y) for x,y in itertools.product(contour_distribution,rhythm_distribution) if (x.tolist(),y.tolist()) not in seen_combinations]
+        unseen_combinations = [(x,y) for x,y in itertools.product(contour_distribution,rhythm_distribution) if (str(x['contour']),str(y['rhythm'])) not in seen_combinations]
         print('len(unseen_combinations): ',len(unseen_combinations))
-        random_features = [{'contour':contour, 'rhythm': rhythm,'key':m21.key.Key('D'),} for contour,rhythm in unseen_combinations]
+
+
+
+        random_features = [{'contour':x['contour'], 'rhythm': y['rhythm'],'key':m21.key.Key('D'),'source':[x['source'],x['location'],y['source'],y['location']]} for x,y in unseen_combinations]
+
         random_features = list({str(i):i for i in random_features}.values())
 
 
@@ -1446,17 +1602,27 @@ class Experiment:
         best_features_for_first_8_bar = []
         second_best_features_for_first_8_bar = []
         third_best_features_for_first_8_bar = []
-        features_for_first_8_bars = []
-        for position in range(8):
+
+
+        target_locations = [[0,4],[1,4],[2,4],[3,4],[0,8],[1,8],[2,8],[3,8],[4,8],[5,8],[6,8],[7,8]]
+        print('calculating internal_match_fits')
+        internal_match_fits = [feature_evaluator.internal_match(features=random_feature) for random_feature in random_features]
+        print('done')
+        for i,current_location in enumerate(target_locations):
             total_scores = []
-            for random_feature in random_features:
-                location_fit = feature_evaluator.location_match(features=random_feature,current_location=position)
-                internal_match_fit = feature_evaluator.internal_match(features=random_feature)
-                latent_match_fit = feature_evaluator.match_with_latent(features=random_feature,latent_features= list_of_latent_features[position%len(list_of_latent_features)])
+            print('current_location: ', current_location)
+            for random_feature,internal_match_fit in zip(random_features,internal_match_fits):
+                location_fit = feature_evaluator.location_match(features=random_feature,current_location=current_location)
+                #location_fit = 1
+                #internal_match_fit = feature_evaluator.internal_match(features=random_feature)
+                #internal_match_fit = 1
+                #latent_match_fit = feature_evaluator.match_with_latent(features=random_feature,latent_features= list_of_latent_features[i%len(list_of_latent_features)])
+                latent_match_fit = 1
                 total_score = (location_fit)*(latent_match_fit)*internal_match_fit
                 total_scores.append(total_score)
             total_scores = np.array(total_scores)
             arg_sort = np.argsort(-total_scores)
+            print('total_scores[arg_sort]: ',total_scores[arg_sort])
             random_features = np.array(random_features)
             top_ten_features = random_features[arg_sort[:10]]
 
@@ -1465,8 +1631,9 @@ class Experiment:
             second_best_features_for_first_8_bar.append(top_ten_features[1])
             third_best_features_for_first_8_bar.append(top_ten_features[2])
 
-        #print(best_features_for_first_8_bar)
-        #print(second_best_features_for_first_8_bar)
+        for feature in best_features_for_first_8_bar:
+            print(feature['source'])
+
 
         # generate melody based on  candidate features
         stream = m21.stream.Stream()
@@ -1518,4 +1685,4 @@ if __name__ == '__main__':
 
     #Experiment.generate_piece_from_tree(contour_coeff_dict={'opening': opening_contours, 'ending': ending_contours, 'middle':middle_contours })
     #Experiment.contour_self_similarity(pieces[0])
-    Experiment.feature_evaluation_at_work(pieces=twelve_bar_pieces)
+    Experiment.feature_evaluation_at_work(pieces=pieces[:200])
