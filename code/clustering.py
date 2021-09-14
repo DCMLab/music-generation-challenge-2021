@@ -20,59 +20,12 @@ import plotly.subplots
 import scipy.fftpack
 from ipywidgets import HTML, HBox, VBox
 
-xml_files = ['../data/xml/' + file_name for file_name in
-             filter(lambda x: x.endswith('.xml'), sorted(os.listdir('../data/xml')))]
-D_major_pieces = []
-samples = random.sample(xml_files, k=300)
-
-specific_sample = ['../data/xml/Polonäs_6b9196.xml',
-                   '../data/xml/_Polska_efter_Petter_Dufva_75c046.xml',
-                   '../data/xml/_Polonäs_sexdregasamlingen_del_2_nr_40_f6ee90.xml',
-                   '../data/xml/Polonäs_i_Dm_efter_Daniel_Danielsson_ac3754.xml',
-                   '../data/xml/Polonäs_ab479a.xml',]
-specific_pieces =[]
-for xml_file in specific_sample:
-    test_piece = m21.converter.parse(xml_file)
-    voice = test_piece.getElementsByClass(m21.stream.Part)[0]
-    measures = voice.getElementsByClass(m21.stream.Measure)
-    key_signature = test_piece.flat.getKeySignatures()[0]
-    time_signature = test_piece.flat.getTimeSignatures()[0]
-    measures_with_piece_info = [(m, key_signature, time_signature, xml_file) for m in measures]
-    specific_pieces.append(measures_with_piece_info)
-    if len(measures_with_piece_info) == 8:
-        print(xml_file)
-
-for xml_file in samples:
-    test_piece = m21.converter.parse(xml_file)
-    voice = test_piece.getElementsByClass(m21.stream.Part)[0]
-    measures = voice.getElementsByClass(m21.stream.Measure)
-    key_signature = test_piece.flat.getKeySignatures()[0]
-    if key_signature == m21.key.Key('D'):
-        time_signature = test_piece.flat.getTimeSignatures()[0]
-        measures_with_piece_info = [(m, key_signature, time_signature, xml_file) for m in measures]
-        D_major_pieces.append(measures_with_piece_info)
-        if len(measures_with_piece_info) == 8:
-            print(xml_file)
-all_measures = sum(D_major_pieces, [])
-
-twelve_bar_pieces = [x for x in D_major_pieces if len(x) in [8]]
 
 
-def measure_contain_end_repeat(m: m21.stream.Measure) -> bool:
-    repeat_marks = list(m.getElementsByClass(m21.repeat.RepeatMark))
-    repeat_marks = [x for x in repeat_marks if hasattr(x, 'direction')]
-    end_repeat_marks = [x for x in repeat_marks if x.direction == 'end']
-    return end_repeat_marks != []
 
 
-measure_with_repeat_end = [x for x in all_measures if measure_contain_end_repeat(x[0])]
-cadential_measures = list(
-    set([x[-1] for x in D_major_pieces] + [x[3] for x in twelve_bar_pieces] + measure_with_repeat_end))
-print('len(measure_with_repeat_end): ', len(measure_with_repeat_end))
-print('len(cadential_measures): ', len(cadential_measures))
 
 
-assert len(twelve_bar_pieces) > 0
 Mode = {
     'major': [0, 2, 4, 5, 7, 9, 11],
     'minor': [0, 2, 3, 5, 7, 8, 9, 10, 11],
@@ -189,7 +142,7 @@ class BarPatternFeatures:
         notes = []
         for event in events:
             if type(event) == m21.chord.Chord:
-                note = event.notes[0]
+                note = event.notes[-1]
                 note.offset = event.offset
                 #print(note.offset)
                 notes.append(note)
@@ -313,14 +266,27 @@ class BarPatternFeatures:
 
 
 class PieceFeatures:
+    @staticmethod
+    def clean_measures(piece: list[(object, object, object, object)]):
+        cleaned_piece = []
+        for x in piece:
+            m21_measure = x[0]
+            duration = m21_measure.duration.quarterLength
+            if duration >= 2.0:
+                cleaned_piece.append(x)
+            else:
+                print('ignore measure with duration ', duration)
+        return cleaned_piece
 
     @staticmethod
     def get_location_contour_rhythm_dict(piece: list[(object, object, object, object)], feature_evaluator):
+        piece = PieceFeatures.clean_measures(piece)
         list_of_feature_dict = []
         cadence_locations = PieceFeatures.cadence_detector(piece, feature_evaluator)
-        # print('cadence_locations: ',cadence_locations)
         partition_by_cadence = np.diff(np.concatenate([[0], cadence_locations + 1]))
-        print('partition_by_cadence: ', partition_by_cadence)
+        print('{:>12} {:>12} | {:>12} {:>12} | {:>12} {:>12}'.format('partition_by_cadence: ', str(partition_by_cadence),'cadence_locations: ',str(cadence_locations), 'piece_length:',str(len(piece))))
+        if len(cadence_locations) == 0:
+            StreamBuilder.measures_to_stream(piece,title=piece[-1][-1])
         location_numerator = 0
         cadence_passed = 0
         for i, (measure, key_signature, time_signature, file_name) in enumerate(piece):
@@ -361,7 +327,7 @@ class PieceFeatures:
             contour = BarPatternFeatures.contour_cosine(measure, key_signature, n_beat=time_signature.numerator)
             rhythm = BarPatternFeatures.rhythm_sixteenth_grid(measure, key_signature, n_beat=time_signature.numerator)
             feature = {'contour': contour, 'rhythm': rhythm}
-            cadence_features = PieceFeatures.get_contour_rhythm_dict(cadential_measures)
+            cadence_features = PieceFeatures.get_contour_rhythm_dict(experiment.strong_candeces)
             cadences_match = np.max(
                 [feature_evaluator._match_with_latent(feature, cadence_feature) for cadence_feature in
                  cadence_features])
@@ -374,16 +340,19 @@ class PieceFeatures:
         #print(cadence_matchness)
         candidate_cadence_location = np.where(cadence_matchness > 0.5)[0]
 
-        return candidate_cadence_location
 
-        # xs = np.arange(len(softmax_cadence_matchness))+1
-        # plt.plot(xs,softmax_cadence_matchness,marker='o')
+
+        # xs = np.arange(len(cadence_matchness))+1
+        # plt.plot(xs,cadence_matchness,marker='o',zorder=0)
         # plt.title('cadence-like of each measure')
         # plt.xticks(xs)
-        # print(cadence_matchness)
+        # print(# cadence_matchness)
         # print(np.argsort(-cadence_matchness))
+        # plt.scatter(candidate_cadence_location+1,cadence_matchness[candidate_cadence_location],marker='x',c='red',zorder=1)
+        # StreamBuilder.measures_to_stream(piece)
         # print(np.where(cadence_matchness>0.5))
         # plt.show()
+        return candidate_cadence_location
 
 
 class DistanceFunction:
@@ -896,6 +865,30 @@ class FeatureEvaluation:
         plausibility = 1 / (1 + total_distance)
         return plausibility
 
+    def cadence_only_location_match(self, features, current_location):
+        if self.locations_of_all_rhythms == None:
+            self.locations_of_all_rhythms = self.get_locations_of_all_rhythms()
+        if self.locations_of_all_contours == None:
+            self.locations_of_all_contours = self.get_locations_of_all_contours()
+
+        rhythm = features['rhythm']
+        contour = features['contour']
+        locations_of_this_rhythm = np.array(self.locations_of_all_rhythms[str(rhythm)])
+        locations_of_this_contour = np.array(self.locations_of_all_contours[str(contour)])
+
+        if current_location[0] != current_location[-1]-1:
+            rhythm_location_distances = np.average(locations_of_this_rhythm[:,-1] - locations_of_this_rhythm[:,0] > 1)
+            contour_location_distances = np.average(locations_of_this_contour[:,-1] - locations_of_this_contour[:,0] > 1)
+            plausibility = (rhythm_location_distances+contour_location_distances)/2
+        else:
+            rhythm_location_distances = np.sum(np.abs(locations_of_this_rhythm - current_location), axis=-1)
+            contour_location_distances = np.sum(np.abs(locations_of_this_contour - current_location), axis=-1)
+            min_rhythm_location_distance = np.min(rhythm_location_distances)
+            min_contour_location_distance = np.min(contour_location_distances)
+            total_distance = np.linalg.norm(np.array([min_contour_location_distance, min_rhythm_location_distance]), ord=2)
+            plausibility = 1 / (1 + total_distance)
+        return plausibility
+
     def internal_match(self, features):
         if self.rhythms_of_all_contours == None:
             self.rhythms_of_all_contours = self.get_rhythms_of_all_contours()
@@ -923,6 +916,7 @@ class FeatureEvaluation:
         # min_distance_rhythm = np.min(np.abs([self.rhythm_distance_func(rhythm_contour, rhythm) for rhythm_contour in rhythms_contour]))
 
         total_distance = np.linalg.norm(np.array([min_distance_contour, min_distance_rhythm]), ord=2)
+        #total_distance = np.sum([min_distance_contour, min_distance_rhythm])/2
         plausibility = 1 / (1 + total_distance)
         return plausibility
 
@@ -979,7 +973,8 @@ class FeatureEvaluation:
             distance_rhythm = self.rhythm_distance_func(rhythm, latent_rhythm)
             distance_contour = self.contour_distance_func(contour, latent_contour)
 
-            total_distance = np.linalg.norm(np.array([distance_contour, distance_rhythm]), ord=2)
+            #total_distance = np.linalg.norm(np.array([distance_contour, distance_rhythm]), ord=2)
+            total_distance = np.sum([distance_contour, distance_rhythm])/2
             plausibility = 1 / (1 + total_distance)
         return plausibility
 
@@ -1075,16 +1070,16 @@ class MelodySynthesis:
 
 class StreamBuilder:
     @staticmethod
-    def measures_to_stream(measures: list[(object, object, object, object)], ignore_offset=False):
+    def measures_to_stream(measures: list[(object, object, object, object)], ignore_offset=False,title='original'):
 
         stream = m21.stream.Stream()
-        stream.append(m21.metadata.Metadata(title='original'))
+        stream.append(m21.metadata.Metadata(title=title))
+        stream.append(m21.meter.TimeSignature('3/4'))
         key = measures[0][1]
         Mm = key.mode
 
         for i, test_measure in enumerate(measures):
             m21_measure = copy.deepcopy(test_measure[0])
-
             stream.append(m21_measure)
 
         stream.show()
@@ -1151,6 +1146,81 @@ class Experiment:
         # 'vii': np.tile([0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1], (12, 1)),
     }
 
+    def __init__(self):
+        xml_files = ['../data/xml/' + file_name for file_name in
+                     filter(lambda x: x.endswith('.xml'), sorted(os.listdir('../data/xml')))]
+        D_major_pieces = []
+        samples = random.sample(xml_files, k=599)
+
+        specific_sample = ['../data/xml/Polonäs_6b9196.xml',
+                           '../data/xml/_Polska_efter_Petter_Dufva_75c046.xml',
+                           '../data/xml/_Polonäs_sexdregasamlingen_del_2_nr_40_f6ee90.xml',
+                           '../data/xml/Polonäs_i_Dm_efter_Daniel_Danielsson_ac3754.xml',
+                           '../data/xml/Polonäs_ab479a.xml',
+                           '../data/xml/Slängpolska_från_Torna_Hällestad_d2f7e4.xml',
+                           '../data/xml/Pollonesse_183229_d6da88.xml',
+                           '../data/xml/Polonäs_efter_Pehr_Andersson_Bild_20_nr_56_20b592.xml',
+                           '../data/xml/_Fingertarmen_polska_efter_ByssKalle_nr_46_b824bf.xml',
+                           '../data/xml/Pollonesse_183212_de27a4.xml',
+                           '../data/xml/Polonäs_sexdregasamlingen_del_3_nr_27_ff1c20.xml',
+                           '../data/xml/Polska_efter_Ida_i_Rye_4b4d84.xml',
+                           '../data/xml/Polonäs_av_Forssén_f59468.xml',
+
+                           ]
+        specific_pieces = []
+        for xml_file in specific_sample:
+            test_piece = m21.converter.parse(xml_file)
+            voice = test_piece.getElementsByClass(m21.stream.Part)[0]
+            measures = voice.getElementsByClass(m21.stream.Measure)
+            duration = measures[0].duration.quarterLength
+            key_signature = test_piece.flat.getKeySignatures()[0]
+            time_signature = test_piece.flat.getTimeSignatures()[0]
+            measures_with_piece_info = [(m, key_signature, time_signature, xml_file) for m in measures]
+            specific_pieces.append(measures_with_piece_info)
+
+        for xml_file in samples:
+            test_piece = m21.converter.parse(xml_file)
+            voice = test_piece.getElementsByClass(m21.stream.Part)[0]
+            measures = voice.getElementsByClass(m21.stream.Measure)
+            key_signature = test_piece.flat.getKeySignatures()[0]
+            if key_signature == m21.key.Key('D'):
+                time_signature = test_piece.flat.getTimeSignatures()[0]
+                measures_with_piece_info = [(m, key_signature, time_signature, xml_file) for m in measures]
+                if len(measures_with_piece_info) > 1:
+                    D_major_pieces.append(measures_with_piece_info)
+                if len(measures_with_piece_info) == 8:
+                    print(xml_file)
+        all_measures = sum(D_major_pieces, [])
+
+        eight_bar_pieces = [x for x in D_major_pieces if len(x) in [8]]
+        print('len(eight_bar_pieces): ', len(eight_bar_pieces))
+        assert len(eight_bar_pieces) > 0
+
+        def measure_contain_end_repeat(m: m21.stream.Measure) -> bool:
+            repeat_marks = list(m.getElementsByClass(m21.repeat.RepeatMark))
+            repeat_marks = [x for x in repeat_marks if hasattr(x, 'direction')]
+            end_repeat_marks = [x for x in repeat_marks if x.direction == 'end']
+            return end_repeat_marks != []
+
+        measure_with_repeat_end = [x for x in all_measures if measure_contain_end_repeat(x[0])]
+
+        cadential_measures = list(
+            set([x[-1] for x in D_major_pieces] + [x[3] for x in eight_bar_pieces] + measure_with_repeat_end))
+        ending_measures = list(set([x[-1] for x in D_major_pieces]))
+
+        print('len(measure_with_repeat_end): ', len(measure_with_repeat_end))
+        print('len(cadential_measures): ', len(cadential_measures))
+        strong_candeces = [x for x in cadential_measures if
+                           BarPatternFeatures.contour_sixteenth_grid(x[0], x[1], x[2])[-1]%12 == 0]+ending_measures
+        strong_candeces = list(set(strong_candeces))
+        weak_cadences = list(set([x for x in cadential_measures if x not in strong_candeces]))
+        self.specific_pieces = specific_pieces
+        self.D_major_pieces = D_major_pieces
+        self.measure_with_repeat_end = measure_with_repeat_end
+        self.strong_candeces = strong_candeces
+        self.weak_cadences = weak_cadences
+
+
     @staticmethod
     def recover_measures(measures: list[m21.stream.Measure]):
 
@@ -1168,20 +1238,22 @@ class Experiment:
 
         pc_distribution_grid = Experiment.mode_pc_onehot[Mm]
         for test_measure in measures:
-            stream.append(test_measure[0])
-            test_contour = BarPatternFeatures.contour_cosine(test_measure[0], key=key,
-                                                             n_beat=test_measure[2].numerator)
-            test_rhythm = BarPatternFeatures.rhythm_sixteenth_grid(test_measure[0], key=key,
-                                                                   n_beat=test_measure[2].numerator)
-            constructed_melody = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=test_contour,
-                                                                           rhythm_grid=test_rhythm, vl=None,
-                                                                           sample_point_size=300,
-                                                                           pc_distribution_grid=pc_distribution_grid)
-            constructed_stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody, test_rhythm,
-                                                                                key=key)
+            m21_measure = test_measure[0]
+            stream.append(m21_measure)
+            if m21_measure.duration.quarterLength >= 2.0:
+                test_contour = BarPatternFeatures.contour_cosine(test_measure[0], key=key,
+                                                                 n_beat=test_measure[2].numerator)
+                test_rhythm = BarPatternFeatures.rhythm_sixteenth_grid(test_measure[0], key=key,
+                                                                       n_beat=test_measure[2].numerator)
+                constructed_melody = MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=test_contour,
+                                                                               rhythm_grid=test_rhythm, vl=None,
+                                                                               sample_point_size=300,
+                                                                               pc_distribution_grid=pc_distribution_grid)
+                constructed_stream = StreamBuilder.pitch_grid_rhythm_grid_to_stream(constructed_melody, test_rhythm,
+                                                                                    key=key)
 
-            constructed_melodies.append(constructed_melody)
-            stream_constructed_melodies.append(constructed_stream)
+                constructed_melodies.append(constructed_melody)
+                stream_constructed_melodies.append(constructed_stream)
 
         stream.show()
         stream_constructed_melodies.show()
@@ -1643,7 +1715,7 @@ class Experiment:
 
     @staticmethod
     def contour_self_similarity(measures):
-        Experiment.recover_measures(measures)
+        StreamBuilder.measures_to_stream(measures,title=measures[0][-1])
         n = len(measures)
         contours = np.array(
             [BarPatternFeatures.contour_cosine(measure=x[0], key=x[1], n_beat=x[2])[1:] for x in measures])
@@ -1711,6 +1783,16 @@ class Experiment:
         plt.show()
 
     @staticmethod
+    def cadence_detection_test(pieces):
+        _feature_distribution = sum([PieceFeatures.get_contour_rhythm_dict(piece) for piece in pieces], [])
+        _feature_evaluator = FeatureEvaluation(joint_distribution_of_features=_feature_distribution)
+        for piece in pieces:
+            cadence_locations = PieceFeatures.cadence_detector(piece,_feature_evaluator)
+            piece_title = piece[0][-1]
+            piece_title = piece_title.replace('../data/xml/','')
+            print(piece[0][-1],cadence_locations)
+            StreamBuilder.measures_to_stream(piece,title=piece_title)
+    @staticmethod
     def feature_evaluation_at_work(pieces):
 
         # configuring feature evaluator
@@ -1776,27 +1858,31 @@ class Experiment:
         target_locations = [[0, 4], [1, 4], [2, 4], [3, 4]] \
                            + [[0, 8], [1, 8], [2, 8], [3, 8], [4, 8], [5, 8], [6, 8], [7, 8]] + [[0, 4], [1, 4], [2, 4],
                                                                                                  [3, 4]]
+        def evaluate_fits(features:list[dict],latent_features:list[dict]):
+            internal_match_fits = []
+            latent_match_fits = []
+            location_match_fits = []
+            l = len(random_features)
 
-        internal_match_fits = []
-        latent_match_fits = []
-        location_match_fits = []
-        l = len(random_features)
+            for i, feature in enumerate(features):
+                internal_match = feature_evaluator.internal_match(features=feature)
+                latent_match = [
+                    feature_evaluator._match_with_latent(features=feature, latent_features=latent_feature) for
+                    latent_feature in latent_features]
+                location_match_fit = [
+                    feature_evaluator.location_match(features=feature, current_location=location)
+                    for location in target_locations]
+                print('\r', str(i) + '/' + str(l), end='')
+                internal_match_fits.append(internal_match)
+                latent_match_fits.append(latent_match)
+                location_match_fits.append(location_match_fit)
 
-        for i, random_feature in enumerate(random_features):
-            internal_match = feature_evaluator.internal_match(features=random_feature)
-            latent_match = [
-                feature_evaluator._match_with_latent(features=random_feature, latent_features=latent_feature) for
-                latent_feature in list_of_latent_features]
-            location_match_fit = [feature_evaluator.location_match(features=random_feature, current_location=location)
-                                  for location in target_locations]
-            print('\r', str(i) + '/' + str(l), end='')
-            internal_match_fits.append(internal_match)
-            latent_match_fits.append(latent_match)
-            location_match_fits.append(location_match_fit)
+            print('len(internal_match_fits): ', len(internal_match_fits))
+            print('len(latent_match_fits): ', len(latent_match_fits))
+            print('len(location_match_fits): ', len(location_match_fits))
+            return internal_match_fits,latent_match_fits,location_match_fits
 
-        print('len(internal_match_fits): ', len(internal_match_fits))
-        print('len(latent_match_fits): ', len(latent_match_fits))
-        print('len(location_match_fits): ', len(location_match_fits))
+        internal_match_fits,latent_match_fits,location_match_fits = evaluate_fits(features=random_features,latent_features=list_of_latent_features)
 
         print(' ', 'done')
         print('-------- Selecting best features in each position --------')
@@ -1819,12 +1905,16 @@ class Experiment:
                 total_scores.append(total_score)
             total_scores = np.array(total_scores)
             arg_sort = np.argsort(-total_scores)
-            print('total_scores[arg_sort]: ', total_scores[arg_sort])
-            random_features = np.array(random_features)
-            top_features = random_features[arg_sort[:300]]
+            random_features = np.array(random_features).reshape(-1)
+            top_features = random_features[arg_sort[:5]]
+            top_features = np.random.choice(top_features,10)
             all_top_features.append(top_features)
-            # for i,candidate in enumerate(candidates):
-            #    candidate.append(top_features[i])
+
+            #sampling_probabilities = np.exp(total_scores) / np.sum(np.exp(total_scores))
+            #sampled_features = np.random.choice(random_features,10,p=sampling_probabilities)
+            #all_top_features.append(sampled_features)
+
+
         print('-------- Assembling pieces from candidates in each position--------')
         candidates = list(zip(*all_top_features))[:5]
         # varying_source_pieces = [[] for _ in range(5)]
@@ -1854,13 +1944,15 @@ class Experiment:
         # generate melody based on  candidate features
         for i, candidate in enumerate(candidates):
             stream = m21.stream.Stream()
+
             stream.append(m21.metadata.Metadata(title='Top {}'.format(i + 1)))
+            stream.append(m21.meter.TimeSignature('3/4'))
             stream.append(m21.key.KeySignature(2))
             pitch_grids = [MelodySynthesis.combine_contour_rhythm_vl(contour_coeffs=feature['contour'],
                                                                      rhythm_grid=feature['rhythm'],
                                                                      sample_point_size=300, vl=None,
                                                                      pc_distribution_grid=Experiment.mode_pc_onehot[
-                                                                         'major']) for feature in candidate]
+                                                                         'chromatic']) for feature in candidate]
             streams = [
                 StreamBuilder.pitch_grid_rhythm_grid_to_stream(pitch_grid=pitch_grid, rhythm_grid=feature['rhythm'],
                                                                key=m21.key.Key('D')) for pitch_grid, feature in
@@ -1870,13 +1962,14 @@ class Experiment:
 
 
 if __name__ == '__main__':
-    Experiment.recover_measures(measures=specific_pieces[-1])
-    # Experiment.mix_match_rhythm_contour(twelve_bar_pieces[2], twelve_bar_pieces[3])
+    experiment = Experiment()
+    # Experiment.recover_measures(measures=specific_pieces[-1])
+    # Experiment.mix_match_rhythm_contour(eight_bar_pieces[2], eight_bar_pieces[3])
     # Experiment.clustering_contour_diff(all_measures)
-    # Experiment.recovering_with_varying_contour_hierarchy(twelve_bar_pieces[2])
-    # Experiment.mix_match_contour_surface(twelve_bar_pieces[2], twelve_bar_pieces[3])
-    # Experiment.recover_measures_with_diffrent_pc_distribution(twelve_bar_pieces[2])
-    # Experiment.generate_measure(twelve_bar_pieces[0][0])
+    # Experiment.recovering_with_varying_contour_hierarchy(eight_bar_pieces[2])
+    # Experiment.mix_match_contour_surface(eight_bar_pieces[2], eight_bar_pieces[3])
+    # Experiment.recover_measures_with_diffrent_pc_distribution(eight_bar_pieces[2])
+    # Experiment.generate_measure(eight_bar_pieces[0][0])
 
     # all_contours = [BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2]) for x in all_measures]
     # ending_contours = [BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2]) for y in pieces for x in y[-2:]]
@@ -1884,6 +1977,10 @@ if __name__ == '__main__':
     # middle_contours = [BarPatternFeatures.contour_cosine(measure=x[0],key=x[1],n_beat=x[2]) for y in pieces for x in y[5:7]]
 
     # Experiment.generate_piece_from_tree(contour_coeff_dict={'opening': opening_contours, 'ending': ending_contours, 'middle':middle_contours })
-    # Experiment.contour_self_similarity(pieces[0])
-    #StreamBuilder.measures_to_stream(cadential_measures)
-    #Experiment.feature_evaluation_at_work(pieces=D_major_pieces)
+    # Experiment.contour_self_similarity(D_major_pieces[0])
+    # Experiment.recover_measures(specific_pieces[-1])
+    # StreamBuilder.measures_to_stream(experiment.specific_pieces[-1])
+    Experiment.feature_evaluation_at_work(pieces=experiment.D_major_pieces[:100])
+    # Experiment.cadence_detection_test(pieces=D_major_pieces[:5])
+    #StreamBuilder.measures_to_stream(experiment.strong_candeces, title='strong candences')
+    #StreamBuilder.measures_to_stream(experiment.weak_cadences, title='weak cadences')
