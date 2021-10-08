@@ -1,118 +1,72 @@
-import copy
 import itertools
-import random
-
-import numpy as np
-
-
-def left_and_right_pitch(melody, slot):
-    left_pitches = [x for i, x in enumerate(melody) if i < slot and x != '_']
-    right_pitches = [x for i, x in enumerate(melody) if i > slot and x != '_']
-    if len(left_pitches) > 0:
-        left_pitch = left_pitches[-1]
-    else:
-        left_pitch = None
-    if len(right_pitches) > 0:
-        right_pitch = right_pitches[0]
-    else:
-        right_pitch = None
-    # print('left_pitch, right_pitch: ', left_pitch, right_pitch)
-    return left_pitch, right_pitch
+import policy
+import actions
+from typing import Type
 
 
-class Operation:
-    def __init__(self, type_of_operation):
-        self.type_of_operation = None
-
-    @staticmethod
-    def is_legal(melody: list, slot: int, latent_info: dict = None):
-        pass
-
-    @staticmethod
-    def perform(melody: list, slot: int, latent_info: dict = None):
-        pass
-
-
-class Neighbor(Operation):
-    def __init__(self):
-        super().__init__(type_of_operation='Neighbor')
-
-    @staticmethod
-    def is_legal(melody: list, slot: int, latent_info: dict = None):
-        """works when left pitch = right pitch, both present"""
-        left_pitch, right_pitch = left_and_right_pitch(melody, slot)
-        condition = all([
-            left_pitch == right_pitch,
-            left_pitch is not None,
-            right_pitch is not None,
-        ])
-        return condition
-
-    @staticmethod
-    def perform(melody: list, slot: int, latent_info: dict = None):
-        left_pitch, right_pitch = left_and_right_pitch(melody, slot)
-        scale = latent_info['scale']
-        register = left_pitch//12
-        neighbor_pitch = register +sorted(scale,key=lambda pitch: abs(pitch-left_pitch%12))[0]
-        melody[slot:slot + 1] = '_', neighbor_pitch,'_'
-        return melody
-
-
-class Fill(Operation):
-    def __init__(self):
-        super().__init__(type_of_operation='Neighbor')
-
-    @staticmethod
-    def is_legal(melody: list, slot: int, latent_info: dict = None):
-        """works when left pitch != right pitch, both present"""
-        left_pitch, right_pitch = left_and_right_pitch(melody, slot)
-        condition = all([
-            left_pitch is not None,
-            right_pitch is not None,
-            left_pitch != right_pitch,
-        ])
-        return condition
-
-    @staticmethod
-    def perform(melody: list, slot: int, latent_info: dict = None):
-        left_pitch, right_pitch = left_and_right_pitch(melody, slot)
-        midpoint = (right_pitch + left_pitch)/2
-        low_pitch,high_pitch = sorted([left_pitch,right_pitch])
-        scale_notes_between = [pitch for pitch in range(low_pitch,high_pitch+1) if pitch%12 in latent_info['scale']]
-        print('scale_notes_between: ',scale_notes_between)
-        fill_pitch = sorted(scale_notes_between,key=lambda pitch: [1/(1e-5+abs(pitch-midpoint))*(pitch%12 in latent_info['harmony'])])[-1]
-        melody[slot:slot + 1] = '_', fill_pitch,'_'
-        return melody
-
-
-
-def elaborate_melody(melody: list, operations: list,latent_info: dict = None) -> list:
-    print('----------------')
+def elaborate_melody_one_step(melody: list, operations: list, latent_info: dict = None,
+                              policy: Type[policy.Policy] = policy.UniformRandom) -> (list,dict):
     slots = [i for i, x in enumerate(melody) if x == '_']
-    legal_operations_on_slot = [(slot,operation) for slot,operation in itertools.product(slots,operations) if operation.is_legal(melody=melody, slot=slot)]
-    print('legal_operations_on_slot: ',legal_operations_on_slot)
-    selected_slot,selected_operation = random.choice(legal_operations_on_slot)
-    print('selected_slot,selected_operation: ', (selected_slot,selected_operation))
-    melody = selected_operation.perform(melody=melody,slot=selected_slot,latent_info=latent_info)
-    print('resulted melody: ', melody)
-    return melody
+    legal_operations_on_slot = [(slot, operation) for slot, operation in itertools.product(slots, operations) if
+                                operation.is_legal(melody=melody, slot=slot,latent_info=latent_info)]
+    if len(legal_operations_on_slot) == 0:
+        raise Exception('legal_operations_on_slot is empty')
+    selected_slot, selected_operation = policy.determine_action(state={'melody': melody},
+                                                                legal_operations_on_slot=legal_operations_on_slot)
+    new_melody = selected_operation.perform(melody=melody, slot=selected_slot, latent_info=latent_info)
+    log = {'selected_slot': selected_slot,
+           'selected_operation': selected_operation,
+           'resulted_melody': new_melody,
+           }
+    return new_melody, log
+
+
+melody_templates = [
+    {
+        'melody': [-5, '_', 7, '_', 5],
+        'latent_info': {
+            'harmony': [0, 4, 7],
+            'scale': [0, 2, 4, 5, 7, 9, 11]
+        }
+    },
+
+    {
+        'melody': [-5, '_', 5, '_', 4],
+        'latent_info': {
+            'harmony': [2, 7, 11],
+            'scale': [0, 2, 4, 5, 7, 9, 11]
+        }
+    },
+
+    {
+        'melody': [-5, '_', 7, '_', 5],
+        'latent_info': {
+            'harmony': [0, 4, 7],
+            'scale': [0, 2, 4, 5, 7, 9, 11]
+        }
+    }
+]
+
+
+class Experiment:
+    @staticmethod
+    def elaborate_one_melody(melody_template: dict, n_iterations=3):
+        operations = actions.Operation.__subclasses__()
+        print('\n**********\n')
+        print('set of operations: ', operations)
+        melody, latent_info = melody_template.values()
+        print('starting melody: ', melody)
+        history = []
+        for i in range(n_iterations):
+            melody, log = elaborate_melody_one_step(melody, operations, latent_info=latent_info,
+                                                        policy=policy.UniformRandom)
+            history.append(log)
+
+        for log in history:
+            print(log)
+
 
 if __name__ == '__main__':
-    operations = Operation.__subclasses__()
-    print('set of operations: ', operations)
 
-    print('\n**********\n')
-    melody1 = [-5, '_', 7, '_',5]
-    print('starting melody: ', melody1)
-    latent_info1 = {'harmony': [0,4,7],
-                   'scale': [0,2,4,5,7,9,11]}
-    for i in range(3):
-        elaborate_melody(melody1, operations,latent_info=latent_info1)
-
-    print('\n**********\n')
-    melody2 = [-5, '_', 5, '_', 4]
-    print('starting melody: ', melody2)
-    latent_info2 = {'harmony': [2, 7,11],
-                   'scale': [0, 2, 4, 5, 7, 9, 11]}
-    for i in range(3):
-        elaborate_melody(melody2, operations, latent_info=latent_info2)
+    Experiment.elaborate_one_melody(melody_templates[0], n_iterations=3)
+    Experiment.elaborate_one_melody(melody_templates[1], n_iterations=3)

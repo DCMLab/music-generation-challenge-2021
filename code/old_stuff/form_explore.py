@@ -1,14 +1,11 @@
 
 import os
 
-import matplotlib.pyplot as plt
-import music21
-import numpy as np
-
 import corpus_analyzer
 
-abc_files = ['../data/abc/' + file_name for file_name in sorted(os.listdir('../data/abc'))]
-xml_files = ['../data/xml/' + file_name for file_name in filter(lambda x:x.endswith('generated_template_for_polyphony.xml'),sorted(os.listdir('../data/xml')))]
+abc_files = ['../data/abc/' + file_name for file_name in sorted(os.listdir('../../data/abc'))]
+xml_files = ['../data/xml/' + file_name for file_name in filter(lambda x:x.endswith('generated_template_for_polyphony.xml'), sorted(os.listdir(
+    '../../data/xml')))]
 
 
 

@@ -140,9 +140,6 @@ class BarTemplate:
         self.rhythm = None
         self.ornaments = None # a function of self.type
 
-    def evaluate(self):
-
-
 
     def generate(self):
         pitch_grid = []
@@ -162,10 +159,7 @@ class BarTemplate:
         start_end_indices = [(indices_with_pitch[i],indices_with_pitch[i+1]) for i in range(len(indices_with_pitch)-1)]
         return start_end_indices
 
-    def connect_pitch(self,start_end_index):
-        if method == 'arp':
 
-        pass
 
 
 

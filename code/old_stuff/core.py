@@ -1,16 +1,13 @@
-import collections
 import copy
 import itertools
 import random
 import sys
-import time
 
-import ipywidgets
 import matplotlib.pyplot as plt
 import music21.stream
 import sklearn.cluster as cluster
 import sklearn.manifold
-from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.cluster.hierarchy import linkage
 import numpy as np
 import music21 as m21
 import os
@@ -18,7 +15,6 @@ import scipy.spatial.distance as distance
 import plotly.graph_objects as go
 import plotly.subplots
 import scipy.fftpack
-from ipywidgets import HTML, HBox, VBox
 
 Mode = {
     'major': [0, 2, 4, 5, 7, 9, 11],
@@ -1200,7 +1196,7 @@ class Experiment:
 
     def __init__(self):
         xml_files = ['../data/xml/' + file_name for file_name in
-                     filter(lambda x: x.endswith('.xml'), sorted(os.listdir('../data/xml')))]
+                     filter(lambda x: x.endswith('.xml'), sorted(os.listdir('../../data/xml')))]
 
         samples = random.sample(xml_files, k=599)
 
