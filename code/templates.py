@@ -1,5 +1,6 @@
 import random
-
+import numpy as np
+from core import MelodySynthesis,BarPatternFeatures
 
 class Grammar:
     """Symbol -> Word (or list of Words)"""
@@ -123,3 +124,59 @@ class Grammar:
         for key, value in dict.items():
             new_dict[key] = random.choice(value)
         return new_dict
+
+
+class BarTemplate:
+    def __init__(self):
+        # indirect arguments for generating bar
+        self.type = None # cadence, non-cadence
+        self.scale = None
+        self.harmony = None
+        self.reduction = None
+
+        # direct arguments for generating bar
+        self.pc_distribution = None # a function of self.harmony and self.scale
+        self.contour = None
+        self.rhythm = None
+        self.ornaments = None # a function of self.type
+
+    def evaluate(self):
+
+
+
+    def generate(self):
+        pitch_grid = []
+        start_end_indices = self.get_start_end_indices()
+        for i,start_end_index in enumerate(start_end_indices):
+            connection = self.connect_pitch(start_end_index=start_end_index)
+            if i == 0:
+                pitch_grid.extend(connection)
+            else:
+                pitch_grid.extend(connection[1:])
+
+        print(pitch_grid)
+        return pitch_grid
+
+    def get_start_end_indices(self):
+        indices_with_pitch = [i for i,x in enumerate(self.reduction) if type(x) != str]
+        start_end_indices = [(indices_with_pitch[i],indices_with_pitch[i+1]) for i in range(len(indices_with_pitch)-1)]
+        return start_end_indices
+
+    def connect_pitch(self,start_end_index):
+        if method == 'arp':
+
+        pass
+
+
+
+
+test_temp = BarTemplate()
+test_temp.scale = [1,0,1,0,1,1,0,1,0,1,0,1]
+test_temp.harmony = [1,0,0,0,1,0,0,1,0,0,0,0]
+test_temp.contour = [0]
+test_temp.reduction = [-5,'_','_','_',7,'-','_','_',5,'-','-','-']
+test_temp.ornaments = ['arp','2ap']
+
+
+if __name__ == '__main__':
+    test_temp.generate()
