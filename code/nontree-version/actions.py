@@ -69,8 +69,8 @@ class Neighbor(Operation):
         left_pitch, right_pitch = left_and_right_pitch(melody, slot)
         scale = latent_info['scale']
         register = left_pitch // 12
-        neighbor_pitch = register + \
-                         sorted([x for x in scale if x != left_pitch], key=lambda pitch: abs(pitch - left_pitch % 12))[
+        neighbor_pitch = register*12 + \
+                         sorted([x for x in scale if x != left_pitch%12], key=lambda pitch: abs(pitch - left_pitch % 12))[
                              0]
         new_melody = copy.deepcopy(melody)
         new_melody[slot:slot + 1] = '_', neighbor_pitch, '_'
@@ -125,6 +125,8 @@ class Escape(Operation):
             left_pitch is not None,
             right_pitch is not None,
             len(scale_notes_in_between) == 0,
+            left_pitch!=right_pitch,
+            right_pitch % 12 in latent_info['harmony']
         ])
         return condition
 
@@ -150,7 +152,8 @@ class Appoggiatura(Operation):
         condition = all([
             left_pitch is not None,
             right_pitch is not None,
-            left_pitch != right_pitch
+            left_pitch != right_pitch,
+            right_pitch%12 in latent_info['harmony']
         ])
         return condition
 

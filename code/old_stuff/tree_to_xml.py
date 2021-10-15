@@ -163,7 +163,7 @@ def tree_to_piece_info(tree: Tree) -> PieceInfo:
             chord_string = str(beat.data.harmony.symbols[0])
             chord_array = chord_string_to_array_dict[chord_string]
             target_chords[_bar, _beat, :, :] = chord_array
-    # print(template)
+    # print(template.py)
     piece_info = PieceInfo()
     piece_info.template = template.tolist()
     piece_info.target_chords = target_chords[np.newaxis,...]

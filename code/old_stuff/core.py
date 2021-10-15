@@ -1360,7 +1360,7 @@ class Experiment:
             print(Mm)
 
         chord_preference_grid = np.array([Experiment.chord_pc_onehot[x] for x in chord_sequence])
-        piece_pc_distribution_grid = piece_pc_distribution_grid[len(chord_preference_grid)] ## same length as template
+        piece_pc_distribution_grid = piece_pc_distribution_grid[len(chord_preference_grid)] ## same length as template.py
         piece_pc_distribution_grid = piece_pc_distribution_grid + 1 * chord_preference_grid
         if len(measures) == 1:
             measures = measures * len(piece_pc_distribution_grid)
