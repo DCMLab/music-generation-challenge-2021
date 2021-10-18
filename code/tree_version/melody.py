@@ -3,6 +3,7 @@ class Tree:
         self.value = value
         self.children = []
         self.parent = None
+        self.memory = None
 
     def add_children(self, children):
         self.children += children
