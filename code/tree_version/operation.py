@@ -71,7 +71,7 @@ class Fill(Operation):
         scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=melody.latent_variables['scale'])
         # print('scale_notes_in_between: ', scale_notes_in_between)
         harmony_notes_in_between = harmony_notes_between(low_pitch, high_pitch,
-                                                         harmony=melody.latent_variables['harmony'])
+                                                         harmony=melody.latent_variables['harmony'][0])
         # print('harmony_notes_between: ', harmony_notes_in_between)
         pitch_evaluation = lambda pitch: (1 / (1e-2 + abs(pitch - midpoint))) * (pitch % 12 in harmony_notes_in_between)
         # print(list(map(pitch_evaluation,scale_notes_between)))
@@ -90,7 +90,7 @@ class RightNeighbor(Operation):
             left_pitch is not None,
             right_pitch is not None,
             left_pitch != right_pitch,
-            left_pitch % 12 in melody.latent_variables['harmony']
+            left_pitch % 12 in melody.latent_variables['harmony'][0]
         ])
         return condition
 
@@ -98,7 +98,7 @@ class RightNeighbor(Operation):
     def perform(melody: Melody):
         left_pitch, right_pitch = melody.value
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
-        right_neighbor_pitch = move_in_scale(start_pitch=right_pitch, scale=melody.latent_variables['scale'], step=sign)
+        right_neighbor_pitch = move_in_scale(start_pitch=left_pitch, scale=melody.latent_variables['scale'], step=-sign)
         Operation.add_children_by_pitch(melody, right_neighbor_pitch)
 
 
@@ -113,7 +113,7 @@ class LeftNeighbor(Operation):
             left_pitch is not None,
             right_pitch is not None,
             left_pitch != right_pitch,
-            right_pitch % 12 in melody.latent_variables['harmony']
+            right_pitch % 12 in melody.latent_variables['harmony'][1]
         ])
         return condition
 
@@ -121,5 +121,5 @@ class LeftNeighbor(Operation):
     def perform(melody: Melody):
         left_pitch, right_pitch = melody.value
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
-        left_neighbor_pitch = move_in_scale(start_pitch=left_pitch, scale=melody.latent_variables['scale'], step=-sign)
+        left_neighbor_pitch = move_in_scale(start_pitch=right_pitch, scale=melody.latent_variables['scale'], step=sign)
         Operation.add_children_by_pitch(melody, left_neighbor_pitch)

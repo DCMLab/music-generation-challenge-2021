@@ -12,20 +12,26 @@ from pc_helpers import interval_list_to_pitch_list
 
 
 class MelodyElaboration:
-    def __init__(self, operations: list[Type[operation.Operation]], policy: Type[tree_policy.Policy],
-                 elaboration_to_mimic=None):
+    def __init__(self, operations: list[Type[operation.Operation]], policy: Type[tree_policy.Policy], mimicking_policy: Type[tree_policy.ImitatingPolicy],
+                 memory_melody: Melody = None):
         self.operations = operations
         self.policy = policy
+        self.mimicking_policy = mimicking_policy
+        self.memory_melody = memory_melody
+        print('memory: ', memory_melody)
 
     def elaborate_one_step(self, melody: Melody, show=True):
-        selected_action = self.policy.determine_action(melody, self.operations)
+        # whether mimicking memory_melody to enforce coherence
+        if self.memory_melody is None:
+            selected_action = self.policy.determine_action(melody, self.operations)
+        else:
+            selected_action = self.mimicking_policy.determine_action(melody,self.operations,self.memory_melody,)
+
         if selected_action is not None:
             selected_action.perform()
-            if show is True:
-                selected_action.show()
+            selected_action.show()
         else:
-            if show is True:
-                print('no action is available, do not perform elaboration')
+            print('no action is available, do not perform elaboration')
 
     def elaborate(self, melody: Melody, steps=3, show=True):
         for i in range(steps):
@@ -35,9 +41,6 @@ class MelodyElaboration:
                 melody.show()
 
 
-
-
-
 class PieceElaboration:
     def __init__(self, melody_elaborator: MelodyElaboration, tree_templates: list[Melody],
                  self_similarity_template: list[str] = None):
@@ -45,11 +48,25 @@ class PieceElaboration:
         self.tree_templates = tree_templates
         self.trees = copy.deepcopy(tree_templates)
         self.self_similarity_template = self_similarity_template
+        self.symbol_memory = {}
 
     def elaborate(self):
         for i, melody in enumerate(self.trees):
-            print('******', 'bar', i + 1, '******')
-            self.melody_elaborator.elaborate(melody, steps=4, show=True)
+            print('\n******', 'bar', i + 1, '******\n ')
+            if self.self_similarity_template is not None:
+                current_symbol = self.self_similarity_template[i]
+                if current_symbol in self.symbol_memory.keys():
+                    print('loading memory \'{}\'\n'.format(current_symbol))
+                    memory_melody = self.symbol_memory[current_symbol]
+                    self.melody_elaborator.memory_melody = memory_melody
+                    self.melody_elaborator.elaborate(melody, steps=4, show=True)
+                    self.melody_elaborator.memory_melody = None
+                else:
+                    print('writing memory \'{}\'\n'.format(current_symbol))
+                    self.melody_elaborator.elaborate(melody, steps=4, show=True)
+                    self.symbol_memory.update({current_symbol: melody})
+            else:
+                self.melody_elaborator.elaborate(melody, steps=4, show=True)
 
     def result_to_stream(self):
         stream = music21.stream.Stream()
@@ -63,8 +80,10 @@ class PieceElaboration:
 
 
 if __name__ == '__main__':
-    elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.BalancedTree)
-    piece_elaborator = PieceElaboration(elaborator, tree_templates=template.tree_templates)
+    elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.BalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
+    self_similarity_template = ['a', 'b', 'c', 'c', 'c', 'c', 'd', 'e']
+    piece_elaborator = PieceElaboration(elaborator, tree_templates=template.tree_templates,
+                                        self_similarity_template=self_similarity_template)
     piece_elaborator.elaborate()
     stream = piece_elaborator.result_to_stream()
     stream.show()

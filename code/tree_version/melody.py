@@ -15,6 +15,11 @@ class Tree:
             return 0
         return max([child.get_depth() for child in self.children]) + 1
 
+    def get_dist_to_root(self):
+        if not self.parent:
+            return 0
+        return 1+self.parent.get_dist_to_root()
+
     def get_subtrees_at_depth(self, depth):
         children = [self]
         while depth > 0:
