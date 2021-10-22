@@ -8,7 +8,7 @@ from melody import Melody
 import operation
 import template
 from visualize_helper import Converter
-from pc_helpers import interval_list_to_pitch_list
+from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list
 
 
 class MelodyElaboration:
@@ -72,7 +72,8 @@ class PieceElaboration:
         stream = music21.stream.Stream()
         surfaces = [melody.get_surface() for melody in self.trees]
         surfaces_values = [[x.value for x in surface] for surface in surfaces]
-        pitch_lists = [interval_list_to_pitch_list(surfaces_value) for surfaces_value in surfaces_values]
+        #pitch_lists = [interval_list_to_pitch_list(surfaces_value) for surfaces_value in surfaces_values]
+        pitch_lists = [melody_surface_to_pitch_list(surface) for surface in surfaces]
         measures = [Converter.melody_list_to_m21_measure(pitch_list) for pitch_list in pitch_lists]
         # stream.append([Converter.melody_list_to_m21_measure(interval_list_to_pitch_list(melody.get_surface())) for melody in piece_elaborator.trees])
         stream.append(measures)

@@ -1,9 +1,10 @@
 class Tree:
-    def __init__(self, value):
+    def __init__(self, value,part=None):
         self.value = value
         self.children = []
         self.parent = None
         self.memory = None
+        self.part = part # head, body, or tail region of root
 
     def add_children(self, children):
         self.children += children
@@ -52,8 +53,8 @@ class Tree:
 
 
 class Melody(Tree):
-    def __init__(self, value, latent_variables):
-        super().__init__(value)
+    def __init__(self, value, latent_variables,part=None):
+        super().__init__(value,part=part)
         self.surface = None
         self.latent_variables = latent_variables
 
