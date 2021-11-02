@@ -1,6 +1,7 @@
 class Tree:
-    def __init__(self, value,part=None):
+    def __init__(self, value,part=None,rhythm = (1.0,1.0)):
         self.value = value
+        self.rhythm = rhythm
         self.children = []
         self.parent = None
         self.memory = None
@@ -73,3 +74,4 @@ if __name__ == '__main__':
     tree.show()
     #print(tree.get_surface()[0].parent.parent == tree)
     print('surface: ',[x.value for x in tree.get_surface()])
+    print('pitch_rhythm_surface: ', [(x.value,x.rhythm) for x in tree.get_surface()])

@@ -43,3 +43,15 @@ def melody_surface_to_pitch_list(surface:list[Melody]) -> list[int]:
 
     pitch_list = head_region_pitch_list+body_region_pitch_list+tail_region_pitch_list
     return pitch_list
+
+def melody_surface_to_pitch_duration_list(surface:list[Melody]) -> list[int]:
+    head_region = [(x.value,x.rhythm) for x in surface if x.part == 'head']
+    body_region = [(x.value,x.rhythm) for x in surface if x.part == 'body']
+    tail_region = [(x.value,x.rhythm) for x in surface if x.part == 'tail']
+    head_region_pitch_list = [interval[1] for interval in head_region[:-1]]
+    body_region_pitch_list = [body_region[0][0]]+[interval[1] for interval in body_region]
+    tail_region_pitch_list = [interval[1] for interval in tail_region[:-1]]
+    pitch_duration_list = head_region_pitch_list+body_region_pitch_list+tail_region_pitch_list
+    print('*** pitch_duration_list ***')
+    print(pitch_duration_list)
+    return pitch_duration_list
