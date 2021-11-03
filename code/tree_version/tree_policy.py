@@ -129,7 +129,7 @@ class ImitatingPolicy:
                                                         [operation.is_legal(pair[0]) for operation in operations]]
         matching_subtree_pairs_with_legal_operations_memory_has_children = [pair for pair in matching_subtree_pairs_with_legal_operations if bool(pair[1].children)]
         dists_to_root = [x[0].get_dist_to_root() for x in matching_subtree_pairs_with_legal_operations_memory_has_children]
-        print('dist_to_root: ',dists_to_root)
+        #print('dist_to_root: ',dists_to_root)
         matching_subtree_pairs_with_legal_operations_memory_has_children = sorted(matching_subtree_pairs_with_legal_operations_memory_has_children,key=lambda x:x[0].get_dist_to_root())
         if bool(matching_subtree_pairs_with_legal_operations_memory_has_children):
             current_melody_tree, current_memory_melody_tree = matching_subtree_pairs_with_legal_operations_memory_has_children[0]

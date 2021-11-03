@@ -49,9 +49,10 @@ class Repeat(Operation):
             left_pitch is not None,
             right_pitch is not None,
             right_pitch != left_pitch,
-            left_duration >= 0.5,
-            right_duration >= 0.5,
-            right_pitch % 12 in latent_variables['harmony']
+            #left_duration >= 0.5,
+            #right_duration >= 0.5,
+            #right_pitch % 12 in latent_variables['harmony'],
+            left_pitch % 12 in latent_variables['harmony']
         ])
         return False
 
@@ -150,7 +151,7 @@ class RightNeighbor(Operation):
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
         latent_variables = melody.transition[0].latent_variables
         right_neighbor_pitch = move_in_scale(start_pitch=left_pitch, scale=latent_variables['scale'], step=-sign)
-        Operation.add_children_by_pitch(melody, right_neighbor_pitch, part=melody.part, which_duration_to_steal=0)
+        Operation.add_children_by_pitch(melody, right_neighbor_pitch, part=melody.part, which_duration_to_steal=1)
 
 
 class LeftNeighbor(Operation):
@@ -177,4 +178,4 @@ class LeftNeighbor(Operation):
         latent_variables = melody.transition[0].latent_variables
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
         left_neighbor_pitch = move_in_scale(start_pitch=right_pitch, scale=latent_variables['scale'], step=sign)
-        Operation.add_children_by_pitch(melody, left_neighbor_pitch, part=melody.part, which_duration_to_steal=1)
+        Operation.add_children_by_pitch(melody, left_neighbor_pitch, part=melody.part, which_duration_to_steal=0)
