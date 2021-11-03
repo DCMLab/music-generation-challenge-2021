@@ -1,4 +1,6 @@
-from melody import Melody
+from melody import Melody,Note
+
+
 def move_in_scale(start_pitch, scale, step):
     current_pitch = start_pitch
     sign = int(step / abs(step))
@@ -10,6 +12,7 @@ def move_in_scale(start_pitch, scale, step):
 
 
 def scale_notes_between(low_pitch, high_pitch, scale):
+    assert isinstance(low_pitch,int) and isinstance(high_pitch,int) and isinstance(scale,list),(low_pitch,high_pitch,scale)
     chromatic_notes_between = list(range(low_pitch + 1, high_pitch))
     scale_notes_in_between = [x for x in chromatic_notes_between if x % 12 in scale]
     return scale_notes_in_between
@@ -17,6 +20,7 @@ def scale_notes_between(low_pitch, high_pitch, scale):
 
 def harmony_notes_between(low_pitch, high_pitch, harmony):
     return scale_notes_between(low_pitch, high_pitch, harmony)
+
 
 def interval_list_to_pitch_list(interval_list: list[(int, int)]) -> list[int]:
     pitch_list = []
@@ -33,25 +37,17 @@ def interval_list_to_pitch_list(interval_list: list[(int, int)]) -> list[int]:
                 pitch_list.append(pair[1])
     return pitch_list
 
-def melody_surface_to_pitch_list(surface:list[Melody]) -> list[int]:
+
+def melody_surface_to_pitch_list(surface: list[Melody]) -> list[int]:
     head_region = [x.value for x in surface if x.part == 'head']
     body_region = [x.value for x in surface if x.part == 'body']
     tail_region = [x.value for x in surface if x.part == 'tail']
     head_region_pitch_list = [interval[1] for interval in head_region[:-1]]
-    body_region_pitch_list = [body_region[0][0]]+[interval[1] for interval in body_region]
+    body_region_pitch_list = [body_region[0][0]] + [interval[1] for interval in body_region]
     tail_region_pitch_list = [interval[1] for interval in tail_region[:-1]]
 
-    pitch_list = head_region_pitch_list+body_region_pitch_list+tail_region_pitch_list
+    pitch_list = head_region_pitch_list + body_region_pitch_list + tail_region_pitch_list
     return pitch_list
 
-def melody_surface_to_pitch_duration_list(surface:list[Melody]) -> list[int]:
-    head_region = [(x.value,x.rhythm) for x in surface if x.part == 'head']
-    body_region = [(x.value,x.rhythm) for x in surface if x.part == 'body']
-    tail_region = [(x.value,x.rhythm) for x in surface if x.part == 'tail']
-    head_region_pitch_list = [interval[1] for interval in head_region[:-1]]
-    body_region_pitch_list = [body_region[0][0]]+[interval[1] for interval in body_region]
-    tail_region_pitch_list = [interval[1] for interval in tail_region[:-1]]
-    pitch_duration_list = head_region_pitch_list+body_region_pitch_list+tail_region_pitch_list
-    print('*** pitch_duration_list ***')
-    print(pitch_duration_list)
-    return pitch_duration_list
+
+

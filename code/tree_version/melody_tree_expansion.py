@@ -8,7 +8,7 @@ from melody import Melody
 import operation
 import template
 from visualize_helper import Converter
-from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list,melody_surface_to_pitch_duration_list
+from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list
 
 
 class MelodyElaboration:
@@ -50,6 +50,7 @@ class PieceElaboration:
         self.symbol_memory = {}
 
     def elaborate(self):
+        steps = 4
         for i, melody in enumerate(self.trees):
             print('\n******', 'bar', i + 1, '******\n ')
             if self.self_similarity_template is not None:
@@ -58,31 +59,25 @@ class PieceElaboration:
                     print('loading memory \'{}\'\n'.format(current_symbol))
                     memory_melody = self.symbol_memory[current_symbol]
                     #self.melody_elaborator.memory_melody = memory_melody
-                    self.melody_elaborator.elaborate(melody, steps=5, show=True,memory_melody=memory_melody)
+                    self.melody_elaborator.elaborate(melody, steps=steps, show=True,memory_melody=memory_melody)
                     #self.melody_elaborator.memory_melody = None
                 else:
                     print('writing memory \'{}\'\n'.format(current_symbol))
-                    self.melody_elaborator.elaborate(melody, steps=5, show=True)
+                    self.melody_elaborator.elaborate(melody, steps=steps, show=True)
                     self.symbol_memory.update({current_symbol: melody})
             else:
-                self.melody_elaborator.elaborate(melody, steps=5, show=True)
+                self.melody_elaborator.elaborate(melody, steps=steps, show=True)
 
     def result_to_stream(self):
         stream = music21.stream.Stream()
-        surfaces = [melody.get_surface() for melody in self.trees]
-        surfaces_values = [[x.value for x in surface] for surface in surfaces]
-        #pitch_lists = [interval_list_to_pitch_list(surfaces_value) for surfaces_value in surfaces_values]
-        pitch_lists = [melody_surface_to_pitch_list(surface) for surface in surfaces]
-        pitch_duration_list = [melody_surface_to_pitch_duration_list(surface) for surface in surfaces]
-        measures = [Converter.melody_list_to_m21_measure(pitch_list) for pitch_list in pitch_lists]
-        measures = [Converter.melody_duration_list_to_m21_measure(pitch_duration) for pitch_duration in pitch_duration_list]
-        # stream.append([Converter.melody_list_to_m21_measure(interval_list_to_pitch_list(melody.get_surface())) for melody in piece_elaborator.trees])
+        stream.append(music21.meter.TimeSignature('3/4'))
+        measures = [tree.surface_to_stream() for tree in self.trees]
         stream.append(measures)
         return stream
 
 
 if __name__ == '__main__':
-    elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.BalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
+    elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.RhythmBalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
     self_similarity_template = ['a', 'b', 'c', 'c', 'c', 'c', 'd', 'e']
     piece_elaborator = PieceElaboration(elaborator, tree_templates=template.tree_templates,
                                         self_similarity_template=self_similarity_template)

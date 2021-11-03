@@ -1,4 +1,7 @@
-from melody import Melody
+import copy
+import random
+
+from melody import Melody, Note
 from pc_helpers import move_in_scale, scale_notes_between, harmony_notes_between
 
 
@@ -11,16 +14,51 @@ class Operation:
         pass
 
     @staticmethod
-    def add_children_by_pitch(melody: Melody, pitch: int,part):
-        left_pitch, right_pitch = melody.value
-
-        child1 = Melody((left_pitch, pitch), latent_variables=melody.latent_variables,part=part)
-        child2 = Melody((pitch, right_pitch), latent_variables=melody.latent_variables,part=part)
+    def add_children_by_pitch(melody: Melody, pitch: int, part, which_duration_to_steal):
+        latent_variables = melody.transition[0].latent_variables
+        transition = copy.deepcopy(melody.transition)
+        which_note_to_give_duration = transition[which_duration_to_steal]
+        halved_rhythm_cat = which_note_to_give_duration.rhythm_cat / 2
+        which_note_to_give_duration.rhythm_cat = halved_rhythm_cat
+        surface = melody.get_root().get_surface()
+        location = surface.index(melody)
+        if which_duration_to_steal == 0:
+            if location>0:
+                print(surface[location-1].transition[1].__dict__)
+                surface[location-1].transition[1].rhythm_cat = halved_rhythm_cat
+                print(surface[location - 1].transition[1].__dict__)
+        if which_duration_to_steal == 1:
+            if location < len(surface)-1:
+                surface[location+1].transition[0].rhythm_cat = halved_rhythm_cat
+        left_note, right_note = transition
+        added_note = Note(pitch_cat=pitch, rhythm_cat=halved_rhythm_cat, latent_variables=latent_variables)
+        child1 = Melody((left_note, added_note), part=part)
+        child2 = Melody((added_note, right_note), part=part)
         melody.add_children([child1, child2])
+
+class Repeat(Operation):
+    def __init__(self):
+        super().__init__(type_of_operation='Neighbor')
+
+    @staticmethod
+    def is_legal(melody: Melody):
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
+        left_duration,right_duration = melody.transition[0].rhythm_cat, melody.transition[1].rhythm_cat
+        latent_variables = melody.transition[1].latent_variables
+        condition = all([
+            left_pitch is not None,
+            right_pitch is not None,
+            right_pitch != left_pitch,
+            left_duration >= 0.5,
+            right_duration >= 0.5,
+            right_pitch % 12 in latent_variables['harmony']
+        ])
+        return False
+
     @staticmethod
     def perform(melody: Melody):
-        pass
-
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
+        Operation.add_children_by_pitch(melody, left_pitch, part=melody.part, which_duration_to_steal=0)
 
 class Neighbor(Operation):
     def __init__(self):
@@ -28,7 +66,7 @@ class Neighbor(Operation):
 
     @staticmethod
     def is_legal(melody: Melody):
-        left_pitch, right_pitch = melody.value
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
         condition = all([
             left_pitch == right_pitch,
             left_pitch is not None,
@@ -38,14 +76,15 @@ class Neighbor(Operation):
 
     @staticmethod
     def perform(melody: Melody):
-        left_pitch, right_pitch = melody.value
-        scale = melody.latent_variables['scale']
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
+        latent_variables = melody.transition[0].latent_variables
+        scale = latent_variables['scale']
         register = left_pitch // 12
         neighbor_pitch = register * 12 + \
                          sorted([x for x in scale if x != left_pitch % 12],
                                 key=lambda pitch: abs(pitch - left_pitch % 12))[
                              0]
-        Operation.add_children_by_pitch(melody, neighbor_pitch,part=melody.part)
+        Operation.add_children_by_pitch(melody, neighbor_pitch, part=melody.part, which_duration_to_steal=0)
 
 
 class Fill(Operation):
@@ -54,11 +93,12 @@ class Fill(Operation):
 
     @staticmethod
     def is_legal(melody: Melody):
-        left_pitch, right_pitch = melody.value
-        if {left_pitch,right_pitch}.intersection({'start','end'}):
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
+        if {left_pitch, right_pitch}.intersection({'start', 'end'}):
             return False
         low_pitch, high_pitch = sorted([left_pitch, right_pitch])
-        scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=melody.latent_variables['scale'])
+        latent_variables = melody.transition[0].latent_variables
+        scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=latent_variables['scale'])
         condition = all([
             left_pitch is not None,
             right_pitch is not None,
@@ -68,18 +108,19 @@ class Fill(Operation):
 
     @staticmethod
     def perform(melody: Melody):
-        left_pitch, right_pitch = melody.value
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
         midpoint = (right_pitch + left_pitch) / 2
         low_pitch, high_pitch = sorted([left_pitch, right_pitch])
-        scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=melody.latent_variables['scale'])
+        latent_variables = melody.transition[0].latent_variables
+        scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=latent_variables['scale'])
         # print('scale_notes_in_between: ', scale_notes_in_between)
         harmony_notes_in_between = harmony_notes_between(low_pitch, high_pitch,
-                                                         harmony=melody.latent_variables['harmony'][0])
+                                                         harmony=latent_variables['harmony'])
         # print('harmony_notes_between: ', harmony_notes_in_between)
         pitch_evaluation = lambda pitch: (1 / (1e-2 + abs(pitch - midpoint))) * (pitch % 12 in harmony_notes_in_between)
         # print(list(map(pitch_evaluation,scale_notes_between)))
         fill_pitch = sorted(scale_notes_in_between, key=pitch_evaluation)[-1]
-        Operation.add_children_by_pitch(melody, fill_pitch,part=melody.part)
+        Operation.add_children_by_pitch(melody, fill_pitch, part=melody.part, which_duration_to_steal=0)
 
 
 class RightNeighbor(Operation):
@@ -88,26 +129,28 @@ class RightNeighbor(Operation):
 
     @staticmethod
     def is_legal(melody: Melody):
-        left_pitch, right_pitch = melody.value
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
 
         if right_pitch == 'end' or left_pitch == 'start':
             return False
-        print('melody.value: ', melody.value)
-        print('harmony: ',melody.latent_variables['harmony'][0])
+        latent_variables = melody.transition[0].latent_variables
+        # print('melody.value: ', melody.transition[0].pitch_cat,melody.transition[1].pitch_cat)
+        # print('harmony: ',latent_variables['harmony'])
         condition = all([
             left_pitch is not None,
             right_pitch is not None,
             left_pitch != right_pitch,
-            left_pitch % 12 in melody.latent_variables['harmony'][0]
+            left_pitch % 12 in latent_variables['harmony']
         ])
         return condition
 
     @staticmethod
     def perform(melody: Melody):
-        left_pitch, right_pitch = melody.value
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
-        right_neighbor_pitch = move_in_scale(start_pitch=left_pitch, scale=melody.latent_variables['scale'], step=-sign)
-        Operation.add_children_by_pitch(melody, right_neighbor_pitch,part=melody.part)
+        latent_variables = melody.transition[0].latent_variables
+        right_neighbor_pitch = move_in_scale(start_pitch=left_pitch, scale=latent_variables['scale'], step=-sign)
+        Operation.add_children_by_pitch(melody, right_neighbor_pitch, part=melody.part, which_duration_to_steal=0)
 
 
 class LeftNeighbor(Operation):
@@ -116,20 +159,22 @@ class LeftNeighbor(Operation):
 
     @staticmethod
     def is_legal(melody: Melody):
-        left_pitch, right_pitch = melody.value
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
         if right_pitch == 'end' or left_pitch == 'start':
             return False
+        latent_variables = melody.transition[1].latent_variables
         condition = all([
             left_pitch is not None,
             right_pitch is not None,
             left_pitch != right_pitch,
-            right_pitch % 12 in melody.latent_variables['harmony'][1]
+            right_pitch % 12 in latent_variables['harmony']
         ])
         return condition
 
     @staticmethod
     def perform(melody: Melody):
-        left_pitch, right_pitch = melody.value
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
+        latent_variables = melody.transition[0].latent_variables
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
-        left_neighbor_pitch = move_in_scale(start_pitch=right_pitch, scale=melody.latent_variables['scale'], step=sign)
-        Operation.add_children_by_pitch(melody, left_neighbor_pitch,part=melody.part)
+        left_neighbor_pitch = move_in_scale(start_pitch=right_pitch, scale=latent_variables['scale'], step=sign)
+        Operation.add_children_by_pitch(melody, left_neighbor_pitch, part=melody.part, which_duration_to_steal=1)

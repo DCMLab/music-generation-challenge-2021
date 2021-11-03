@@ -1,7 +1,7 @@
 import copy
 import random
 
-from melody import Melody
+from melody import Melody, Note
 
 
 def old_template_to_tree(padded_old_template):
@@ -27,6 +27,7 @@ def old_template_to_tree(padded_old_template):
             left_pitch = old_melody_head[i - 1]
             right_pitch = old_melody_head[i + 1]
             pitch_transition = (left_pitch, right_pitch)
+            rhythm_transition = (left_rhythm, right_rhythm)
             tree.add_children([Melody(pitch_transition, latent_variables=new_latent_variables, part='head')])
 
     for i, (x, h) in enumerate(zip(old_melody_body, old_harmony_body)):
@@ -67,66 +68,6 @@ def make_harmony_same_format_as_melody(old_temp):
     return new_old_temp
 
 
-beginning = {
-    'melody': [12, '_', 12, '_', 12],
-    'latent_info': {
-        'harmony': [0, 4, 7],
-        'scale': [0, 2, 4, 5, 7, 9, 11]
-    }
-}
-
-second = {
-    'melody': [11, '_', 9, '_', 7, '_', 5, '_', 4, '_', 2],
-    'latent_info': {
-        'harmony': [2, 7, 11],
-        'scale': [0, 2, 4, 5, 7, 9, 11]
-    }
-}
-
-
-
-seq_1 = {
-    'melody': [-5, '_', 7, '_', 5],
-    'latent_info': {
-        'harmony': [[0, 4, 7], '_', [0, 4, 7], '_', [2, 5, 7, 11]],
-        'scale': [0, 2, 4, 5, 7, 9, 11]
-    }
-}
-
-seq_2 = {
-    'melody': [-5, '_', 5, '_', 4],
-    'latent_info': {
-        'harmony': [[2, 5, 7, 11], '_', [2, 5, 7, 11], '_', [0, 4, 7]],
-        'scale': [0, 2, 4, 5, 7, 9, 11]
-    }
-}
-
-pre_cadence = {
-    'melody': [0, '_', 7, '_', 7],
-    'latent_info': {
-        'harmony': [0, 4, 7],
-        'scale': [0, 2, 4, 5, 7, 9, 11]
-    }
-}
-
-cadence = {
-    'melody': [4, '_', 2, '_', 0],
-    'latent_info': {
-        'harmony': [0, 4, 7],
-        'scale': [0, 2, 4, 5, 7, 9, 11]
-    }
-}
-
-piece_old_templates = [beginning,
-                       second,
-                       seq_1,
-                       seq_2,
-                       seq_1,
-                       seq_2,
-                       pre_cadence,
-                       cadence]
-
-
 def add_head_or_tail(old_templates):
     all_start_and_end_notes = [[old_temp['melody'][0], old_temp['melody'][-1]] for old_temp in old_templates]
     all_start_and_end_notes = [['start', 'start']] + all_start_and_end_notes + [['end', 'end']]
@@ -151,6 +92,7 @@ def add_head_or_tail(old_templates):
         if add_what == 'head':
             last_bar_has_tail = False
             padded_old_temp['melody'] = {'head': melody_head, 'body': padded_old_temp['melody'], 'tail': []}
+            padded_old_temp['duration'] = {'head': melody_head, 'body': padded_old_temp['melody'], 'tail': []}
             padded_old_temp['latent_info']['harmony'] = {'head': harmony_head,
                                                          'body': padded_old_temp['latent_info']['harmony'],
                                                          'tail': []}
@@ -177,13 +119,60 @@ def add_head_or_tail(old_templates):
     return padded_old_temps
 
 
-# print(piece_old_templates)
-piece_old_templates = [make_harmony_same_format_as_melody(old_temp=old_temp) for old_temp in piece_old_templates]
-# print('piece_old_templates: ',piece_old_templates)
-padded_old_templates = add_head_or_tail(old_templates=piece_old_templates)
-# print('padded_old_templates: ', padded_old_templates)
+beginning = Melody()
+scale = [0, 2, 4, 5, 7, 9, 11]
+latent_variables = {'harmony':[0, 4, 7],'scale':scale}
+beginning.add_children(
+    [Melody(transition=(Note(12, 1.0, latent_variables=latent_variables), Note(12, 1.0, latent_variables=latent_variables))),
+     Melody(transition=(Note(12, 1.0, latent_variables=latent_variables), Note(12, 1.0, latent_variables=latent_variables)))
+     ])
 
-tree_templates = [old_template_to_tree(x) for x in padded_old_templates]
+second = Melody()
+second.add_children(
+    [Melody(transition=(Note(11, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}), Note(9, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}))),
+     Melody(transition=(Note(9, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}), Note(7, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}))),
+     Melody(transition=(Note(7, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}), Note(5, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}))),
+     Melody(transition=(Note(5, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}), Note(4, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}))),
+     Melody(transition=(Note(4, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}), Note(2, 0.5, latent_variables={'harmony':[2, 7, 11],'scale':scale}))),
+     ])
+
+seq_1 = Melody()
+seq_1.add_children([Melody(transition=(Note(-5, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables))),
+                    Melody(transition=(Note(7, 1.0, latent_variables=latent_variables), Note(5, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale})))
+                    ])
+
+seq_2 = Melody()
+seq_2.add_children(
+    [Melody(transition=(Note(-5, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale}), Note(5, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale}))),
+     Melody(transition=(Note(5, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale}), Note(4, 1.0, latent_variables=latent_variables)))
+     ])
+
+pre_cadence = Melody()
+pre_cadence.add_children(
+    [Melody(transition=(Note(0, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables))),
+     Melody(transition=(Note(7, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables)))
+     ])
+
+cadence = Melody()
+cadence.add_children(
+    [Melody(transition=(Note(4, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale}), Note(2, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale}))),
+     Melody(transition=(Note(2, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale}), Note(0, 1.0, latent_variables=latent_variables)))
+     ])
+
+tree_templates = [beginning,
+                  second,
+                  seq_1,
+                  seq_2,
+                  seq_1,
+                  seq_2,
+                  pre_cadence,
+                  cadence]
+
+# padded_old_templates = add_head_or_tail(old_templates=piece_old_templates)
+
+
+# tree_templates = [old_template_to_tree(x) for x in padded_old_templates]
+
 # print(tree_templates)
 if __name__ == '__main__':
 
@@ -193,4 +182,4 @@ if __name__ == '__main__':
         for child in template.children:
             pass
             # print('value: ',child.value)
-            print('part: ', child.part, 'latent_variables: ', child.latent_variables)
+            print('part: ', child.part, )

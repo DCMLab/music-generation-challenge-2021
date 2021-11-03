@@ -25,7 +25,7 @@ class Action:
         self.target_tree.memory = Memory(operation=self.operation)
 
     def show(self):
-        print(self.operation, 'on', self.target_tree.value,self.target_tree.latent_variables)
+        print(self.operation, 'on', self.target_tree.transition,self.target_tree.transition[0].latent_variables)
 
 
 class Policy:
@@ -80,7 +80,7 @@ class BalancedTree(Policy):
                 continue_searching_condition = have_children
                 # print('continue_searching_condition: ', continue_searching_condition)
             # now we have found the subtree in the surface to expand
-            print('subtree_to_expand.value: ', current_subtree.value)
+            print('subtree_to_expand.transition: ', current_subtree.transition)
             assert current_subtree in melody.get_surface()
             actions_for_current_subtree = [action for action in legal_actions if action.target_tree is current_subtree]
             print('operations_for_current_subtree: ',[x.operation for x in actions_for_current_subtree])
@@ -88,6 +88,20 @@ class BalancedTree(Policy):
             selected_action = random.choice(actions_for_current_subtree)
         return selected_action
 
+class RhythmBalancedTree(Policy):
+    @staticmethod
+    def determine_action(melody: Melody, operations: list[Type[Operation]]) -> Action:
+        legal_actions = Policy._legal_actions(melody, operations)
+        if not legal_actions:
+            selected_action = None
+        else:
+            durations = [min(x.target_tree.transition[0].rhythm_cat,x.target_tree.transition[1].rhythm_cat) for x in legal_actions]
+            selected_action = random.choices(legal_actions,weights=np.array(durations)**10)[0]
+            print('durations: ',durations)
+            print('np.argmax(durations): ',np.argmax(durations))
+            #selected_action = legal_actions[np.argmax(durations)]
+            print(selected_action.__dict__)
+        return selected_action
 
 
 class ImitatingPolicy:
