@@ -15,20 +15,30 @@ class Operation:
 
     @staticmethod
     def add_children_by_pitch(melody: Melody, pitch: int, part, which_duration_to_steal):
+        # if melody.part is head or tail overwrite which_duation_to_steal
+        print('melody.part: ',melody.part)
+        if melody.part == 'head':
+            which_duration_to_steal=1
+        elif melody.part == 'tail':
+            which_duration_to_steal=0
+        print('which_duration_to_steal: ', which_duration_to_steal)
         latent_variables = melody.transition[0].latent_variables
-        transition = copy.deepcopy(melody.transition)
+        transition = melody.transition
         which_note_to_give_duration = transition[which_duration_to_steal]
         halved_rhythm_cat = which_note_to_give_duration.rhythm_cat / 2
         which_note_to_give_duration.rhythm_cat = halved_rhythm_cat
-        surface = melody.get_root().get_surface()
-        location = surface.index(melody)
+        print('root_transition:',melody.get_root().transition)
+        surface = (melody.get_root()).get_surface()
+        location = melody.get_location_in_siblings()
+        print('location: ',location)
         if which_duration_to_steal == 0:
             if location>0:
-                print(surface[location-1].transition[1].__dict__)
+                print('stealing duration from left',location-1)
                 surface[location-1].transition[1].rhythm_cat = halved_rhythm_cat
-                print(surface[location - 1].transition[1].__dict__)
+
         if which_duration_to_steal == 1:
             if location < len(surface)-1:
+                print('stealing duration from right',location+1)
                 surface[location+1].transition[0].rhythm_cat = halved_rhythm_cat
         left_note, right_note = transition
         added_note = Note(pitch_cat=pitch, rhythm_cat=halved_rhythm_cat, latent_variables=latent_variables)

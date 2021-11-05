@@ -73,13 +73,15 @@ class Tree:
         body_region = [x for x in surface if x.part == 'body']
         tail_region = [x for x in surface if x.part == 'tail']
 
-        #head_region_note_list = [transition[1] for transition in head_region[:-1]]
-        #body_region_note_list = [body_region[0][0]] + [transition[1] for transition in body_region]
-        #tail_region_note_list = [transition[1] for transition in tail_region[:-1]]
-        #note_list = head_region_note_list + body_region_note_list + tail_region_note_list
+        head_region_note_list = [melody.transition[1] for melody in head_region[:-1]]
+        body_region_note_list = [body_region[0].transition[0],body_region[0].transition[1]] + [melody.transition[1] for melody in body_region[1:]]
+        tail_region_note_list = [melody.transition[1] for melody in tail_region[:-1]]
+        note_list = head_region_note_list + body_region_note_list + tail_region_note_list
+        print('*****')
+        print('pitch_dur_list: ',[(note.pitch_cat,note.rhythm_cat) for note in note_list])
 
 
-        note_list = [surface[0].transition[0], surface[0].transition[1]] + [melody.transition[1] for melody in surface[1:]]
+        #note_list = [surface[0].transition[0], surface[0].transition[1]] + [melody.transition[1] for melody in surface[1:]]
 
         return note_list
 
@@ -98,10 +100,15 @@ class Tree:
         total_duration = sum(durations)
         return total_duration
 
+    def get_location_in_siblings(self):
+        surface = (self.get_root()).get_surface()
+        location = [i for i, x in enumerate(surface) if x is self][0]
+        return location
+
 
 
 class Melody(Tree):
-    def __init__(self, transition = (Note('start', 'start',{}), Note('end', 'end',{})), part=None):
+    def __init__(self, transition = (Note('start', 'start',{}), Note('end', 'end',{})), part='body'):
         super().__init__(transition, part=part)
         self.surface = None
 

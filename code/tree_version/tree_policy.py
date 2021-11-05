@@ -114,6 +114,8 @@ class ImitatingPolicy:
             matching_subtree_pairs.append((melody,memory_melody))
         else:
             same_num_children = len(melody.children) == len(memory_melody.children)
+            print('length of melody/memory_melody .children: ',len(melody.children),len(memory_melody.children))
+            print('same_num_children: ',same_num_children)
             if same_num_children:
                 for child_melody, child_memory_melody in zip(melody.children,memory_melody.children):
                     new_pairs = ImitatingPolicy._matching_subtree_pairs(child_melody,child_memory_melody)
@@ -125,6 +127,7 @@ class ImitatingPolicy:
         """imitating the memory melody as far as possible"""
         memory_melody = copy.deepcopy(memory_melody)
         matching_subtree_pairs = ImitatingPolicy._matching_subtree_pairs(melody, memory_melody)
+        print('there are matching_subtree_pairs: ', bool(matching_subtree_pairs))
         matching_subtree_pairs_with_legal_operations = [pair for pair in matching_subtree_pairs if
                                                         [operation.is_legal(pair[0]) for operation in operations]]
         matching_subtree_pairs_with_legal_operations_memory_has_children = [pair for pair in matching_subtree_pairs_with_legal_operations if bool(pair[1].children)]

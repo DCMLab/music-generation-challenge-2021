@@ -50,7 +50,7 @@ class PieceElaboration:
         self.symbol_memory = {}
 
     def elaborate(self):
-        steps = 4
+        steps = 3
         for i, melody in enumerate(self.trees):
             print('\n******', 'bar', i + 1, '******\n ')
             if self.self_similarity_template is not None:
@@ -79,7 +79,7 @@ class PieceElaboration:
 if __name__ == '__main__':
     elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.RhythmBalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
     self_similarity_template = ['a', 'b', 'c', 'c', 'c', 'c', 'd', 'e']
-    piece_elaborator = PieceElaboration(elaborator, tree_templates=template.tree_templates,
+    piece_elaborator = PieceElaboration(elaborator, tree_templates=template.padded_melody_templates,
                                         self_similarity_template=self_similarity_template)
     piece_elaborator.elaborate()
     stream = piece_elaborator.result_to_stream()
