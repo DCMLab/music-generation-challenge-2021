@@ -96,7 +96,7 @@ class RhythmBalancedTree(Policy):
             selected_action = None
         else:
             durations = [min(x.target_tree.transition[0].rhythm_cat,x.target_tree.transition[1].rhythm_cat) for x in legal_actions]
-            selected_action = random.choices(legal_actions,weights=np.array(durations)**10)[0]
+            selected_action = random.choices(legal_actions,weights=np.array(durations)**2)[0]
             print('durations: ',durations)
             print('np.argmax(durations): ',np.argmax(durations))
             #selected_action = legal_actions[np.argmax(durations)]

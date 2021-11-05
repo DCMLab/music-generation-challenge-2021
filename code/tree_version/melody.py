@@ -8,12 +8,11 @@ class Note:
 
 
 class Tree:
-    def __init__(self, transition: (Note, Note), part=None):
-        self.transition = transition
+    def __init__(self):
         self.children = []
         self.parent = None
         self.memory = None
-        self.part = part  # head, body, or tail region of root
+
 
     def add_children(self, children):
         self.children += children
@@ -60,6 +59,20 @@ class Tree:
         max_depth = self.get_depth()
         return self.get_surface_at_depth(max_depth)
 
+    def get_location_in_siblings(self):
+        surface = (self.get_root()).get_surface()
+        location = [i for i, x in enumerate(surface) if x is self][0]
+        return location
+
+
+
+class Melody(Tree):
+    def __init__(self, transition = (Note('start', 'start',{}), Note('end', 'end',{})), part='body'):
+        super().__init__()
+        self.surface = None
+        self.transition = transition
+        self.part = part  # head, body, or tail region of root
+
     def show(self):
         depth = self.get_depth()
         for i in range(depth + 1):
@@ -99,18 +112,6 @@ class Tree:
         durations = [note.rhythm_cat for note in note_list]
         total_duration = sum(durations)
         return total_duration
-
-    def get_location_in_siblings(self):
-        surface = (self.get_root()).get_surface()
-        location = [i for i, x in enumerate(surface) if x is self][0]
-        return location
-
-
-
-class Melody(Tree):
-    def __init__(self, transition = (Note('start', 'start',{}), Note('end', 'end',{})), part='body'):
-        super().__init__(transition, part=part)
-        self.surface = None
 
 
 scale = [0, 2, 4, 5, 7, 9, 11]

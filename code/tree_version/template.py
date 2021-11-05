@@ -197,7 +197,7 @@ def pad_melody_templates(melody_templates=list[Melody]) -> list[Melody]:
         else:
             if last_bar_has_tail or i==0:
                 if i != len(melody_templates) - 1:
-                    add_what = random.choice(['tail', 'none'])
+                    add_what = random.choice(['tail'])
                 else:
                     add_what = 'none'
             else:
