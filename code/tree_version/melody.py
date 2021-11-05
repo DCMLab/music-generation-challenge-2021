@@ -1,7 +1,8 @@
 import music21 as m21
 
+
 class Note:
-    def __init__(self, pitch_cat, rhythm_cat, latent_variables:dict):
+    def __init__(self, pitch_cat, rhythm_cat, latent_variables: dict):
         self.pitch_cat = pitch_cat
         self.rhythm_cat = rhythm_cat
         self.latent_variables = latent_variables
@@ -12,7 +13,6 @@ class Tree:
         self.children = []
         self.parent = None
         self.memory = None
-
 
     def add_children(self, children):
         self.children += children
@@ -64,10 +64,15 @@ class Tree:
         location = [i for i, x in enumerate(surface) if x is self][0]
         return location
 
+    def show(self):
+        depth = self.get_depth()
+        for i in range(depth + 1):
+            subtrees = self.get_surface_at_depth(i)
+            print([(x.symbol_cat,x.rhythm_cat,x.latent_variables['harmony']) for x in subtrees])
 
 
 class Melody(Tree):
-    def __init__(self, transition = (Note('start', 'start',{}), Note('end', 'end',{})), part='body'):
+    def __init__(self, transition=(Note('start', 'start', {}), Note('end', 'end', {})), part='body'):
         super().__init__()
         self.surface = None
         self.transition = transition
@@ -78,7 +83,6 @@ class Melody(Tree):
         for i in range(depth + 1):
             subtrees = self.get_surface_at_depth(i)
             print([tuple(map(lambda _: _.__dict__, x.transition)) for x in subtrees])
-        return [tuple(map(lambda _: _.__dict__, (x.transition[0],x.transition[1]))) for x in subtrees for subtrees in self.get_surface()]
 
     def surface_to_note_list(self):
         surface = self.get_surface()
@@ -87,23 +91,24 @@ class Melody(Tree):
         tail_region = [x for x in surface if x.part == 'tail']
 
         head_region_note_list = [melody.transition[1] for melody in head_region[:-1]]
-        body_region_note_list = [body_region[0].transition[0],body_region[0].transition[1]] + [melody.transition[1] for melody in body_region[1:]]
+        body_region_note_list = [body_region[0].transition[0], body_region[0].transition[1]] + [melody.transition[1] for
+                                                                                                melody in
+                                                                                                body_region[1:]]
         tail_region_note_list = [melody.transition[1] for melody in tail_region[:-1]]
         note_list = head_region_note_list + body_region_note_list + tail_region_note_list
         print('*****')
-        print('pitch_dur_list: ',[(note.pitch_cat,note.rhythm_cat) for note in note_list])
+        print('pitch_dur_list: ', [(note.pitch_cat, note.rhythm_cat) for note in note_list])
 
-
-        #note_list = [surface[0].transition[0], surface[0].transition[1]] + [melody.transition[1] for melody in surface[1:]]
+        # note_list = [surface[0].transition[0], surface[0].transition[1]] + [melody.transition[1] for melody in surface[1:]]
 
         return note_list
 
     def surface_to_stream(self):
         note_list = self.surface_to_note_list()
         measure = m21.stream.Measure()
-        #measure.append(m21.meter.TimeSignature('3/4'))
+        # measure.append(m21.meter.TimeSignature('3/4'))
         for note in note_list:
-            m21_note = m21.note.Note(pitch=60+note.pitch_cat,quarterLength=note.rhythm_cat)
+            m21_note = m21.note.Note(pitch=60 + note.pitch_cat, quarterLength=note.rhythm_cat)
             measure.append(m21_note)
         return measure
 
@@ -115,11 +120,13 @@ class Melody(Tree):
 
 
 scale = [0, 2, 4, 5, 7, 9, 11]
-latent_variables = {'harmony':[0, 4, 7],'scale':scale}
+latent_variables = {'harmony': [0, 4, 7], 'scale': scale}
 
 seq_1 = Melody()
-seq_1.add_children([Melody(transition=(Note(-5, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables))),
-                    Melody(transition=(Note(7, 1.0, latent_variables=latent_variables), Note(5, 1.0, latent_variables={'harmony':[2, 5, 7, 11],'scale':scale})))
+seq_1.add_children([Melody(
+    transition=(Note(-5, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables))),
+                    Melody(transition=(Note(7, 1.0, latent_variables=latent_variables),
+                                       Note(5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale})))
                     ])
 
 if __name__ == '__main__':
