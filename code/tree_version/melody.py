@@ -2,10 +2,11 @@ import music21 as m21
 
 
 class Note:
-    def __init__(self, pitch_cat, rhythm_cat, latent_variables: dict):
+    def __init__(self, pitch_cat, rhythm_cat, latent_variables: dict,time_stealable=True):
         self.pitch_cat = pitch_cat
         self.rhythm_cat = rhythm_cat
         self.latent_variables = latent_variables
+        self.time_stealable = time_stealable
 
 
 class Tree:
@@ -72,11 +73,12 @@ class Tree:
 
 
 class Melody(Tree):
-    def __init__(self, transition=(Note('start', 'start', {}), Note('end', 'end', {})), part='body'):
+    def __init__(self, transition=(Note('start', 'start', {}), Note('end', 'end', {})), part='body',no_tail = False):
         super().__init__()
         self.surface = None
         self.transition = transition
         self.part = part  # head, body, or tail region of root
+        self.no_tail = no_tail
 
     def show(self):
         depth = self.get_depth()

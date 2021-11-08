@@ -95,8 +95,8 @@ class RhythmBalancedTree(Policy):
         if not legal_actions:
             selected_action = None
         else:
-            durations = [min(x.target_tree.transition[0].rhythm_cat,x.target_tree.transition[1].rhythm_cat) for x in legal_actions]
-            selected_action = random.choices(legal_actions,weights=np.array(durations)**2)[0]
+            durations = [x.target_tree.transition[0].rhythm_cat for x in legal_actions]
+            selected_action = random.choices(legal_actions,weights=np.array(durations)**10)[0]
             print('durations: ',durations)
             print('np.argmax(durations): ',np.argmax(durations))
             #selected_action = legal_actions[np.argmax(durations)]
@@ -128,23 +128,30 @@ class ImitatingPolicy:
         memory_melody = copy.deepcopy(memory_melody)
         matching_subtree_pairs = ImitatingPolicy._matching_subtree_pairs(melody, memory_melody)
         print('there are matching_subtree_pairs: ', bool(matching_subtree_pairs))
-        matching_subtree_pairs_with_legal_operations = [pair for pair in matching_subtree_pairs if
-                                                        [operation.is_legal(pair[0]) for operation in operations]]
-        matching_subtree_pairs_with_legal_operations_memory_has_children = [pair for pair in matching_subtree_pairs_with_legal_operations if bool(pair[1].children)]
-        dists_to_root = [x[0].get_dist_to_root() for x in matching_subtree_pairs_with_legal_operations_memory_has_children]
-        #print('dist_to_root: ',dists_to_root)
-        matching_subtree_pairs_with_legal_operations_memory_has_children = sorted(matching_subtree_pairs_with_legal_operations_memory_has_children,key=lambda x:x[0].get_dist_to_root())
-        if bool(matching_subtree_pairs_with_legal_operations_memory_has_children):
-            current_melody_tree, current_memory_melody_tree = matching_subtree_pairs_with_legal_operations_memory_has_children[0]
-            if current_memory_melody_tree.memory.operation.is_legal(current_melody_tree):
-                selected_operation = current_memory_melody_tree.memory.operation
-            else:
-                print('unable to imitate memory operation',current_memory_melody_tree.memory.operation)
-                legal_operations = [operation for operation in operations if operation.is_legal(current_melody_tree)]
-                selected_operation = legal_operations[0]
-                print('instead, using legal_operation', selected_operation)
-            selected_action = Action(current_melody_tree, selected_operation)
+        if not matching_subtree_pairs:
+            selected_action = RhythmBalancedTree.determine_action(melody,operations=operations)
         else:
-            print('unable to imitate: there is no matching subtrees ')
-            selected_action = None
+            matching_subtree_pairs_with_legal_operations = [pair for pair in matching_subtree_pairs if
+                                                            [operation.is_legal(pair[0]) for operation in operations]]
+            matching_subtree_pairs_with_legal_operations_memory_has_children = [pair for pair in matching_subtree_pairs_with_legal_operations if bool(pair[1].children)]
+            dists_to_root = [x[0].get_dist_to_root() for x in matching_subtree_pairs_with_legal_operations_memory_has_children]
+            #print('dist_to_root: ',dists_to_root)
+            matching_subtree_pairs_with_legal_operations_memory_has_children = sorted(matching_subtree_pairs_with_legal_operations_memory_has_children,key=lambda x:x[0].get_dist_to_root())
+            if bool(matching_subtree_pairs_with_legal_operations_memory_has_children):
+                current_melody_tree, current_memory_melody_tree = matching_subtree_pairs_with_legal_operations_memory_has_children[0]
+                legal_operations = [operation for operation in operations if operation.is_legal(current_melody_tree)]
+                if not bool(legal_operations):
+                    print('unable to imitate: there is no legal action in this subtree ')
+                    selected_action = None
+                else:
+                    if current_memory_melody_tree.memory.operation.is_legal(current_melody_tree):
+                        selected_operation = current_memory_melody_tree.memory.operation
+                    else:
+                        print('unable to imitate memory operation',current_memory_melody_tree.memory.operation)
+                        selected_operation = legal_operations[0]
+                        print('instead, using legal_operation', selected_operation)
+                    selected_action = Action(current_melody_tree, selected_operation)
+            else:
+                print('unable to imitate: there is no matching subtrees ')
+                selected_action = None
         return selected_action

@@ -14,9 +14,21 @@ class Operation:
         pass
 
     @staticmethod
-    def add_children_by_pitch(melody: Melody, pitch: int, part, which_duration_to_steal):
+    def exist_time_stealable(melody:Melody):
+        time_stealable_notes = [note for note in melody.transition if note.time_stealable]
+        not_resulting_32_notes = all([note.rhythm_cat>0.25 for note  in time_stealable_notes])
+        return bool(time_stealable_notes) and not_resulting_32_notes
+
+    @staticmethod
+    def add_children_by_pitch(melody: Melody, pitch: int, part):
         # if melody.part is head or tail overwrite which_duation_to_steal
         print('melody.part: ',melody.part)
+        time_stealable_notes = [note for note in melody.transition if note.time_stealable]
+        assert time_stealable_notes
+        durations = [note.rhythm_cat for note in melody.transition]
+        which_duration_to_steal = durations.index(max(durations))
+        if not melody.transition[which_duration_to_steal].time_stealable:
+            which_duration_to_steal = 1-which_duration_to_steal
         if melody.part == 'head':
             which_duration_to_steal=1
         elif melody.part == 'tail':
@@ -56,20 +68,23 @@ class Repeat(Operation):
         left_duration,right_duration = melody.transition[0].rhythm_cat, melody.transition[1].rhythm_cat
         latent_variables = melody.transition[1].latent_variables
         condition = all([
+            Operation.exist_time_stealable(melody),
             left_pitch is not None,
             right_pitch is not None,
             right_pitch != left_pitch,
             #left_duration >= 0.5,
             #right_duration >= 0.5,
             #right_pitch % 12 in latent_variables['harmony'],
-            left_pitch % 12 in latent_variables['harmony']
+            left_pitch % 12 in latent_variables['harmony'],
+            left_duration > 0.5,
+            right_duration > 0.5,
         ])
-        return False
+        return condition
 
     @staticmethod
     def perform(melody: Melody):
         left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
-        Operation.add_children_by_pitch(melody, left_pitch, part=melody.part, which_duration_to_steal=0)
+        Operation.add_children_by_pitch(melody, left_pitch, part=melody.part)
 
 class Neighbor(Operation):
     def __init__(self):
@@ -79,6 +94,7 @@ class Neighbor(Operation):
     def is_legal(melody: Melody):
         left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
         condition = all([
+            Operation.exist_time_stealable(melody),
             left_pitch == right_pitch,
             left_pitch is not None,
             right_pitch is not None,
@@ -95,7 +111,7 @@ class Neighbor(Operation):
                          sorted([x for x in scale if x != left_pitch % 12],
                                 key=lambda pitch: abs(pitch - left_pitch % 12))[
                              0]
-        Operation.add_children_by_pitch(melody, neighbor_pitch, part=melody.part, which_duration_to_steal=0)
+        Operation.add_children_by_pitch(melody, neighbor_pitch, part=melody.part)
 
 
 class Fill(Operation):
@@ -111,6 +127,7 @@ class Fill(Operation):
         latent_variables = melody.transition[0].latent_variables
         scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=latent_variables['scale'])
         condition = all([
+            Operation.exist_time_stealable(melody),
             left_pitch is not None,
             right_pitch is not None,
             len(scale_notes_in_between) > 0,
@@ -131,7 +148,7 @@ class Fill(Operation):
         pitch_evaluation = lambda pitch: (1 / (1e-2 + abs(pitch - midpoint))) * (pitch % 12 in harmony_notes_in_between)
         # print(list(map(pitch_evaluation,scale_notes_between)))
         fill_pitch = sorted(scale_notes_in_between, key=pitch_evaluation)[-1]
-        Operation.add_children_by_pitch(melody, fill_pitch, part=melody.part, which_duration_to_steal=0)
+        Operation.add_children_by_pitch(melody, fill_pitch, part=melody.part)
 
 
 class RightNeighbor(Operation):
@@ -148,9 +165,10 @@ class RightNeighbor(Operation):
         # print('melody.value: ', melody.transition[0].pitch_cat,melody.transition[1].pitch_cat)
         # print('harmony: ',latent_variables['harmony'])
         condition = all([
+            Operation.exist_time_stealable(melody),
             left_pitch is not None,
             right_pitch is not None,
-            left_pitch != right_pitch,
+            left_pitch > right_pitch,
             left_pitch % 12 in latent_variables['harmony']
         ])
         return condition
@@ -161,7 +179,7 @@ class RightNeighbor(Operation):
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
         latent_variables = melody.transition[0].latent_variables
         right_neighbor_pitch = move_in_scale(start_pitch=left_pitch, scale=latent_variables['scale'], step=-sign)
-        Operation.add_children_by_pitch(melody, right_neighbor_pitch, part=melody.part, which_duration_to_steal=1)
+        Operation.add_children_by_pitch(melody, right_neighbor_pitch, part=melody.part)
 
 
 class LeftNeighbor(Operation):
@@ -175,6 +193,7 @@ class LeftNeighbor(Operation):
             return False
         latent_variables = melody.transition[1].latent_variables
         condition = all([
+            Operation.exist_time_stealable(melody),
             left_pitch is not None,
             right_pitch is not None,
             left_pitch != right_pitch,
@@ -188,4 +207,4 @@ class LeftNeighbor(Operation):
         latent_variables = melody.transition[0].latent_variables
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
         left_neighbor_pitch = move_in_scale(start_pitch=right_pitch, scale=latent_variables['scale'], step=sign)
-        Operation.add_children_by_pitch(melody, left_neighbor_pitch, part=melody.part, which_duration_to_steal=0)
+        Operation.add_children_by_pitch(melody, left_neighbor_pitch, part=melody.part)
