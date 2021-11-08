@@ -50,7 +50,7 @@ class PieceElaboration:
         self.symbol_memory = {}
 
     def elaborate(self):
-        steps = 4
+        steps = 10
         for i, melody in enumerate(self.trees):
             print('\n******', 'bar', i + 1, '******\n ')
             if self.self_similarity_template is not None:

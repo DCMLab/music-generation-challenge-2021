@@ -143,14 +143,14 @@ second.add_children(
                         Note(2, 0.5, latent_variables={'harmony': [2, 7, 11], 'scale': scale}))),
      ])
 
-seq_1 = Melody()
+seq_1 = Melody(no_tail=True)
 seq_1.add_children([Melody(
     transition=(Note(-5, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables))),
     Melody(transition=(Note(7, 1.0, latent_variables=latent_variables),
                        Note(5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale})))
 ])
 
-seq_2 = Melody()
+seq_2 = Melody(no_tail=True)
 seq_2.add_children(
     [Melody(transition=(Note(-5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}),
                         Note(5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}))),
@@ -318,7 +318,7 @@ def pad_melody_templates(melody_templates=list[Melody]) -> list[Melody]:
                     add_what = 'none'
             else:
                 if i != len(melody_templates) - 1:
-                    choices = ['head', 'none'] + (not melody_template.no_tail) * ['head_and_tail', 'tail']
+                    choices = [ 'none'] + (not melody_template.no_tail) * [ 'tail']
                     print('\n\n{}{}!!!!! choices: {}\n\n'.format(i, not melody_template.no_tail, choices))
                     add_what = random.choice(choices)
                 else:
