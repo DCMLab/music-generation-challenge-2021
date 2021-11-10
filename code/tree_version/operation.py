@@ -6,78 +6,85 @@ from pc_helpers import move_in_scale, scale_notes_between, harmony_notes_between
 
 
 class Operation:
-    def __init__(self, type_of_operation):
-        self.type_of_operation = None
+    type_of_operation = 'None'
 
     @staticmethod
     def is_legal(melody: Melody):
         pass
 
     @staticmethod
-    def exist_time_stealable(melody:Melody):
-        time_stealable_notes = [note for note in melody.transition if note.time_stealable]
-        not_resulting_32_notes = all([note.rhythm_cat>0.25 for note  in time_stealable_notes])
+    def exist_time_stealable(melody: Melody):
+        if melody.part == 'tail':
+            time_stealable_notes = [note for note in melody.transition[:1] if note.time_stealable]
+        elif melody.part == 'body':
+            time_stealable_notes = [note for note in melody.transition if note.time_stealable]
+        elif melody.part == 'head':
+            time_stealable_notes = [note for note in melody.transition[1:] if note.time_stealable]
+        else:
+            assert False
+        not_resulting_32_notes = any([note.rhythm_cat > 0.25 for note in time_stealable_notes])
         return bool(time_stealable_notes) and not_resulting_32_notes
 
     @staticmethod
     def add_children_by_pitch(melody: Melody, pitch: int, part):
         # if melody.part is head or tail overwrite which_duation_to_steal
-        print('melody.part: ',melody.part)
+        print('melody.part: ', melody.part)
         time_stealable_notes = [note for note in melody.transition if note.time_stealable]
         assert time_stealable_notes
         durations = [note.rhythm_cat for note in melody.transition]
         which_duration_to_steal = durations.index(max(durations))
         if not melody.transition[which_duration_to_steal].time_stealable:
-            which_duration_to_steal = 1-which_duration_to_steal
+            which_duration_to_steal = 1 - which_duration_to_steal
         if melody.part == 'head':
-            which_duration_to_steal=1
+            which_duration_to_steal = 1
         elif melody.part == 'tail':
-            which_duration_to_steal=0
+            which_duration_to_steal = 0
         print('which_duration_to_steal: ', which_duration_to_steal)
         latent_variables = melody.transition[0].latent_variables
         transition = melody.transition
         which_note_to_give_duration = transition[which_duration_to_steal]
         halved_rhythm_cat = which_note_to_give_duration.rhythm_cat / 2
         which_note_to_give_duration.rhythm_cat = halved_rhythm_cat
-        print('root_transition:',melody.get_root().transition)
+        print('root_transition:', melody.get_root().transition)
         surface = (melody.get_root()).get_surface()
         location = melody.get_location_in_siblings()
-        print('location: ',location)
+        print('location: ', location)
         if which_duration_to_steal == 0:
-            if location>0:
-                print('stealing duration from left',location-1)
-                surface[location-1].transition[1].rhythm_cat = halved_rhythm_cat
+            if location > 0:
+                print('stealing duration from left', location - 1)
+                surface[location - 1].transition[1].rhythm_cat = halved_rhythm_cat
 
         if which_duration_to_steal == 1:
-            if location < len(surface)-1:
-                print('stealing duration from right',location+1)
-                surface[location+1].transition[0].rhythm_cat = halved_rhythm_cat
+            if location < len(surface) - 1:
+                print('stealing duration from right', location + 1)
+                surface[location + 1].transition[0].rhythm_cat = halved_rhythm_cat
         left_note, right_note = transition
         added_note = Note(pitch_cat=pitch, rhythm_cat=halved_rhythm_cat, latent_variables=latent_variables)
         child1 = Melody((left_note, added_note), part=part)
         child2 = Melody((added_note, right_note), part=part)
         melody.add_children([child1, child2])
 
-class Repeat(Operation):
-    def __init__(self):
-        super().__init__(type_of_operation='Neighbor')
+
+class LeftRepeat(Operation):
+    type_of_operation = 'LeftRepeat'
 
     @staticmethod
     def is_legal(melody: Melody):
         left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
-        left_duration,right_duration = melody.transition[0].rhythm_cat, melody.transition[1].rhythm_cat
-        latent_variables = melody.transition[1].latent_variables
+        left_duration, right_duration = melody.transition[0].rhythm_cat, melody.transition[1].rhythm_cat
+        latent_variables = melody.transition[0].latent_variables
         condition = all([
             Operation.exist_time_stealable(melody),
             left_pitch is not None,
             right_pitch is not None,
             right_pitch != left_pitch,
-            #left_duration >= 0.5,
-            #right_duration >= 0.5,
-            #right_pitch % 12 in latent_variables['harmony'],
+            # left_duration >= 0.5,
+            # right_duration >= 0.5,
+            # right_pitch % 12 in latent_variables['harmony'],
             left_pitch % 12 in latent_variables['harmony'],
             left_duration > 0.5,
             right_duration > 0.5,
+
         ])
         return condition
 
@@ -86,9 +93,37 @@ class Repeat(Operation):
         left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
         Operation.add_children_by_pitch(melody, left_pitch, part=melody.part)
 
+class RightRepeat(Operation):
+    type_of_operation = 'RightRepeat'
+
+    @staticmethod
+    def is_legal(melody: Melody):
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
+        left_duration, right_duration = melody.transition[0].rhythm_cat, melody.transition[1].rhythm_cat
+        latent_variables = melody.transition[1].latent_variables
+        condition = all([
+            Operation.exist_time_stealable(melody),
+            left_pitch is not None,
+            right_pitch is not None,
+            right_pitch != left_pitch,
+            # left_duration >= 0.5,
+            # right_duration >= 0.5,
+            # right_pitch % 12 in latent_variables['harmony'],
+            right_pitch % 12 in latent_variables['harmony'],
+            left_duration > 0.5,
+            right_duration > 0.5,
+
+        ])
+        return condition
+
+    @staticmethod
+    def perform(melody: Melody):
+        left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
+        Operation.add_children_by_pitch(melody, right_pitch, part=melody.part)
+
+
 class Neighbor(Operation):
-    def __init__(self):
-        super().__init__(type_of_operation='Neighbor')
+    type_of_operation = 'Neighbor'
 
     @staticmethod
     def is_legal(melody: Melody):
@@ -115,8 +150,7 @@ class Neighbor(Operation):
 
 
 class Fill(Operation):
-    def __init__(self):
-        super().__init__(type_of_operation='Fill')
+    type_of_operation = 'Fill'
 
     @staticmethod
     def is_legal(melody: Melody):
@@ -152,8 +186,7 @@ class Fill(Operation):
 
 
 class RightNeighbor(Operation):
-    def __init__(self):
-        super().__init__(type_of_operation='RightNeighbor')
+    type_of_operation = 'RightNeighbor'
 
     @staticmethod
     def is_legal(melody: Melody):
@@ -183,8 +216,7 @@ class RightNeighbor(Operation):
 
 
 class LeftNeighbor(Operation):
-    def __init__(self):
-        super().__init__(type_of_operation='RightNeighbor')
+    type_of_operation = 'LeftNeighbor'
 
     @staticmethod
     def is_legal(melody: Melody):

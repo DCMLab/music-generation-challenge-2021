@@ -7,6 +7,7 @@ import tree_policy
 from melody import Melody
 import operation
 import template
+import form
 from visualize_helper import Converter
 from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list
 
@@ -50,7 +51,7 @@ class PieceElaboration:
         self.symbol_memory = {}
 
     def elaborate(self):
-        steps = 10
+        steps =5
         for i, melody in enumerate(self.trees):
             print('\n******', 'bar', i + 1, '******\n ')
             if self.self_similarity_template is not None:
@@ -70,7 +71,9 @@ class PieceElaboration:
 
     def result_to_stream(self):
         stream = music21.stream.Stream()
+        stream.append(music21.tempo.MetronomeMark(number=60,referent=60.))
         stream.append(music21.meter.TimeSignature('3/4'))
+
         measures = [tree.surface_to_stream() for tree in self.trees]
         stream.append(measures)
         return stream

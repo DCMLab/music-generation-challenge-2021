@@ -98,8 +98,8 @@ class Melody(Tree):
                                                                                                 body_region[1:]]
         tail_region_note_list = [melody.transition[1] for melody in tail_region[:-1]]
         note_list = head_region_note_list + body_region_note_list + tail_region_note_list
-        print('*****')
-        print('pitch_dur_list: ', [(note.pitch_cat, note.rhythm_cat) for note in note_list])
+        #print('*****')
+        #print('pitch_dur_list: ', [(note.pitch_cat, note.rhythm_cat) for note in note_list])
 
         # note_list = [surface[0].transition[0], surface[0].transition[1]] + [melody.transition[1] for melody in surface[1:]]
 
@@ -108,7 +108,6 @@ class Melody(Tree):
     def surface_to_stream(self):
         note_list = self.surface_to_note_list()
         measure = m21.stream.Measure()
-        # measure.append(m21.meter.TimeSignature('3/4'))
         for note in note_list:
             m21_note = m21.note.Note(pitch=60 + note.pitch_cat, quarterLength=note.rhythm_cat)
             measure.append(m21_note)
