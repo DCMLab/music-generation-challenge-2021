@@ -47,15 +47,8 @@ class Form(Tree):
                 else:
 
                     pitch_population = [x for x in list(range(-5, 12)) if x % 12 in form.latent_variables['harmony']]
-                    # sampled_pitches = random.sample(pitch_population, k=3)
-                    if form.symbol_cat == 'a':
-                        sampled_pitches = [pitch_population[0],pitch_population[3],pitch_population[2]]
-                    elif form.symbol_cat == 'b':
-                        sampled_pitches = [pitch_population[0], pitch_population[1], pitch_population[2]]
-                    elif form.symbol_cat == 'a(frag,v+)':
-                        sampled_pitches = [pitch_population[0], pitch_population[3], pitch_population[1]]
-                    elif form.symbol_cat == 'b(frag,v+)':
-                        sampled_pitches = [pitch_population[0], pitch_population[1], pitch_population[3]]
+                    sampled_pitches = random.sample(pitch_population, k=3)
+
                     print('form.latent_variables[\'harmony\']: ',form.latent_variables['harmony'],'pitch_population: ',pitch_population,'sampled_pitches: ',sampled_pitches)
                     sampled_durations = [1.0, 1.0, 1.0]
                     melody = Melody(no_tail=form.no_tail)
@@ -79,21 +72,21 @@ class Form(Tree):
 
 
 def build_sentence():
-    scale = [0, 2, 4, 7, 9, 11]
+    scale = [0, 2, 4, 5,7, 9, 11]
     sentence = Form(rhythm_cat=8)
     sentence.add_children([Form(rhythm_cat=4), Form(rhythm_cat=4)])
     presentation, continuation = sentence.children
     presentation.add_children([Form(rhythm_cat=2, symbol_cat='a'),
                                Form(rhythm_cat=2, symbol_cat='a')])
     continuation.add_children(
-        [Form(rhythm_cat=2, symbol_cat='a(frag,v+)', latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}),
+        [Form(rhythm_cat=2, symbol_cat='a(frag,v+)', latent_variables={'harmony': [2, 7, 11], 'scale': scale}),
          Form(rhythm_cat=2, symbol_cat='c')])
     presentation.children[0].add_children([Form(rhythm_cat=1, symbol_cat='a'),
                                            Form(rhythm_cat=1, symbol_cat='b',
-                                                latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale},no_tail=True)])
+                                                latent_variables={'harmony': [2,  7, 11], 'scale': scale},no_tail=True)])
     presentation.children[1].add_children([Form(rhythm_cat=1, symbol_cat='a'),
                                            Form(rhythm_cat=1, symbol_cat='b',
-                                                latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale},no_tail=True)])
+                                                latent_variables={'harmony': [2,  7, 11], 'scale': scale},no_tail=True)])
     continuation.children[0].add_children([Form(rhythm_cat=1, symbol_cat='a(frag,v+)'),
                                            Form(rhythm_cat=1, symbol_cat='b(frag,v+)')])
     continuation.children[1].add_children(

@@ -1,8 +1,10 @@
+import copy
+
 from melody import Melody,Note
 
 
 def move_in_scale(start_pitch, scale, step):
-    current_pitch = start_pitch
+    current_pitch = copy.deepcopy(start_pitch)
     sign = int(step / abs(step))
     while step != 0:
         current_pitch = current_pitch + sign
@@ -50,4 +52,5 @@ def melody_surface_to_pitch_list(surface: list[Melody]) -> list[int]:
     return pitch_list
 
 
-
+if __name__ == '__main__':
+    print(scale_notes_between(4,12+4,[0,2,4,5,7,9,11]))

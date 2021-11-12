@@ -86,7 +86,7 @@ class Melody(Tree):
             subtrees = self.get_surface_at_depth(i)
             print([tuple(map(lambda _: _.__dict__, x.transition)) for x in subtrees])
 
-    def surface_to_note_list(self):
+    def surface_to_note_list(self,part='all'):
         surface = self.get_surface()
         head_region = [x for x in surface if x.part == 'head']
         body_region = [x for x in surface if x.part == 'body']
@@ -97,7 +97,16 @@ class Melody(Tree):
                                                                                                 melody in
                                                                                                 body_region[1:]]
         tail_region_note_list = [melody.transition[1] for melody in tail_region[:-1]]
-        note_list = head_region_note_list + body_region_note_list + tail_region_note_list
+        if part == 'all':
+            note_list = head_region_note_list + body_region_note_list + tail_region_note_list
+        elif part == 'head':
+            note_list = head_region_note_list
+        elif part == 'body':
+            note_list = body_region_note_list
+        elif part == 'tail':
+            note_list = tail_region_note_list
+        else:
+            assert False, part
         #print('*****')
         #print('pitch_dur_list: ', [(note.pitch_cat, note.rhythm_cat) for note in note_list])
 

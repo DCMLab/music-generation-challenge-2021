@@ -32,16 +32,16 @@ second.add_children(
 
 seq_1 = Melody(no_tail=True)
 seq_1.add_children([Melody(
-    transition=(Note(-5, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables))),
-    Melody(transition=(Note(7, 1.0, latent_variables=latent_variables),
+    transition=(Note(-5, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}))),
+    Melody(transition=(Note(7, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}),
                        Note(5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale})))
 ])
 
 seq_2 = Melody(no_tail=True)
 seq_2.add_children(
     [Melody(transition=(Note(-5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}),
-                        Note(5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}))),
-     Melody(transition=(Note(5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}),
+                        Note(5, 1.0, latent_variables=latent_variables))),
+     Melody(transition=(Note(5, 1.0, latent_variables=latent_variables),
                         Note(4, 1.0, latent_variables=latent_variables)))
      ])
 
@@ -303,7 +303,8 @@ def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[
     return melody_templates
 
 
-padded_melody_templates = pad_melody_templates(tree_templates,handcoded_similarity)
+padded_melody_templates = pad_melody_templates(melody_templates,similarity_template)
+#padded_melody_templates = pad_melody_templates(tree_templates,handcoded_similarity)
 for x in padded_melody_templates:
     print('************')
     x.show()
