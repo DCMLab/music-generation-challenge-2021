@@ -98,11 +98,13 @@ class RhythmBalancedTree(Policy):
             durations = [x.target_tree.transition[0].rhythm_cat for x in legal_actions]
             interval_sizes = np.array([abs(action.target_tree.transition[1].pitch_cat-action.target_tree.transition[0].pitch_cat) for action in legal_actions])
             fill_operation_check = [action.operation.__dict__['type_of_operation'] == 'Fill' for action in legal_actions]
+            repeat_operation_check = [action.operation.__dict__['type_of_operation'] in ['LeftRepeat','RightRepeat'] for action in legal_actions]
+            repeat_operation_check = 1+ np.array(repeat_operation_check)
             print('fill_operation_check: ',fill_operation_check)
             print('interval_sizes: ',interval_sizes)
             fill_satisfaction = (1+np.array(fill_operation_check))
             #fill_satisfaction = (1 + np.array(0))
-            weights= (100*(np.array(durations)**2)+interval_sizes)+2**(1+1*fill_satisfaction)
+            weights= ((100*(np.array(durations)**2)+interval_sizes)+2**(1+1*fill_satisfaction)+3**(interval_sizes==0))/repeat_operation_check
             print('weights: ',weights )
             selected_action = random.choices(legal_actions,weights=weights)[0]
             print('durations: ',durations)

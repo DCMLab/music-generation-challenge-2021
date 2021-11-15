@@ -49,7 +49,7 @@ class Form(Tree):
                     pitch_population = [x for x in list(range(-5, 12)) if x % 12 in form.latent_variables['harmony']]
                     sampled_pitches = random.sample(pitch_population, k=3)
 
-                    print('form.latent_variables[\'harmony\']: ',form.latent_variables['harmony'],'pitch_population: ',pitch_population,'sampled_pitches: ',sampled_pitches)
+                    #print('form.latent_variables[\'harmony\']: ',form.latent_variables['harmony'],'pitch_population: ',pitch_population,'sampled_pitches: ',sampled_pitches)
                     sampled_durations = [1.0, 1.0, 1.0]
                     melody = Melody(no_tail=form.no_tail)
                     for i in range(2):
@@ -62,7 +62,7 @@ class Form(Tree):
                 symbol_dict[form.symbol_cat] = melody
 
             melody_templates.append(melody)
-        print('form symbol_dict.keys(): ',symbol_dict.keys())
+        #print('form symbol_dict.keys(): ',symbol_dict.keys())
         return melody_templates
 
     def to_similarity_template(self):

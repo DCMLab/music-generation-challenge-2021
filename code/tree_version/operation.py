@@ -59,7 +59,13 @@ class Operation:
                 print('stealing duration from right', location + 1)
                 surface[location + 1].transition[0].rhythm_cat = halved_rhythm_cat
         left_note, right_note = transition
-        added_note = Note(pitch_cat=pitch, rhythm_cat=halved_rhythm_cat, latent_variables=latent_variables)
+        if set(left_note.latent_variables['harmony']) == {2, 4, 8, 11} and left_note.pitch_cat>pitch:
+            new_pitch = pitch+1
+        elif pitch%12 == 7 and (left_note.pitch_cat %12 ==8 or right_note.pitch_cat%12 == 8):
+            new_pitch = pitch + 1
+        else:
+            new_pitch = pitch
+        added_note = Note(pitch_cat=new_pitch, rhythm_cat=halved_rhythm_cat, latent_variables=latent_variables)
         child1 = Melody((left_note, added_note), part=part)
         child2 = Melody((added_note, right_note), part=part)
         melody.add_children([child1, child2])
@@ -140,7 +146,7 @@ class Neighbor(Operation):
             right_pitch is not None,
             inserted_pitch_not_extreme_in_bar,
         ])
-        return condition
+        return False
 
     @staticmethod
     def perform(melody: Melody):
@@ -174,7 +180,7 @@ class Fill(Operation):
             left_pitch is not None,
             right_pitch is not None,
             len(scale_notes_in_between) > 0,
-            contain_harmony_notes
+            contain_harmony_notes or len(scale_notes_in_between)==1
         ])
         return condition
 
@@ -189,7 +195,7 @@ class Fill(Operation):
         harmony_notes_in_between = harmony_notes_between(low_pitch, high_pitch,
                                                          harmony=latent_variables['harmony'])
         # print('harmony_notes_between: ', harmony_notes_in_between)
-        pitch_evaluation = lambda pitch: (1 / (1 + abs(pitch - midpoint))) + 10**(pitch % 12 in harmony_notes_in_between)
+        pitch_evaluation = lambda pitch: (1 / (1 + abs(pitch - midpoint))) + 10**(pitch % 12 in latent_variables['harmony'])
         # print(list(map(pitch_evaluation,scale_notes_between)))
         fill_pitch = sorted(scale_notes_in_between, key=pitch_evaluation)[-1]
         Operation.add_children_by_pitch(melody, fill_pitch, part=melody.part)
@@ -213,14 +219,15 @@ class RightNeighbor(Operation):
         right_neighbor_pitch = move_in_scale(start_pitch=left_pitch,
                                              scale=melody.transition[0].latent_variables['scale'], step=-sign)
         inserted_pitch_not_extreme_in_bar = min(surface_pitches) < right_neighbor_pitch < max(surface_pitches)
-        interval_size_not_big = abs(right_pitch - left_pitch) < 7
+        interval_size_not_big = abs(right_pitch - left_pitch) < 5
         condition = all([
             Operation.exist_time_stealable(melody),
             left_pitch is not None,
             right_pitch is not None,
             left_pitch % 12 in melody.transition[0].latent_variables['harmony'],
-            inserted_pitch_not_extreme_in_bar or interval_size_not_big,
-            right_pitch < left_pitch,
+            inserted_pitch_not_extreme_in_bar or melody.transition[0].pitch_cat>0.5,
+            right_pitch <= left_pitch,
+            interval_size_not_big,
         ])
         return condition
 
@@ -247,6 +254,7 @@ class LeftNeighbor(Operation):
         left_neighbor_pitch = move_in_scale(start_pitch=right_pitch,
                                             scale=melody.transition[1].latent_variables['scale'], step=sign)
         surface_pitches = [note.pitch_cat for note in melody.get_root().surface_to_note_list(part='body')]
+        print('surface_pitches: ',surface_pitches)
         inserted_pitch_not_extreme_in_bar = min(surface_pitches) < left_neighbor_pitch < max(surface_pitches)
         interval_size_not_big = abs(right_pitch-left_pitch)<5
         condition = all([
@@ -254,7 +262,8 @@ class LeftNeighbor(Operation):
             left_pitch is not None,
             right_pitch is not None,
             right_pitch % 12 in melody.transition[1].latent_variables['harmony'],
-            inserted_pitch_not_extreme_in_bar or interval_size_not_big
+            inserted_pitch_not_extreme_in_bar or melody.transition[0].pitch_cat>0.5,
+            interval_size_not_big,
 
         ])
         return condition
