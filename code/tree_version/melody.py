@@ -75,13 +75,14 @@ class Tree:
 
 class Melody(Tree):
     def __init__(self, transition=(Note('start', 'start', {}), Note('end', 'end', {})), part='body', no_tail=False,
-                 max_elaboration=6):
+                 max_elaboration=6,repeat_type=None):
         super().__init__()
         self.surface = None
         self.transition = transition
         self.part = part  # head, body, or tail region of root
         self.no_tail = no_tail
         self.max_elaboration = max_elaboration
+        self.repeat_type = repeat_type
 
     def show(self):
         depth = self.get_depth()
@@ -120,9 +121,21 @@ class Melody(Tree):
     def surface_to_stream(self):
         note_list = self.surface_to_note_list()
         measure = m21.stream.Measure()
+        if self.repeat_type == '|:':
+            print('appending start repeat')
+            measure.append(m21.bar.Repeat(direction='start'))
+        if self.repeat_type == ':|':
+            print('appending end repeat')
+            measure.append(m21.bar.Repeat(direction='end'))
         for note in note_list:
-            m21_note = m21.note.Note(pitch=60 + note.pitch_cat, quarterLength=note.rhythm_cat)
+            pitch = m21.pitch.Pitch(60 + note.pitch_cat)
+            if pitch.accidental == m21.pitch.Accidental('natural'):
+                pitch.accidental=None
+            m21_note = m21.note.Note(pitch=pitch, quarterLength=note.rhythm_cat)
             measure.append(m21_note)
+
+        print('measure: ')
+        measure.show('text')
         return measure
 
     def get_total_duration(self):

@@ -7,13 +7,14 @@ import copy
 
 class Form(Tree):
     def __init__(self, symbol_cat='A', max_elaboration=3, rhythm_cat=8, latent_variables=None, no_tail=False,
-                 time_stealable=True):
+                 time_stealable=True,repeat_type=None):
         super().__init__()
         self.symbol_cat = symbol_cat
         self.rhythm_cat = rhythm_cat
         self.max_elaboration = max_elaboration
         self.no_tail = no_tail
         self.time_stealable = time_stealable
+        self.repeat_type = repeat_type
         if latent_variables is None:
             self.latent_variables = {'harmony': [0, 4, 7], 'scale': [0, 2, 4, 5, 7, 9, 11]}
         else:
@@ -27,11 +28,12 @@ class Form(Tree):
         for form in form_surface:
             if form.symbol_cat in symbol_dict.keys():
                 melody = copy.deepcopy(symbol_dict[form.symbol_cat])
+                melody.repeat_type = form.repeat_type
             else:
                 latent_variables = form.latent_variables
                 if form.symbol_cat == 'HC':
                     if form.latent_variables['harmony'] == [2,4,7]:
-                        melody = Melody(no_tail=form.no_tail, max_elaboration=4)
+                        melody = Melody(no_tail=form.no_tail, max_elaboration=4,repeat_type=form.repeat_type)
 
                         melody.add_children([
                             Melody(transition=(Note(pitch_cat=12 + 5, rhythm_cat=0.5, latent_variables=latent_variables),
@@ -44,7 +46,7 @@ class Form(Tree):
                             Note(pitch_cat=7, rhythm_cat=1.0, latent_variables=latent_variables, time_stealable=False))),
                         ])
                     elif form.latent_variables['harmony'] == [4,8,11]:
-                        melody = Melody(no_tail=form.no_tail, max_elaboration=4)
+                        melody = Melody(no_tail=form.no_tail, max_elaboration=4,repeat_type=form.repeat_type)
 
                         melody.add_children([
                             Melody(
@@ -63,7 +65,7 @@ class Form(Tree):
 
                 elif form.symbol_cat == 'PAC':
                     if form.latent_variables['harmony'] == [0,4,7]:
-                        melody = Melody(no_tail=form.no_tail, max_elaboration=4)
+                        melody = Melody(no_tail=form.no_tail, max_elaboration=4,repeat_type=form.repeat_type)
                         melody.add_children([
                             Melody(transition=(Note(pitch_cat=12 + 4, rhythm_cat=0.5, latent_variables=latent_variables),
                                                Note(pitch_cat=12 + 2, rhythm_cat=0.5, latent_variables=latent_variables))),
@@ -76,7 +78,7 @@ class Form(Tree):
                                      time_stealable=False, ),), )
                         ])
                     elif form.latent_variables['harmony'] == [0,4,9]:
-                        melody = Melody(no_tail=form.no_tail, max_elaboration=4)
+                        melody = Melody(no_tail=form.no_tail, max_elaboration=4,repeat_type=form.repeat_type)
                         melody.add_children([
                             Melody(
                                 transition=(Note(pitch_cat=12, rhythm_cat=0.5, latent_variables={'harmony':[4,8,11],'scale':latent_variables['scale']}),
@@ -108,7 +110,7 @@ class Form(Tree):
                     # print('form.latent_variables[\'harmony\']: ',form.latent_variables['harmony'],'pitch_population: ',pitch_population,'sampled_pitches: ',sampled_pitches)
                     sampled_pitches = [pitch_population[i] for i in sampled_degrees]
                     sampled_durations = [1.0, 1.0, 1.0]
-                    melody = Melody(no_tail=form.no_tail, max_elaboration=form.max_elaboration)
+                    melody = Melody(no_tail=form.no_tail, max_elaboration=form.max_elaboration,repeat_type=form.repeat_type)
                     # if latent_variables['harmony'] == [0,4,7]:
                     #    V_of_latent_variables = {'harmony':[2,5,7],'scale':latent_variables['scale']}
                     # else:
@@ -152,13 +154,13 @@ def build_sentence():
                                                 latent_variables={'harmony': [2, 7, 11], 'scale': scale}, no_tail=True,
                                                 time_stealable=False)])
     continuation.children[0].add_children(
-        [Form(rhythm_cat=1, symbol_cat='c', max_elaboration=5, latent_variables={'harmony': [0, 5, 9], 'scale': scale}),
+        [Form(rhythm_cat=1, symbol_cat='c', max_elaboration=5, latent_variables={'harmony': [0, 5, 9], 'scale': scale},repeat_type='|:'),
          Form(rhythm_cat=1, symbol_cat='c\'', max_elaboration=5,
               latent_variables={'harmony': [0, 4, 7], 'scale': scale})])
     continuation.children[1].add_children(
         [Form(rhythm_cat=1, symbol_cat='c\'\'', max_elaboration=5,
               latent_variables={'harmony': [2, 7, 11], 'scale': scale}),
-         Form(rhythm_cat=1, symbol_cat='PAC', no_tail=True)])
+         Form(rhythm_cat=1, symbol_cat='PAC', no_tail=True,repeat_type=':|')])
     return sentence
 
 
@@ -173,7 +175,7 @@ def build_period():
          Form(rhythm_cat=2, symbol_cat='PAC')])
 
     antecedent.children[0].add_children([
-        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables={'harmony': [0, 4, 7], 'scale': scale}),
+        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables={'harmony': [0, 4, 7], 'scale': scale},repeat_type='|:'),
         Form(rhythm_cat=1, symbol_cat='b', max_elaboration=5, no_tail=True, time_stealable=False,
              latent_variables={'harmony': [2, 7, 11], 'scale': scale})])
     antecedent.children[1].add_children([
@@ -187,7 +189,7 @@ def build_period():
     consequent.children[1].add_children([
         Form(rhythm_cat=1, symbol_cat='c\'', max_elaboration=5,
              latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale}),
-        Form(rhythm_cat=1, symbol_cat='PAC', max_elaboration=5, )])
+        Form(rhythm_cat=1, symbol_cat='PAC', max_elaboration=5, repeat_type=':|')])
     return period
 
 def build_minor_sentence():
@@ -211,13 +213,13 @@ def build_minor_sentence():
                                                 latent_variables=V_latent_variables, no_tail=True,
                                                 time_stealable=False)])
     continuation.children[0].add_children(
-        [Form(rhythm_cat=1, symbol_cat='c', max_elaboration=5, latent_variables={'harmony': [2, 5, 9], 'scale': scale}),
+        [Form(rhythm_cat=1, symbol_cat='c', max_elaboration=5, latent_variables={'harmony': [2, 5, 9], 'scale': scale},repeat_type='|:'),
          Form(rhythm_cat=1, symbol_cat='c\'', max_elaboration=5,
               latent_variables=i_latent_variables)])
     continuation.children[1].add_children(
         [Form(rhythm_cat=1, symbol_cat='c\'\'', max_elaboration=5,
               latent_variables=V_latent_variables),
-         Form(rhythm_cat=1, symbol_cat='PAC', latent_variables=i_latent_variables,no_tail=True)])
+         Form(rhythm_cat=1, symbol_cat='PAC', latent_variables=i_latent_variables,no_tail=True,repeat_type=':|')])
     return sentence
 
 def build_minor_period():
@@ -233,7 +235,7 @@ def build_minor_period():
     V_latent_variables = {'harmony': [4, 8, 11], 'scale': scale}
     ii_latent_variables = {'harmony': [2, 5, 11], 'scale': scale}
     antecedent.children[0].add_children([
-        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables),
+        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables,repeat_type='|:'),
         Form(rhythm_cat=1, symbol_cat='b', max_elaboration=5, no_tail=True, time_stealable=False,
              latent_variables=ii_latent_variables)])
     antecedent.children[1].add_children([
@@ -241,13 +243,13 @@ def build_minor_period():
         Form(rhythm_cat=1, symbol_cat='HC', max_elaboration=5,
              latent_variables=V_latent_variables)])
     consequent.children[0].add_children([
-        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables),
+        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables,),
         Form(rhythm_cat=1, symbol_cat='b', max_elaboration=5, no_tail=True, time_stealable=False,
              latent_variables=ii_latent_variables)])
     consequent.children[1].add_children([
         Form(rhythm_cat=1, symbol_cat='c\'', max_elaboration=5,
              latent_variables=ii_latent_variables),
-        Form(rhythm_cat=1, symbol_cat='PAC', max_elaboration=5,latent_variables=i_latent_variables)])
+        Form(rhythm_cat=1, symbol_cat='PAC', max_elaboration=5,latent_variables=i_latent_variables,repeat_type=':|')])
     return period
 
 sentence = build_minor_sentence()
@@ -255,8 +257,8 @@ period = build_minor_period()
 
 print('\n--- melody template ---\n')
 
-melody_templates = period.to_melody_templates()
-similarity_template = period.to_similarity_template()
+melody_templates = sentence.to_melody_templates()
+similarity_template = sentence.to_similarity_template()
 if __name__ == '__main__':
     pass
     # for i, melody_template in enumerate(melody_templates):
