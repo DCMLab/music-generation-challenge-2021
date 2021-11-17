@@ -71,8 +71,11 @@ padded_melody_templates = pad_melody_templates(melody_templates,similarity_templ
 #padded_melody_templates = pad_melody_templates(tree_templates,handcoded_similarity)
 #padded_melody_templates = pad_melody_templates(minor_template,minor_similarity)
 #padded_melody_templates = pad_melody_templates(mMm_template,mMm_similarity)
+for x in melody_templates:
+    print('&&&&&&&&&& unpadded')
+    x.show()
 for x in padded_melody_templates:
-    print('************')
+    print('************ padded')
     x.show()
 
 # padded_old_templates = add_head_or_tail(old_templates=piece_old_templates)

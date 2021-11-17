@@ -143,6 +143,7 @@ class ImitatingPolicy:
         matching_subtree_pairs = ImitatingPolicy._matching_subtree_pairs(melody, memory_melody)
         print('there are matching_subtree_pairs: ', bool(matching_subtree_pairs))
         if not matching_subtree_pairs:
+            print('there is no matching_subtree_pairs, chose action by policy')
             selected_action = RhythmBalancedTree.determine_action(melody,operations=operations)
         else:
             matching_subtree_pairs_with_legal_operations = [pair for pair in matching_subtree_pairs if
@@ -161,12 +162,13 @@ class ImitatingPolicy:
                     if current_memory_melody_tree.memory.operation.is_legal(current_melody_tree):
                         selected_operation = current_memory_melody_tree.memory.operation
                         selected_action = Action(current_melody_tree, selected_operation)
+                        print('use memory action')
                     else:
                         print('unable to imitate memory operation',current_memory_melody_tree.memory.operation)
                         selected_action = RhythmBalancedTree.determine_action(current_melody_tree,operations)
                         print('instead, using legal_operation', selected_action.operation)
 
             else:
-                print('unable to imitate: there is no matching subtrees ')
+                print('unable to imitate: there is no matching subtrees with legal operations ')
                 selected_action = None
         return selected_action

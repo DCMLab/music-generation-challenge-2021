@@ -34,11 +34,10 @@ class Operation:
     @staticmethod
     def add_children_by_pitch(melody: Melody, pitch: int, part):
         # if melody.part is head or tail overwrite which_duation_to_steal
-        print('melody.part: ', melody.part)
+
         durations = [note.rhythm_cat for note in melody.transition if note.time_stealable]
         max_duration = max(durations)
-        print('durations: ',durations)
-        print('max_duration: ',max_duration)
+
         if max_duration>0.5:
             which_duration_to_steal = [i for i,x in enumerate(durations) if x == max_duration][0]
         else:
@@ -53,10 +52,10 @@ class Operation:
         which_note_to_give_duration = transition[which_duration_to_steal]
         halved_rhythm_cat = which_note_to_give_duration.rhythm_cat / 2
         which_note_to_give_duration.rhythm_cat = halved_rhythm_cat
-        print('root_transition:', melody.get_root().transition)
-        surface = (melody.get_root()).get_surface()
+
+        surface = melody.get_root().get_surface()
         location = melody.get_location_in_siblings()
-        print('location: ', location)
+
         if which_duration_to_steal == 0:
             if location > 0:
                 print('stealing duration from left', location - 1)
@@ -67,8 +66,11 @@ class Operation:
                 print('stealing duration from right', location + 1)
                 surface[location + 1].transition[0].rhythm_cat = halved_rhythm_cat
         left_note, right_note = transition
-        if pitch%12 == 7 and {4,8,11}.issubset(set(left_note.latent_variables['harmony']))  :
-            new_pitch = pitch+1
+        if pitch%12 == 7:
+            if {4,8,11}.issubset(set(left_note.latent_variables['harmony'])) or (right_note.pitch_cat%12 == 9 and left_note.pitch_cat%12 == 7) :
+                new_pitch = pitch+1
+            else:
+                new_pitch = pitch
         else:
             new_pitch = pitch
         added_note = Note(pitch_cat=new_pitch, rhythm_cat=halved_rhythm_cat, latent_variables=latent_variables)
@@ -178,7 +180,7 @@ class Fill(Operation):
         low_pitch, high_pitch = sorted([left_pitch, right_pitch])
         latent_variables = melody.transition[0].latent_variables
         scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=latent_variables['scale'])
-        print('scale_notes_in_between: ',scale_notes_in_between)
+
         harmony_notes_in_between = harmony_notes_between(low_pitch, high_pitch,
                                                          harmony=latent_variables['harmony'])
         contain_harmony_notes = bool(harmony_notes_in_between)
@@ -259,7 +261,6 @@ class LeftNeighbor(Operation):
         left_neighbor_pitch = move_in_scale(start_pitch=right_pitch,
                                             scale=melody.transition[1].latent_variables['scale'], step=sign)
         surface_pitches = [note.pitch_cat for note in melody.get_root().surface_to_note_list(part='body')]
-        print('surface_pitches: ',surface_pitches)
         inserted_pitch_not_extreme_in_bar = min(surface_pitches) < left_neighbor_pitch < max(surface_pitches)
         interval_size_not_big = abs(right_pitch-left_pitch)<5
         condition = all([
@@ -281,7 +282,4 @@ class LeftNeighbor(Operation):
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
         left_neighbor_pitch = move_in_scale(start_pitch=right_pitch,
                                             scale=melody.transition[1].latent_variables['scale'], step=sign)
-        print('scale: ', melody.transition[1].latent_variables['scale'])
-        print('right_pitch: ', right_pitch)
-        print('left_neighbor_pitch: ', left_neighbor_pitch)
         Operation.add_children_by_pitch(melody, left_neighbor_pitch, part=melody.part)

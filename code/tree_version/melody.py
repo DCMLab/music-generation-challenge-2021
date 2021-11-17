@@ -32,6 +32,12 @@ class Tree:
         else:
             return self.parent.get_root()
 
+    def get_root_at_height(self,height):
+        if height!=0:
+            return self.parent.get_root_at_height(height-1)
+        else:
+            return self
+
     def get_dist_to_root(self):
         if not self.parent:
             return 0
@@ -122,10 +128,8 @@ class Melody(Tree):
         note_list = self.surface_to_note_list()
         measure = m21.stream.Measure()
         if self.repeat_type == '|:':
-            print('appending start repeat')
             measure.append(m21.bar.Repeat(direction='start'))
         if self.repeat_type == ':|':
-            print('appending end repeat')
             measure.append(m21.bar.Repeat(direction='end'))
         for note in note_list:
             pitch = m21.pitch.Pitch(60 + note.pitch_cat)
@@ -134,8 +138,8 @@ class Melody(Tree):
             m21_note = m21.note.Note(pitch=pitch, quarterLength=note.rhythm_cat)
             measure.append(m21_note)
 
-        print('measure: ')
-        measure.show('text')
+
+
         return measure
 
     def get_total_duration(self):
