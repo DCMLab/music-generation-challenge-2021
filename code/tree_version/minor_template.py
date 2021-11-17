@@ -40,20 +40,20 @@ seq_1.add_children([
 
 seq_2 = Melody(max_elaboration=5)
 seq_2.add_children([
-    Melody(transition=(Note(7, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale}), Note(12+2, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale}))),
-    Melody(transition=(Note(12+2, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale}), Note(4, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale})))
+    Melody(transition=(Note(7, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale}), Note(12+2, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale}))),
+    Melody(transition=(Note(12+2, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale}), Note(4, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale})))
 ])
 
 seq_3 = Melody(max_elaboration=6)
 seq_3.add_children([
-    Melody(transition=(Note(9, 1.0, latent_variables=latent_variables), Note(12+9, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale}))),
-    Melody(transition=(Note(12+9, 1.0, latent_variables=latent_variables), Note(12+5, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale})))
+    Melody(transition=(Note(9, 1.0, latent_variables=latent_variables), Note(12+9, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale}))),
+    Melody(transition=(Note(12+9, 1.0, latent_variables=latent_variables), Note(12+5, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale})))
 ])
 
 seq_4 = Melody(max_elaboration=7)
 seq_4.add_children([
-    Melody(transition=(Note(12+2, 1.0, latent_variables=latent_variables), Note(12+7, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale}))),
-    Melody(transition=(Note(12+7, 1.0, latent_variables=latent_variables), Note(12+4, 1.0, latent_variables={'harmony': [2,4, 7,11], 'scale': scale})))
+    Melody(transition=(Note(12+2, 1.0, latent_variables=latent_variables), Note(12+7, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale}))),
+    Melody(transition=(Note(12+7, 1.0, latent_variables=latent_variables), Note(12+4, 1.0, latent_variables={'harmony': [2,4, 8,11], 'scale': scale})))
 ])
 
 minor_template = [

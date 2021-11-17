@@ -4,6 +4,7 @@ from form import melody_templates, similarity_template
 from melody import Melody, Note
 from major_template import tree_templates,handcoded_similarity
 from minor_template import minor_template,minor_similarity
+from mMm_template import mMm_template,mMm_similarity
 
 def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[str]) -> list[Melody]:
     # melody_templates = copy.deepcopy(_melody_templates)
@@ -17,8 +18,10 @@ def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[
             add_what = memory_padding[symbol]
         else:
             if i != len(melody_templates) - 1:
-                choices = ['none'] + (not melody_template.no_tail) * ['tail']
-                add_what = random.choice(choices)
+                if melody_template.no_tail:
+                    add_what = 'none'
+                else:
+                    add_what = 'tail'
             else:
                 add_what = random.choice([ 'none'])
         memory_padding[symbol] = add_what
@@ -64,9 +67,10 @@ def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[
     return melody_templates
 
 
-#padded_melody_templates = pad_melody_templates(melody_templates,similarity_template)
+padded_melody_templates = pad_melody_templates(melody_templates,similarity_template)
 #padded_melody_templates = pad_melody_templates(tree_templates,handcoded_similarity)
-padded_melody_templates = pad_melody_templates(minor_template,minor_similarity)
+#padded_melody_templates = pad_melody_templates(minor_template,minor_similarity)
+#padded_melody_templates = pad_melody_templates(mMm_template,mMm_similarity)
 for x in padded_melody_templates:
     print('************')
     x.show()
