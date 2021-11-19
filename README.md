@@ -11,6 +11,7 @@ Pieces are first generated in either C major or A minor and then transposed to D
 ### The Model
 
 ####Stage 0: Specifying form
+
 The input of the model is a collection of form templates (currently four), which specified the following information on the bar level:
 - Harmony
 - Marker for coherence structure (which bars should be the exact copy, or similar, or different from each other)
