@@ -1,6 +1,6 @@
 import copy
 
-from melody import Melody, Note
+from ..melody import Melody, Note
 
 
 scale = [0, 2, 4, 5, 7,9,11]

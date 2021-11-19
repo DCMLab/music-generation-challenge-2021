@@ -3,31 +3,38 @@ Repo for the DCML submission to the AI Music Challenge 2021
 ### Introduction
 
 
-On a high level, our system generates **slängpolska** by recombining bar-level latent features from the pieces in the corpus, and then selecting the plausible recombinations that optimize a fitness function designed by us. 
-These bar-level latent features includes **Contour**, **Rhythm**, and **Location within phrase**.
-For a more flexible control over the generated music, the system provides the option for the user to specifies a template for form and repetitive structures. 
+We designed a general model to generate tonal melody. We then tuned certain parameters that influences the generative process to match the style of the Slängpolska. 
+
+Pieces are first generated in either C major or A minor and then transposed to D major and A minor to fit with the style.
 
 
-### Preprocessing
+### The Model
 
-- All the pieces in the corpus are converted into .xml format.
-- For practical reasons, when multiple voice is present we only take the top one.
+####Stage 0: Specifying form
+The input of the model is a collection of form templates (currently four), which specified the following information on the bar level:
+- Harmony
+- Marker for coherence structure (which bars should be the exact copy, or similar, or different from each other)
+- Flag for phrase ending
+- Flag for cadences (perfect authentic cadence or half cadence)
 
-### Encoding and feature extraction
-Three features are automatically extracted from each bar of the pieces in the corpus. 
+an example form template:
 
-- Contour
-  - represented as the first 25 weights of the component of the Discrete Cosine Decomposition of the melody which is represented as piano roll(relative to tonic).
-  - Idea inspired by the recent paper [Cosine Contours:
-A Multipurpose Representation For Melodies](https://bascornelissen.nl/static/bb40b6993ad2589cb16ba2ffaa940a24/cosine-contours.pdf)
-- Rhythm
-  - represented as a 16th note grid, a list of length 16 containing symbols for **onset** `'x'`, **keep** `'-'`, and **rest** `'_'`.
-- Location
-  - represented as a pair of integers `[m,n]` where `n` is length of the phrase containing this bar and `m` is the bar position with in the phrase (starting from 0 to n-1) 
+| info \ position|1|2|3|4|5|6|7|8
+|---|---|---|---|---|---|---|---|---|
+|harmony|I|V|I|V|IV|cad64|V|I
+|coherence marker|a|b|a|b|c|c'|c''|d
+|phrase ending flag|-|True|-|True|-|-|-|True
+|cadence flag|-|-|-|HC|-|-|-|PAC
+
+####Stage 1: Generating skeleton
+
+![alt text](readme%20materials/guidetones.png "Logo Title Text 1")
 
 
-### Objective functions
-We crafted a fitness function **g** that maps (contour, rhythm, location) to a real number in [0,1] to determine how well the `(contour,rhythm)` pair fit at `location` in a phrase.
+####Stage 2: Elaboration
 
-### Search Space
-Observed contours 
+![alt text](readme%20materials/1.png "Logo Title Text 1")
+![alt text](readme%20materials/2.png "Logo Title Text 1")
+![alt text](readme%20materials/3.png "Logo Title Text 1")
+![alt text](readme%20materials/4.png "Logo Title Text 1")
+![alt text](readme%20materials/5.png "Logo Title Text 1")

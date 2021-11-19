@@ -1,5 +1,5 @@
 import copy
-from melody import Melody, Note
+from ..melody import Melody, Note
 
 
 
