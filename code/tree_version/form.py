@@ -207,9 +207,9 @@ def build_period():
     antecedent.children[0].add_children([
         Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables, repeat_type='|:'),
         Form(rhythm_cat=1, symbol_cat='b', max_elaboration=5, no_tail=True, time_stealable=False,
-             latent_variables=ii_latent_variables)])
+             latent_variables=V_latent_variables)])
     antecedent.children[1].add_children([
-        Form(rhythm_cat=1, symbol_cat='c', max_elaboration=5, latent_variables=V_latent_variables),
+        Form(rhythm_cat=1, symbol_cat='c', max_elaboration=5, latent_variables=i_latent_variables),
         Form(rhythm_cat=1, symbol_cat='HC', max_elaboration=5,
              latent_variables=V_latent_variables)])
     consequent.children[0].add_children([
@@ -218,7 +218,7 @@ def build_period():
              latent_variables=ii_latent_variables)])
     consequent.children[1].add_children([
         Form(rhythm_cat=1, symbol_cat='c\'', max_elaboration=5,
-             latent_variables=ii_latent_variables),
+             latent_variables=V_latent_variables),
         Form(rhythm_cat=1, symbol_cat='PAC', max_elaboration=5, latent_variables=i_latent_variables, repeat_type=':|')])
     return period
 
@@ -295,8 +295,8 @@ mperiod = build_minor_period()
 
 print('\n--- melody template ---\n')
 
-melody_templates = Mperiod.to_melody_templates()
-similarity_template = Mperiod.to_similarity_template()
+melody_templates = msentence.to_melody_templates()
+similarity_template = msentence.to_similarity_template()
 if __name__ == '__main__':
     pass
     # for i, melody_template in enumerate(melody_templates):

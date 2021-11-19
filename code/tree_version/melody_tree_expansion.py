@@ -1,4 +1,5 @@
 # external libs
+
 import copy
 import music21.stream
 from typing import Type
@@ -9,6 +10,8 @@ import operation
 import template
 import form
 from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list
+
+
 
 
 class MelodyElaboration:
@@ -71,7 +74,15 @@ class PieceElaboration:
 
     def result_to_stream(self):
         stream = music21.stream.Stream()
-        stream.append(music21.tempo.MetronomeMark(number=60,referent=60.))
+        stream.append(music21.tempo.MetronomeMark(number=100,referent=1.))
+        stream.append(music21.meter.TimeSignature('3/4'))
+        measures = [tree.surface_to_stream() for tree in self.trees]
+        stream.append(measures)
+        return stream
+
+    def surface_to_stream(self):
+        stream = music21.stream.Stream()
+        stream.append(music21.tempo.MetronomeMark(number=100,referent=1.))
         stream.append(music21.meter.TimeSignature('3/4'))
         measures = [tree.surface_to_stream() for tree in self.trees]
         stream.append(measures)

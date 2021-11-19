@@ -128,15 +128,15 @@ class Melody(Tree):
         note_list = self.surface_to_note_list()
         measure = m21.stream.Measure()
         if self.repeat_type == '|:':
-            measure.append(m21.bar.Repeat(direction='start'))
-        if self.repeat_type == ':|':
-            measure.append(m21.bar.Repeat(direction='end'))
+            measure.leftBarline=m21.bar.Repeat(direction='start')
         for note in note_list:
             pitch = m21.pitch.Pitch(60 + note.pitch_cat)
             if pitch.accidental == m21.pitch.Accidental('natural'):
                 pitch.accidental=None
             m21_note = m21.note.Note(pitch=pitch, quarterLength=note.rhythm_cat)
             measure.append(m21_note)
+        if self.repeat_type == ':|':
+            measure.rightBarline=m21.bar.Repeat(direction='end')
 
 
 
