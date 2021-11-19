@@ -10,7 +10,7 @@ Pieces are first generated in either C major or A minor and then transposed to D
 
 ### The Model
 
-####Stage 0: Specifying form
+#### Stage 0: Specifying form
 
 The input of the model is a collection of form templates (currently four), which specified the following information on the bar level:
 - Harmony
@@ -27,12 +27,12 @@ an example form template:
 |phrase ending flag|-|True|-|True|-|-|-|True
 |cadence flag|-|-|-|HC|-|-|-|PAC
 
-####Stage 1: Generating skeleton
+#### Stage 1: Generating skeleton
 
 ![alt text](readme%20materials/guidetones.png "Logo Title Text 1")
 
 
-####Stage 2: Elaboration
+#### Stage 2: Elaboration
 
 ![alt text](readme%20materials/1.png "Logo Title Text 1")
 ![alt text](readme%20materials/2.png "Logo Title Text 1")
