@@ -25,7 +25,7 @@ class Action:
         self.target_tree.memory = Memory(operation=self.operation)
 
     def show(self):
-        print(self.operation, 'on', self.target_tree.transition,self.target_tree.transition[0].latent_variables)
+        print(self.operation, 'on', self.target_tree.transition, self.target_tree.transition[0].latent_variables)
 
 
 class Policy:
@@ -83,37 +83,44 @@ class BalancedTree(Policy):
             print('subtree_to_expand.transition: ', current_subtree.transition)
             assert current_subtree in melody.get_surface()
             actions_for_current_subtree = [action for action in legal_actions if action.target_tree is current_subtree]
-            print('operations_for_current_subtree: ',[x.operation for x in actions_for_current_subtree])
+            print('operations_for_current_subtree: ', [x.operation for x in actions_for_current_subtree])
             assert bool(actions_for_current_subtree)
             selected_action = random.choice(actions_for_current_subtree)
         return selected_action
 
+
 class RhythmBalancedTree(Policy):
+    # currently the one in use
     @staticmethod
     def determine_action(melody: Melody, operations: list[Type[Operation]]) -> Action:
         legal_actions = Policy._legal_actions(melody, operations)
         if not legal_actions:
             selected_action = None
         else:
-            print('legal_operation_type: ',[action.operation.type_of_operation for action in legal_actions])
+            print('legal_operation_type: ', [action.operation.type_of_operation for action in legal_actions])
             durations = [x.target_tree.transition[0].rhythm_cat for x in legal_actions]
-            interval_sizes = np.array([abs(action.target_tree.transition[1].pitch_cat-action.target_tree.transition[0].pitch_cat) for action in legal_actions])
-            fill_operation_check = [action.operation.__dict__['type_of_operation'] == 'Fill' for action in legal_actions]
-            repeat_operation_check = [action.operation.__dict__['type_of_operation'] in ['LeftRepeat','RightRepeat'] for action in legal_actions]
-            repeat_operation_check = 1+ np.array(repeat_operation_check)
-            print('repeat_operation_check: ',repeat_operation_check)
-            print('fill_operation_check: ',fill_operation_check)
-            print('interval_sizes: ',interval_sizes)
-            fill_satisfaction = (1+np.array(fill_operation_check))
+            interval_sizes = np.array(
+                [abs(action.target_tree.transition[1].pitch_cat - action.target_tree.transition[0].pitch_cat) for action
+                 in legal_actions])
+            fill_operation_check = [action.operation.__dict__['type_of_operation'] == 'Fill' for action in
+                                    legal_actions]
+            repeat_operation_check = [action.operation.__dict__['type_of_operation'] in ['LeftRepeat', 'RightRepeat']
+                                      for action in legal_actions]
+            repeat_operation_check = 1 + np.array(repeat_operation_check)
+            print('repeat_operation_check: ', repeat_operation_check)
+            print('fill_operation_check: ', fill_operation_check)
+            print('interval_sizes: ', interval_sizes)
+            fill_satisfaction = (1 + np.array(fill_operation_check))
 
-            #fill_satisfaction = (1 + np.array(0))
-            encourage = 1000*(interval_sizes*fill_satisfaction)+100*(np.array(durations))+10*fill_satisfaction
-            penalty = 100*repeat_operation_check
-            weights= encourage/penalty
-            print('weights: ',weights )
-            selected_action = random.choices(legal_actions,weights=weights**10)[0]
-            print('durations: ',durations)
-            #selected_action = legal_actions[np.argmax(durations)]
+            # fill_satisfaction = (1 + np.array(0))
+            encourage = 1000 * (interval_sizes * fill_satisfaction) + 100 * (
+                np.array(durations)) + 10 * fill_satisfaction
+            penalty = 100 * repeat_operation_check
+            weights = encourage / penalty
+            print('weights: ', weights)
+            selected_action = random.choices(legal_actions, weights=weights ** 10)[0]
+            print('durations: ', durations)
+            # selected_action = legal_actions[np.argmax(durations)]
             print(selected_action.__dict__)
         return selected_action
 
@@ -125,14 +132,14 @@ class ImitatingPolicy:
         matching_subtree_pairs = []
         found_a_match = (not melody.children)
         if found_a_match:
-            matching_subtree_pairs.append((melody,memory_melody))
+            matching_subtree_pairs.append((melody, memory_melody))
         else:
             same_num_children = len(melody.children) == len(memory_melody.children)
-            print('length of melody/memory_melody .children: ',len(melody.children),len(memory_melody.children))
-            print('same_num_children: ',same_num_children)
+            print('length of melody/memory_melody .children: ', len(melody.children), len(memory_melody.children))
+            print('same_num_children: ', same_num_children)
             if same_num_children:
-                for child_melody, child_memory_melody in zip(melody.children,memory_melody.children):
-                    new_pairs = ImitatingPolicy._matching_subtree_pairs(child_melody,child_memory_melody)
+                for child_melody, child_memory_melody in zip(melody.children, memory_melody.children):
+                    new_pairs = ImitatingPolicy._matching_subtree_pairs(child_melody, child_memory_melody)
                     matching_subtree_pairs.extend(new_pairs)
         return matching_subtree_pairs
 
@@ -144,28 +151,32 @@ class ImitatingPolicy:
         print('there are matching_subtree_pairs: ', bool(matching_subtree_pairs))
         if not matching_subtree_pairs:
             print('there is no matching_subtree_pairs, chose action by policy')
-            selected_action = RhythmBalancedTree.determine_action(melody,operations=operations)
+            selected_action = RhythmBalancedTree.determine_action(melody, operations=operations)
         else:
             matching_subtree_pairs_with_legal_operations = [pair for pair in matching_subtree_pairs if
                                                             [operation.is_legal(pair[0]) for operation in operations]]
-            matching_subtree_pairs_with_legal_operations_memory_has_children = [pair for pair in matching_subtree_pairs_with_legal_operations if bool(pair[1].children)]
-            #dists_to_root = [x[0].get_dist_to_root() for x in matching_subtree_pairs_with_legal_operations_memory_has_children]
-            #print('dist_to_root: ',dists_to_root)
-            matching_subtree_pairs_with_legal_operations_memory_has_children = sorted(matching_subtree_pairs_with_legal_operations_memory_has_children,key=lambda x:x[0].get_dist_to_root())
+            matching_subtree_pairs_with_legal_operations_memory_has_children = [pair for pair in
+                                                                                matching_subtree_pairs_with_legal_operations
+                                                                                if bool(pair[1].children)]
+            # dists_to_root = [x[0].get_dist_to_root() for x in matching_subtree_pairs_with_legal_operations_memory_has_children]
+            # print('dist_to_root: ',dists_to_root)
+            matching_subtree_pairs_with_legal_operations_memory_has_children = sorted(
+                matching_subtree_pairs_with_legal_operations_memory_has_children, key=lambda x: x[0].get_dist_to_root())
             if bool(matching_subtree_pairs_with_legal_operations_memory_has_children):
-                current_melody_tree, current_memory_melody_tree = matching_subtree_pairs_with_legal_operations_memory_has_children[0]
+                current_melody_tree, current_memory_melody_tree = \
+                    matching_subtree_pairs_with_legal_operations_memory_has_children[0]
                 legal_operations = [operation for operation in operations if operation.is_legal(current_melody_tree)]
                 if not bool(legal_operations):
                     print('unable to imitate in this subtree ')
-                    selected_action = RhythmBalancedTree.determine_action(melody,operations)
+                    selected_action = RhythmBalancedTree.determine_action(melody, operations)
                 else:
                     if current_memory_melody_tree.memory.operation.is_legal(current_melody_tree):
                         selected_operation = current_memory_melody_tree.memory.operation
                         selected_action = Action(current_melody_tree, selected_operation)
                         print('use memory action')
                     else:
-                        print('unable to imitate memory operation',current_memory_melody_tree.memory.operation)
-                        selected_action = RhythmBalancedTree.determine_action(current_melody_tree,operations)
+                        print('unable to imitate memory operation', current_memory_melody_tree.memory.operation)
+                        selected_action = RhythmBalancedTree.determine_action(current_melody_tree, operations)
                         print('instead, using legal_operation', selected_action.operation)
 
             else:

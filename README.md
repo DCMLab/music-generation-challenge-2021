@@ -6,6 +6,12 @@ The user can specify the harmony, coherence (similarity among bars), phrase endi
 Pieces are first generated in either C major or A minor and then transposed to D major and A minor.
 
 ## Usage
+**Dependencies**
+- numpy: for numerical computation.
+- music21: for building musicxml and midi files from custom melody representation.
+
+**Reproducing the generated pieces**
+
 To generate all the 1000 Slängpolska pieces in both `.xml` and `.mid` format,
 run `code/tree_model/run.py`, which put the generated pieces to the two folders: `code/tree_model/generated_midi` and `code/tree_model/generated_xml`. 
 The generation process should take less than 5 mins. 
