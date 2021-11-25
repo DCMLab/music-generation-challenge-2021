@@ -60,7 +60,7 @@ fruitful discussions.
 
 
 
-<p>
+<p align="center">
    <img src="img/erc-logo.jpg" width="300"/>
    <img src="img/epfl-logo.png" width="300"/>
 </p>
