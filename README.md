@@ -38,12 +38,12 @@ The generation process should take less than 5 mins.
 
 #### Stage 0: Specifying form
 
-The input of the model is a collection of form templates (currently four), which specified the following information on the bar level:
+The input of the model is a collection of form templates (currently four), which specify the following information on the bar level:
 - Harmony
-- Marker for coherence structure (which bars should be the exact copy, or similar, or different from each other)
-- Flag for phrase ending
-- Flag for cadences (perfect authentic cadence or half cadence)
-- Number of maximum elaboration (to enable the control of rhythmic density)
+- Markers for coherence structure (which bars should be an exact copy, or similar, or different from each other)
+- Flags for phrase endings
+- Flags for cadences (perfect authentic cadence or half cadence)
+- Numbers of maximum elaboration (to enable the control of rhythmic density)
 
 an example form template:
 
@@ -58,17 +58,18 @@ an example form template:
 #### Stage 1: Generating Guide Tones
 
 ![alt text](img/guidetones.png "Logo Title Text 1")
-For each bar other than the cadence that has a unique coherence marker, we pick three register positions at random. The guidetones are then determined simply by looking for harmony notes in that register. 
+For each non-cadence bar that has a unique coherence marker, we assign a random integer k (from 0 to 6) to each beat. The guide tone for each beat is then determined as the k-th chord tone (in ascending order by pitch height) within a pre-specified piece range. 
 
-To enforce coherence specified by the form template, we then assign the bars that has the same coherence markers with the same guide tone register. 
-In the case of cadence, the guide tones are always fixed as scale degree 3-2,1, 1 (octave down)
+To enforce the coherence specified by the form template, we then assign this integer to all bars that have the same coherence marker. 
+In the case of cadences, the guide tones are always fixed as scale degrees 3-2, 1, 1 (one octave lower), as in the last bar of the example above.
 
-The guide tone in the picture corresponds to the previous form example. 
+The guide tones in the example correspond to the example form template. 
+
 #### Stage 2: Elaboration
 
-For each step of elaboration, the model perform an elaboration operation on a location within a bar. 
+At each elaboration step, the model performs one operation per bar. 
 
-The operations contains `LeftRepeat`,`RightRepeat`,`LeftNeighbor`,`RightNeighbor` as well as `Fill`, which is an umbrella operation for both arpeggiation and passing tone.
+The list of available elaboration operations is: `LeftRepeat`,`RightRepeat`,`LeftNeighbor`,`RightNeighbor` as well as `Fill`, which is an umbrella operation for both arpeggiation and passing tone.
 The choice of operation and location, called `Action`, is determined by a hand-tuned policy called `RhythmBalancedPolicy`. When encountering a bar whose coherence marker is present in a previous bar, another policy called `ImitatingPolicy` is used to determine the action on this bar. This is an essential component that enables imitation of previous materials and thus enforces motivic coherence.  
 
 Here is an example of how the melody is elaborated iteratively from the guide tones (first line) to the final result (last line).
