@@ -31,7 +31,7 @@ an example form template:
 
 #### Stage 1: Generating skeleton
 
-![alt text](readme%20materials/guidetones.png "Logo Title Text 1")
+![alt text](img/guidetones.png "Logo Title Text 1")
 
 For each unique coherence marker except the cadence, we pick three register positions at random. we then assign the bars that has the same coherence markers with the same guide tone register. 
 The guidetones are then determined simply by looking for harmony notes in that register. The guide tones for the cadences are always fixed as scale degree 3-2,1, 1 (octave down)
@@ -43,9 +43,24 @@ For each step of elaboration, the model perform an elaboration operation on a lo
 The operations contains `LeftRepeat`,`RightRepeat`,`LeftNeighbor`,`RightNeighbor` as well as `Fill`, which is an umbrella operation for both arpeggiation and passing tone.
 The choice of operation and location, called `Action`, is determined by a hand-tuned policy called `RhythmBalancedPolicy`. When encountering a bar whose coherence marker is present in a previous bar, another policy called `ImitatingPolicy` is used to determine the action on this bar. This is an essential component that enables imitation of previous materials and thus enforces motivic coherence.  
 
-![alt text](readme%20materials/guidetones.png)
-![alt text](readme%20materials/1.png)
-![alt text](readme%20materials/2.png)
-![alt text](readme%20materials/3.png)
-![alt text](readme%20materials/4.png)
-![alt text](readme%20materials/5.png)
+![alt text](img/guidetones.png)
+![alt text](img/1.png)
+![alt text](img/2.png)
+![alt text](img/3.png)
+![alt text](img/4.png)
+![alt text](img/5.png)
+
+## Acknowledgements
+
+This project has received funding from the European Research Council
+(ERC) under the European Union's Horizon 2020 research and innovation
+program under grant agreement No 760081 – PMSB. We thank Claude Latour for supporting this research
+through the Latour Chair in Digital Musicology. We additionally thank the members of the Digital and Cognitive Musicology Lab (DCML) for
+fruitful discussions.
+
+
+
+<p>
+   <img src="img/erc-logo.jpg" width="300"/>
+   <img src="img/epfl-logo.png" width="300"/>
+</p>
