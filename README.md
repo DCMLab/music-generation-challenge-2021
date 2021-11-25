@@ -1,6 +1,6 @@
 ## DCML submission to the AI Music Challenge 2021 (Interval Tree Model)
 
-We designed a rule based model to generate Slängpolska iteratively in a controllable manner.
+We designed a rule based model to generate Slängpolska melodies iteratively in a controllable manner.
 The user can specify the harmony, coherence (similarity among bars), phrase ending, cadence type, rhythmic density, across multiple levels.
 
 Pieces are first generated in either C major or A minor and then transposed to D major and A minor.
