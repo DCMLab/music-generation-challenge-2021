@@ -8,7 +8,7 @@
   <identification>
     <creator type="composer">Interval tree model</creator>
     <encoding>
-      <encoding-date>2021-11-19</encoding-date>
+      <encoding-date>2021-11-25</encoding-date>
       <software>music21 v.6.7.1</software>
     </encoding>
   </identification>
@@ -19,12 +19,12 @@
     </scaling>
   </defaults>
   <part-list>
-    <score-part id="Pccee1d1a38842424d408ca9b3c82a61d">
+    <score-part id="Pffe7b665225091e3c09105e7ea639875">
       <part-name />
     </score-part>
   </part-list>
   <!--=========================== Part 1 ===========================-->
-  <part id="Pccee1d1a38842424d408ca9b3c82a61d">
+  <part id="Pffe7b665225091e3c09105e7ea639875">
     <!--========================= Measure 0 ==========================-->
     <measure number="0">
       <attributes>
