@@ -36,9 +36,11 @@ class MelodyElaboration:
             print('no action is available, do not perform elaboration')
 
     def elaborate(self, melody: Melody, memory_melody:Melody=None, steps=3, show=True):
+        melody.history = [copy.deepcopy(melody)]
         for i in range(steps):
             print('---', 'step', i + 1, '---')
             self.elaborate_one_step(melody, memory_melody,show)
+            melody.history.append(copy.deepcopy(melody))
             if show is True:
                 melody.show()
 
@@ -72,21 +74,32 @@ class PieceElaboration:
             else:
                 self.melody_elaborator.elaborate(melody, steps=steps, show=True)
 
-    def result_to_stream(self):
+    def surface_to_stream(self):
         stream = music21.stream.Stream()
-        stream.append(music21.tempo.MetronomeMark(number=100,referent=1.))
+        stream.append(music21.tempo.MetronomeMark(number=100, referent=1.))
         stream.append(music21.meter.TimeSignature('3/4'))
         measures = [tree.surface_to_stream() for tree in self.trees]
         stream.append(measures)
         return stream
 
-    def surface_to_stream(self):
-        stream = music21.stream.Stream()
-        stream.append(music21.tempo.MetronomeMark(number=100,referent=1.))
-        stream.append(music21.meter.TimeSignature('3/4'))
-        measures = [tree.surface_to_stream() for tree in self.trees]
-        stream.append(measures)
-        return stream
+    def history_to_stream(self):
+        streams = music21.stream.Stream()
+        streams.append(music21.metadata.Metadata(title='The elaboration process',composer='Interval tree model'))
+
+
+        longest_history_length = max([len(tree.history) for tree in self.trees])
+        for i in range(longest_history_length):
+            stream = music21.stream.Part()
+            stream.append(music21.metadata.Metadata())
+            stream.partName = f'step {i}'
+            stream.append(music21.tempo.MetronomeMark(number=100, referent=1.))
+            stream.append(music21.meter.TimeSignature('3/4'))
+            measures = [tree.history[min(i,len(tree.history)-1)].surface_to_stream() for tree in self.trees]
+            stream.append(measures)
+            streams.append(stream)
+        return streams
+
+
 
 
 if __name__ == '__main__':
@@ -94,5 +107,5 @@ if __name__ == '__main__':
     piece_elaborator = PieceElaboration(elaborator, tree_templates=template.padded_melody_templates,
                                         self_similarity_template=template.similarity_template)
     piece_elaborator.elaborate()
-    stream = piece_elaborator.result_to_stream()
+    stream = piece_elaborator.history_to_stream()
     stream.show()

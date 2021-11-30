@@ -1,9 +1,10 @@
+import copy
+
 import music21 as m21
 
 
 class Note:
     def __init__(self, pitch_cat, rhythm_cat, latent_variables: dict, time_stealable=True):
-
         self.pitch_cat = pitch_cat
         self.rhythm_cat = rhythm_cat
         self.latent_variables = latent_variables
@@ -32,9 +33,9 @@ class Tree:
         else:
             return self.parent.get_root()
 
-    def get_root_at_height(self,height):
-        if height!=0:
-            return self.parent.get_root_at_height(height-1)
+    def get_root_at_height(self, height):
+        if height != 0:
+            return self.parent.get_root_at_height(height - 1)
         else:
             return self
 
@@ -81,7 +82,7 @@ class Tree:
 
 class Melody(Tree):
     def __init__(self, transition=(Note('start', 'start', {}), Note('end', 'end', {})), part='body', no_tail=False,
-                 max_elaboration=6,repeat_type=None):
+                 max_elaboration=6, repeat_type=None):
         super().__init__()
         self.surface = None
         self.transition = transition
@@ -89,6 +90,7 @@ class Melody(Tree):
         self.no_tail = no_tail
         self.max_elaboration = max_elaboration
         self.repeat_type = repeat_type
+        self.history = []
 
     def show(self):
         depth = self.get_depth()
@@ -96,8 +98,11 @@ class Melody(Tree):
             subtrees = self.get_surface_at_depth(i)
             print([tuple(map(lambda _: _.__dict__, x.transition)) for x in subtrees])
 
-    def surface_to_note_list(self, part='all'):
-        surface = self.get_surface()
+    def surface_to_note_list(self, part='all', depth=None):
+        if depth == None:
+            surface = self.get_surface()
+        else:
+            surface = self.get_surface_at_depth(depth=depth)
         head_region = [x for x in surface if x.part == 'head']
         body_region = [x for x in surface if x.part == 'body']
         tail_region = [x for x in surface if x.part == 'tail']
@@ -128,18 +133,15 @@ class Melody(Tree):
         note_list = self.surface_to_note_list()
         measure = m21.stream.Measure()
         if self.repeat_type == '|:':
-            measure.leftBarline=m21.bar.Repeat(direction='start')
+            measure.leftBarline = m21.bar.Repeat(direction='start')
         for note in note_list:
             pitch = m21.pitch.Pitch(60 + note.pitch_cat)
             if pitch.accidental == m21.pitch.Accidental('natural'):
-                pitch.accidental=None
+                pitch.accidental = None
             m21_note = m21.note.Note(pitch=pitch, quarterLength=note.rhythm_cat)
             measure.append(m21_note)
         if self.repeat_type == ':|':
-            measure.rightBarline=m21.bar.Repeat(direction='end')
-
-
-
+            measure.rightBarline = m21.bar.Repeat(direction='end')
         return measure
 
     def get_total_duration(self):

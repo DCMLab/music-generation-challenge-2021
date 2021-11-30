@@ -22,7 +22,7 @@ for i,myform in enumerate([Mperiod, Msentence, mperiod, msentence]):
                                             self_similarity_template=myform.to_similarity_template())
         print('template_names[i]: ',template_names[i])
         piece_elaborator.elaborate()
-        stream = piece_elaborator.result_to_stream()
+        stream = piece_elaborator.surface_to_stream()
         if i in [0,1]:
             interval = m21.interval.Interval('M2')
             print('interval: ',interval.show('text'))

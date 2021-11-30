@@ -3,18 +3,19 @@ import random
 from form import melody_templates, similarity_template
 from melody import Melody
 
-def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[str]) -> list[Melody]:
+def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[str]) -> Melody:
     # melody_templates = copy.deepcopy(_melody_templates)
     last_bar_has_tail = False
     self_similarity_template = similarity_template
     memory_padding = {}
-    assert len(melody_templates) == len(self_similarity_template)
-    print(len(melody_templates),len(self_similarity_template))
-    for i, (melody_template, symbol) in enumerate(zip(melody_templates, self_similarity_template)):
+    _melody_templates=melody_templates
+    assert len(_melody_templates) == len(self_similarity_template)
+    print(len(_melody_templates),len(self_similarity_template))
+    for i, (melody_template, symbol) in enumerate(zip(_melody_templates, self_similarity_template)):
         if symbol in memory_padding.keys():
             add_what = memory_padding[symbol]
         else:
-            if i != len(melody_templates) - 1:
+            if i != len(_melody_templates) - 1:
                 if melody_template.no_tail:
                     add_what = 'none'
                 else:
@@ -26,7 +27,7 @@ def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[
         print('add_what: ', add_what)
         # add corresponding subtrees to head or tail
         if add_what == 'head':
-            previous_bar = melody_templates[i - 1]
+            previous_bar = _melody_templates[i - 1]
             previous_note = copy.deepcopy(previous_bar.children[-1].transition[1])
             first_note = melody_template.children[0].transition[0]
             new_transition = (previous_note, first_note)
@@ -37,7 +38,7 @@ def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[
             #print('before padding:', len(melody_template.children))
             #print('i: ',i)
 
-            next_bar = melody_templates[i + 1]
+            next_bar = _melody_templates[i + 1]
             next_note = copy.deepcopy(next_bar.children[0].transition[0])
             last_note = copy.deepcopy(melody_template.children[-1].transition[1])
             #print('pitch_cat of transition:', last_note.pitch_cat, next_note.pitch_cat)
@@ -45,7 +46,7 @@ def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[
             melody_template.add_children([Melody(transition=new_transition, part='tail')])
             #print('after padding:', len(melody_template.children))
         elif add_what == 'head_and_tail':
-            next_bar = melody_templates[i + 1]
+            next_bar = _melody_templates[i + 1]
             next_note = copy.deepcopy(next_bar.children[0].transition[0])
             last_note = copy.deepcopy(melody_template.children[-1].transition[1])
             tail_transition = (last_note, next_note)
@@ -61,7 +62,7 @@ def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[
         else:
             assert False, add_what
 
-    return melody_templates
+    return _melody_templates
 
 
 padded_melody_templates = pad_melody_templates(melody_templates,similarity_template)
