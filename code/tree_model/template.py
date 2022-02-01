@@ -1,9 +1,12 @@
 import copy
 import random
+
+from typing import List
+
 from form import melody_templates, similarity_template
 from melody import Melody
 
-def pad_melody_templates(melody_templates:list[Melody],similarity_template:list[str]) -> Melody:
+def pad_melody_templates(melody_templates: List[Melody], similarity_template: List[str]) -> Melody:
     # melody_templates = copy.deepcopy(_melody_templates)
     last_bar_has_tail = False
     self_similarity_template = similarity_template

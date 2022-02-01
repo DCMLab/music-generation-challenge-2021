@@ -4,7 +4,7 @@ from operation import Operation
 from melody import Melody
 import random
 import numpy as np
-from typing import Type
+from typing import Type,List,Tuple
 
 
 class Memory:
@@ -32,7 +32,7 @@ class Policy:
     """ Given a melody tree and a list of candidate actions determine where and what operation to use"""
 
     @staticmethod
-    def _legal_actions(melody: Melody, operations: list[Type[Operation]]) -> list[Action]:
+    def _legal_actions(melody: Melody, operations: List[Type[Operation]]) -> List[Action]:
         """ return a list of all legal actions"""
         surface_subtrees = melody.get_surface()
         all_actions = [Action(subtree, operation) for subtree in surface_subtrees for operation in operations]
@@ -40,14 +40,14 @@ class Policy:
         return legal_actions
 
     @staticmethod
-    def determine_action(melody: Melody, operations: list[Type[Operation]]) -> Action:
+    def determine_action(melody: Melody, operations: List[Type[Operation]]) -> Action:
         """ return a operation and the subtree from the surface on which the operation will be done"""
         pass
 
 
 class UniformRandom(Policy):
     @staticmethod
-    def determine_action(melody: Melody, operations: list[Type[Operation]]) -> Action:
+    def determine_action(melody: Melody, operations: List[Type[Operation]]) -> Action:
         legal_actions = Policy._legal_actions(melody, operations)
         if not legal_actions:
             selected_action = None
@@ -58,7 +58,7 @@ class UniformRandom(Policy):
 
 class BalancedTree(Policy):
     @staticmethod
-    def determine_action(melody: Melody, operations: list[Type[Operation]]) -> Action:
+    def determine_action(melody: Melody, operations: List[Type[Operation]]) -> Action:
         legal_actions = Policy._legal_actions(melody, operations)
         if not legal_actions:
             selected_action = None
@@ -92,7 +92,7 @@ class BalancedTree(Policy):
 class RhythmBalancedTree(Policy):
     # currently the one in use
     @staticmethod
-    def determine_action(melody: Melody, operations: list[Type[Operation]]) -> Action:
+    def determine_action(melody: Melody, operations: List[Type[Operation]]) -> Action:
         legal_actions = Policy._legal_actions(melody, operations)
         if not legal_actions:
             selected_action = None
@@ -128,7 +128,7 @@ class RhythmBalancedTree(Policy):
 class ImitatingPolicy:
 
     @staticmethod
-    def _matching_subtree_pairs(melody: Melody, memory_melody: Melody) -> list[(Melody, Melody)]:
+    def _matching_subtree_pairs(melody: Melody, memory_melody: Melody) -> List[Tuple[Melody, Melody]]:
         matching_subtree_pairs = []
         found_a_match = (not melody.children)
         if found_a_match:
@@ -144,7 +144,7 @@ class ImitatingPolicy:
         return matching_subtree_pairs
 
     @staticmethod
-    def determine_action(melody: Melody, operations: list[Type[Operation]], memory_melody: Melody) -> Action:
+    def determine_action(melody: Melody, operations: List[Type[Operation]], memory_melody: Melody) -> Action:
         """imitating the memory melody as far as possible"""
         memory_melody = copy.deepcopy(memory_melody)
         matching_subtree_pairs = ImitatingPolicy._matching_subtree_pairs(melody, memory_melody)

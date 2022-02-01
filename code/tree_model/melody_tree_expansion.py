@@ -2,7 +2,7 @@
 
 import copy
 import music21.stream
-from typing import Type
+from typing import Type, List,Tuple
 # local modules
 import tree_policy
 from melody import Melody
@@ -15,7 +15,7 @@ from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list
 
 
 class MelodyElaboration:
-    def __init__(self, operations: list[Type[operation.Operation]], policy: Type[tree_policy.Policy], mimicking_policy: Type[tree_policy.ImitatingPolicy],
+    def __init__(self, operations: List[Type[operation.Operation]], policy: Type[tree_policy.Policy], mimicking_policy: Type[tree_policy.ImitatingPolicy],
                  melody_template: Melody = None, rhythm_template: Melody = None):
         self.operations = operations
         self.policy = policy
@@ -46,8 +46,8 @@ class MelodyElaboration:
 
 
 class PieceElaboration:
-    def __init__(self, melody_elaborator: MelodyElaboration, tree_templates: list[Melody],
-                 self_similarity_template: list[str] = None):
+    def __init__(self, melody_elaborator: MelodyElaboration, tree_templates: List[Melody],
+                 self_similarity_template: List[str] = None):
         self.melody_elaborator = melody_elaborator
         self.tree_templates = tree_templates
         self.trees = copy.deepcopy(tree_templates)

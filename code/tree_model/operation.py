@@ -79,6 +79,18 @@ class Operation:
         melody.add_children([child1, child2])
 
 
+class Initialize(Operation):
+    type_of_operation = 'Initialize'
+
+    @staticmethod
+    def is_legal(melody: Melody):
+        return
+
+    @staticmethod
+    def perform(melody: Melody):
+        pass
+
+
 class LeftRepeat(Operation):
     type_of_operation = 'LeftRepeat'
 

@@ -1,5 +1,5 @@
 import copy
-
+from typing import List,Tuple
 from melody import Melody,Note
 
 
@@ -24,7 +24,7 @@ def harmony_notes_between(low_pitch, high_pitch, harmony):
     return scale_notes_between(low_pitch, high_pitch, harmony)
 
 
-def interval_list_to_pitch_list(interval_list: list[(int, int)]) -> list[int]:
+def interval_list_to_pitch_list(interval_list: List[Tuple[int, int]]) -> List[int]:
     pitch_list = []
     for i, pair in enumerate(interval_list):
         if i == 0:
@@ -40,7 +40,7 @@ def interval_list_to_pitch_list(interval_list: list[(int, int)]) -> list[int]:
     return pitch_list
 
 
-def melody_surface_to_pitch_list(surface: list[Melody]) -> list[int]:
+def melody_surface_to_pitch_list(surface: List[Melody]) -> List[int]:
     head_region = [x.value for x in surface if x.part == 'head']
     body_region = [x.value for x in surface if x.part == 'body']
     tail_region = [x.value for x in surface if x.part == 'tail']

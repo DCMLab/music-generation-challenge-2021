@@ -32,7 +32,7 @@ class Form(Tree):
             else:
                 latent_variables = form.latent_variables
                 if form.symbol_cat == 'HC':
-                    if {2,7,11}.issubset(form.latent_variables['harmony']):
+                    if {2, 7, 11}.issubset(form.latent_variables['harmony']):
                         melody = Melody(no_tail=form.no_tail, max_elaboration=4, repeat_type=form.repeat_type)
 
                         melody.add_children([
@@ -74,7 +74,8 @@ class Form(Tree):
                                 Note(pitch_cat=4, rhythm_cat=1.0, latent_variables=latent_variables,
                                      time_stealable=False))),
                         ])
-                    else: assert False
+                    else:
+                        assert False
                 elif form.symbol_cat == 'PAC':
                     if form.latent_variables['harmony'] == [0, 4, 7]:
                         melody = Melody(no_tail=form.no_tail, max_elaboration=4, repeat_type=form.repeat_type)
@@ -116,7 +117,8 @@ class Form(Tree):
                                      time_stealable=False),
                                 Note(pitch_cat=-3, rhythm_cat=1.0, latent_variables=latent_variables,
                                      time_stealable=False, ),), )])
-                    else: assert False
+                    else:
+                        assert False
                 else:
                     pitch_population = [x for x in list(range(-5, 12 + 12)) if
                                         x % 12 in form.latent_variables['harmony']]
@@ -130,9 +132,9 @@ class Form(Tree):
                         ]
                         guidetone_degrees_bank = sum(
                             [list(itertools.permutations(degrees)) for degrees in guidetone_degrees_bank], [])
-                        print('guidetone_degrees_bank: ',guidetone_degrees_bank)
+                        print('guidetone_degrees_bank: ', guidetone_degrees_bank)
                         sampled_degrees = random.choice(guidetone_degrees_bank)
-                        print('sampled_degrees: ',sampled_degrees)
+                        print('sampled_degrees: ', sampled_degrees)
                         chord_degree_dict[symbol_cat_origin] = sampled_degrees
                     # print('form.latent_variables[\'harmony\']: ',form.latent_variables['harmony'],'pitch_population: ',pitch_population,'sampled_pitches: ',sampled_pitches)
                     sampled_pitches = [pitch_population[i] for i in sampled_degrees]
@@ -151,7 +153,7 @@ class Form(Tree):
                                  latent_variables=latent_variables, time_stealable=form.time_stealable))
                         melody.add_children([Melody(transition=transition)])
                 symbol_dict[form.symbol_cat] = melody
-                print('len(melody.children): ',len(melody.children))
+                print('len(melody.children): ', len(melody.children))
 
             melody_templates.append(melody)
         # print('form symbol_dict.keys(): ',symbol_dict.keys())
@@ -200,7 +202,7 @@ def build_period():
     period.add_children([Form(rhythm_cat=4), Form(rhythm_cat=4)])
     antecedent, consequent = period.children
     antecedent.add_children([Form(rhythm_cat=2, symbol_cat='a'), Form(rhythm_cat=2, symbol_cat='HC')])
-    consequent.add_children([Form(rhythm_cat=2, symbol_cat='a\''),Form(rhythm_cat=2, symbol_cat='PAC')])
+    consequent.add_children([Form(rhythm_cat=2, symbol_cat='a\''), Form(rhythm_cat=2, symbol_cat='PAC')])
     i_latent_variables = {'harmony': [0, 4, 7], 'scale': scale}
     V_latent_variables = {'harmony': [2, 7, 11], 'scale': scale}
     ii_latent_variables = {'harmony': [2, 5, 9], 'scale': scale}
