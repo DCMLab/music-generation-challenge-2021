@@ -90,6 +90,10 @@ Here is an example of how the melody is elaborated iteratively from the guide to
 ![alt text](img/4.png)
 ![](img/5.png)
 
+## Model Details:
+
+
+
 ## Acknowledgements
 
 This project has received funding from the European Research Council

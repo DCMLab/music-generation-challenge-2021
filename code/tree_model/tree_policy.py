@@ -104,6 +104,7 @@ class RhythmBalancedTree(Policy):
                  in legal_actions])
             fill_operation_check = [action.operation.__dict__['type_of_operation'] == 'Fill' for action in
                                     legal_actions]
+
             repeat_operation_check = [action.operation.__dict__['type_of_operation'] in ['LeftRepeat', 'RightRepeat']
                                       for action in legal_actions]
             repeat_operation_check = 1 + np.array(repeat_operation_check)
@@ -112,7 +113,7 @@ class RhythmBalancedTree(Policy):
             print('interval_sizes: ', interval_sizes)
             fill_satisfaction = (1 + np.array(fill_operation_check))
 
-            # fill_satisfaction = (1 + np.array(0))
+            #fill_satisfaction = (1 + np.array(0))
             encourage = 1000 * (interval_sizes * fill_satisfaction) + 100 * (
                 np.array(durations)) + 10 * fill_satisfaction
             penalty = 100 * repeat_operation_check

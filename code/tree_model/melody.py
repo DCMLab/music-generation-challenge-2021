@@ -4,11 +4,12 @@ import music21 as m21
 
 
 class Note:
-    def __init__(self, pitch_cat, rhythm_cat, latent_variables: dict, time_stealable=True):
+    def __init__(self, pitch_cat, rhythm_cat, latent_variables: dict, time_stealable=True, source_operation=''):
         self.pitch_cat = pitch_cat
         self.rhythm_cat = rhythm_cat
         self.latent_variables = latent_variables
         self.time_stealable = time_stealable
+        self.source_operation = source_operation
 
 
 class Tree:
@@ -129,7 +130,8 @@ class Melody(Tree):
 
         return note_list
 
-    def surface_to_stream(self):
+    def surface_to_stream(self, last_iteration_stream: m21.stream.Measure = None):
+
         note_list = self.surface_to_note_list()
         measure = m21.stream.Stream()
         if self.repeat_type == '|:':
@@ -139,9 +141,33 @@ class Melody(Tree):
             if pitch.accidental == m21.pitch.Accidental('natural'):
                 pitch.accidental = None
             m21_note = m21.note.Note(pitch=pitch, quarterLength=note.rhythm_cat)
+            m21_note.addLyric(note.source_operation)
             measure.append(m21_note)
         if self.repeat_type == ':|':
             measure.rightBarline = m21.bar.Repeat(direction='end')
+
+        # only if you want to show history change
+        color_map = {
+            'LeftNeighbor': 'brown',
+            'RightNeighbor': 'orange',
+            'Neighbor': 'red',
+            'LeftRepeat': 'olive',
+            'RightRepeat': 'lime',
+            'Fill': 'blue',
+            '':'black',
+        }
+        if last_iteration_stream is not None:
+            for m21_note in (x for x in measure if hasattr(x, 'pitch') and hasattr(x, 'offset')):
+                notes_of_last_iteration = list(last_iteration_stream.getElementsByClass(m21.note.Note))
+                condition = all(
+                    [(m21_note.offset, m21_note.pitch) != (x.offset, x.pitch) for x in notes_of_last_iteration])
+                # if m21_note not in notes_of_last_iteration:
+                m21_note.style.color = color_map[m21_note.lyric]
+                m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
+                if not condition:
+                    m21_note.lyric = ''
+                    m21_note.style.color = 'black'
+
         return measure
 
     def get_total_duration(self):
