@@ -244,7 +244,7 @@ class RightNeighbor(Operation):
         right_neighbor_pitch = move_in_scale(start_pitch=left_pitch,
                                              scale=melody.transition[0].latent_variables['scale'], step=-sign)
         inserted_pitch_not_extreme_in_bar = min(surface_pitches) < right_neighbor_pitch < max(surface_pitches)
-        interval_size_not_big = abs(right_pitch - left_pitch) <= 5
+        interval_size_not_big = abs(right_pitch - left_pitch) <= 7
         condition = all([
             Operation.exist_time_stealable(melody),
             left_pitch is not None,
@@ -281,7 +281,7 @@ class LeftNeighbor(Operation):
                                             scale=melody.transition[1].latent_variables['scale'], step=sign)
         surface_pitches = [note.pitch_cat for note in melody.get_root().surface_to_note_list(part='body')]
         inserted_pitch_not_extreme_in_bar = min(surface_pitches) < left_neighbor_pitch < max(surface_pitches)
-        interval_size_not_big = abs(right_pitch - left_pitch) < 5
+        interval_size_not_big = abs(right_pitch - left_pitch) < 7
         condition = all([
             Operation.exist_time_stealable(melody),
             left_pitch is not None,

@@ -96,7 +96,7 @@ class PieceElaboration:
             stream.append(music21.tempo.MetronomeMark(number=100, referent=1.))
             stream.append(music21.meter.TimeSignature('3/4'))
             if i>0:
-                measures = [tree.history[min(i,len(tree.history)-1)].surface_to_stream(last_iteration_stream=streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Measure)[j]) for j,tree in enumerate(self.trees)]
+                measures = [tree.history[min(i,len(tree.history)-1)].surface_to_stream(last_iteration_stream=streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[j]) for j,tree in enumerate(self.trees)]
             else:
                 measures = [tree.history[min(i, len(tree.history) - 1)].surface_to_stream() for j, tree in enumerate(self.trees)]
             stream.append(measures)
@@ -110,12 +110,14 @@ if __name__ == '__main__':
     import random
     #random.seed(1)
     elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.RhythmBalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
-    myform=form.mperiod
+    myform=form.build_minor_sentence()
+
     piece_elaborator = PieceElaboration(elaborator,
                                         tree_templates=template.pad_melody_templates(myform.to_melody_templates(),
                                                                                      myform.to_similarity_template()),
                                         self_similarity_template=myform.to_similarity_template())
     piece_elaborator.elaborate()
+
     stream = piece_elaborator.history_to_stream()
 
     stream.show()
