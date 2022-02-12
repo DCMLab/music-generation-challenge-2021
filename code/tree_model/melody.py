@@ -131,7 +131,7 @@ class Melody(Tree):
 
     def surface_to_stream(self):
         note_list = self.surface_to_note_list()
-        measure = m21.stream.Measure()
+        measure = m21.stream.Stream()
         if self.repeat_type == '|:':
             measure.leftBarline = m21.bar.Repeat(direction='start')
         for note in note_list:
@@ -156,9 +156,9 @@ latent_variables = {'harmony': [0, 4, 7], 'scale': scale}
 
 seq_1 = Melody()
 seq_1.add_children([Melody(
-    transition=(Note(-5, 1.0, latent_variables=latent_variables), Note(7, 1.0, latent_variables=latent_variables))),
-    Melody(transition=(Note(7, 1.0, latent_variables=latent_variables),
-                       Note(5, 1.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale})))
+    transition=(Note(-5, 3.0, latent_variables=latent_variables), Note(7, 3.0, latent_variables=latent_variables))),
+    Melody(transition=(Note(7, 3.0, latent_variables=latent_variables),
+                       Note(5, 3.0, latent_variables={'harmony': [2, 5, 7, 11], 'scale': scale})))
 ])
 
 if __name__ == '__main__':

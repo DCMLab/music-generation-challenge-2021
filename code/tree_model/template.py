@@ -3,7 +3,7 @@ import random
 
 from typing import List
 
-from form import melody_templates, similarity_template
+from form import get_melody_templates_and_similarity_template
 from melody import Melody
 
 def pad_melody_templates(melody_templates: List[Melody], similarity_template: List[str]) -> Melody:
@@ -67,7 +67,7 @@ def pad_melody_templates(melody_templates: List[Melody], similarity_template: Li
 
     return _melody_templates
 
-
+melody_templates, similarity_template = get_melody_templates_and_similarity_template()
 padded_melody_templates = pad_melody_templates(melody_templates,similarity_template)
 
 for x in melody_templates:

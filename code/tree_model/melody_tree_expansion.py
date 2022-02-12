@@ -9,6 +9,7 @@ from melody import Melody
 import operation
 import template
 import form
+
 from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list
 
 
@@ -103,6 +104,8 @@ class PieceElaboration:
 
 
 if __name__ == '__main__':
+    import random
+    #random.seed(1)
     elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.RhythmBalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
     piece_elaborator = PieceElaboration(elaborator, tree_templates=template.padded_melody_templates,
                                         self_similarity_template=template.similarity_template)

@@ -258,7 +258,6 @@ def build_minor_sentence():
          Form(rhythm_cat=1, symbol_cat='PAC', latent_variables=i_latent_variables, no_tail=True, repeat_type=':|')])
     return sentence
 
-
 def build_minor_period():
     scale = [0, 2, 4, 5, 7, 9, 11]
     period = Form(rhythm_cat=8)
@@ -289,16 +288,18 @@ def build_minor_period():
         Form(rhythm_cat=1, symbol_cat='PAC', max_elaboration=5, latent_variables=i_latent_variables, repeat_type=':|')])
     return period
 
+def get_melody_templates_and_similarity_template():
+    import random
+    #random.seed(1)
+    Msentence = build_sentence()
+    Mperiod = build_period()
+    msentence = build_minor_sentence()
+    mperiod = build_minor_period()
 
-Msentence = build_sentence()
-Mperiod = build_period()
-msentence = build_minor_sentence()
-mperiod = build_minor_period()
-
-print('\n--- melody template ---\n')
-
-melody_templates = msentence.to_melody_templates()
-similarity_template = msentence.to_similarity_template()
+    print('\n--- melody template ---\n')
+    melody_templates = msentence.to_melody_templates()
+    similarity_template = msentence.to_similarity_template()
+    return melody_templates,similarity_template
 if __name__ == '__main__':
     pass
     # for i, melody_template in enumerate(melody_templates):

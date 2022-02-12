@@ -211,11 +211,17 @@ class Fill(Operation):
         midpoint = (right_pitch + left_pitch) / 2
         low_pitch, high_pitch = sorted([left_pitch, right_pitch])
         latent_variables = melody.transition[0].latent_variables
-        scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=latent_variables['scale'])
+        if {4,8,11}.issubset(latent_variables['harmony']):
+            scale = sorted(latent_variables['scale']+[8])
+        else:
+            scale = latent_variables['scale']
+        scale_notes_in_between = scale_notes_between(low_pitch, high_pitch, scale=scale)
         # print('scale_notes_in_between: ', scale_notes_in_between)
         pitch_evaluation = lambda pitch: (1 / (1 + abs(pitch - midpoint))) + 10**(pitch % 12 in latent_variables['harmony'])
         # print(list(map(pitch_evaluation,scale_notes_between)))
         fill_pitch = sorted(scale_notes_in_between, key=pitch_evaluation)[-1]
+        ## future: need to resolve the leading tone hack: fill pitch 7 -> actually 8, repeating leading note instead of passing
+        print('fill_pitch: ',fill_pitch)
         Operation.add_children_by_pitch(melody, fill_pitch, part=melody.part)
 
 
@@ -280,8 +286,9 @@ class LeftNeighbor(Operation):
             left_pitch is not None,
             right_pitch is not None,
             right_pitch %12 != 8, # avoid approach raised leading tone from below
+            left_pitch %12 != 8 and right_pitch<left_pitch, # avoid decent from leading tone
             #left_pitch % 12 in melody.transition[0].latent_variables['harmony'],
-            right_pitch % 12 in melody.transition[1].latent_variables['harmony'],
+            #right_pitch % 12 in melody.transition[1].latent_variables['harmony'],
             #inserted_pitch_not_extreme_in_bar, #or melody.transition[0].pitch_cat>0.5,
             interval_size_not_big,
 
