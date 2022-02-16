@@ -16,7 +16,7 @@ def pad_melody_templates(melody_templates: List[Melody], similarity_template: Li
     assert len(_melody_templates) == len(self_similarity_template)
     print(len(_melody_templates), len(self_similarity_template))
     for i, (melody_template, symbol) in enumerate(zip(_melody_templates, self_similarity_template)):
-        if symbol in memory_padding.keys():
+        if symbol in memory_padding.keys() and i != len(_melody_templates) - 1:
             add_what = memory_padding[symbol]
         else:
             if i != len(_melody_templates) - 1:

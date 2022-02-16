@@ -110,7 +110,7 @@ if __name__ == '__main__':
     import random
     #random.seed(1)
     elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.RhythmBalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
-    myform=form.build_minor_sentence()
+    myform=form.build_advanced_sentence()
 
     piece_elaborator = PieceElaboration(elaborator,
                                         tree_templates=template.pad_melody_templates(myform.to_melody_templates(),

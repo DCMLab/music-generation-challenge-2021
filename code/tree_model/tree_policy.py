@@ -193,5 +193,5 @@ class ImitatingPolicy:
 
             else:
                 print('matched memory tree has no children')
-                selected_action = None
+                selected_action = RhythmBalancedTree.determine_action(melody, operations=operations)
         return selected_action
