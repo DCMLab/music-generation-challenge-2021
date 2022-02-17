@@ -30,7 +30,7 @@ def draw_high_level():
             elaborate >> Edge(style='dotted') >> piece_elaborate
 
 def draw_melody_template():
-
+    pass
 
 if __name__ == '__main__':
     draw_high_level()
