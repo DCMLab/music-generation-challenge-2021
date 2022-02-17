@@ -299,6 +299,9 @@ class LeftNeighbor(Operation):
     def perform(melody: Melody):
         left_pitch, right_pitch = melody.transition[0].pitch_cat, melody.transition[1].pitch_cat
         sign = (right_pitch - left_pitch) / abs(right_pitch - left_pitch)
-        left_neighbor_pitch = move_in_scale(start_pitch=right_pitch,
-                                            scale=melody.transition[1].latent_variables['scale'], step=sign)
+        if right_pitch%12 == 9 and sign < 0:
+            left_neighbor_pitch = right_pitch-1
+        else:
+            left_neighbor_pitch = move_in_scale(start_pitch=right_pitch,
+                                                scale=melody.transition[1].latent_variables['scale'], step=sign)
         LeftNeighbor.add_children_by_pitch(melody, left_neighbor_pitch, part=melody.part)
