@@ -69,9 +69,22 @@ class PieceElaboration:
                     self.melody_elaborator.elaborate(melody, steps=steps, show=True,memory_melody=memory_melody)
                     #self.melody_elaborator.memory_melody = None
                 else:
-                    print('writing memory \'{}\'\n'.format(current_symbol))
-                    self.melody_elaborator.elaborate(melody, steps=steps, show=True)
+                    print('current_symbol: ', current_symbol)
+                    if '\'' in current_symbol:
+                        prototype_symbol = current_symbol[:current_symbol.rfind('\'')]
+                    else:
+                        prototype_symbol = current_symbol
+                    print('prototype_symbol: ', prototype_symbol)
+                    if prototype_symbol in self.symbol_memory.keys():
+                        print('loading memory {}\n'.format(prototype_symbol))
+                        memory_melody = self.symbol_memory[prototype_symbol]
+                        self.melody_elaborator.elaborate(melody, steps=steps, show=True, memory_melody=memory_melody)
+
+                    else:
+
+                        self.melody_elaborator.elaborate(melody, steps=steps, show=True)
                     self.symbol_memory.update({current_symbol: melody})
+                    print('writing memory {}\n'.format(current_symbol))
             else:
                 self.melody_elaborator.elaborate(melody, steps=steps, show=True)
 
