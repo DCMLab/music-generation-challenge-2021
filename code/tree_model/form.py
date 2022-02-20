@@ -269,7 +269,7 @@ def build_minor_period():
     V_latent_variables = {'harmony': [4, 8, 11], 'scale': scale}
     ii_latent_variables = {'harmony': [2, 5, 11], 'scale': scale}
     antecedent.children[0].add_children([
-        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables, repeat_type='|:'),
+        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables),
         Form(rhythm_cat=1, symbol_cat='b', max_elaboration=5, no_tail=True, time_stealable=False,
              latent_variables=ii_latent_variables)])
     antecedent.children[1].add_children([
@@ -277,7 +277,7 @@ def build_minor_period():
         Form(rhythm_cat=1, symbol_cat='HC', max_elaboration=5,
              latent_variables=V_latent_variables)])
     consequent.children[0].add_children([
-        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables, ),
+        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=5, latent_variables=i_latent_variables, repeat_type='|:' ),
         Form(rhythm_cat=1, symbol_cat='b', max_elaboration=5, no_tail=True, time_stealable=False,
              latent_variables=ii_latent_variables)])
     consequent.children[1].add_children([
@@ -306,14 +306,14 @@ def build_advanced_sentence():
         Form(rhythm_cat=1, symbol_cat='b', max_elaboration=4, no_tail=True, time_stealable=False,
              latent_variables=ii_latent_variables)])
     presentation.children[1].add_children([
-        Form(rhythm_cat=1, symbol_cat='a', max_elaboration=2, latent_variables=V_latent_variables),
-        Form(rhythm_cat=1, symbol_cat='b', max_elaboration=4, no_tail=True, time_stealable=False,
+        Form(rhythm_cat=1, symbol_cat='c', max_elaboration=2, latent_variables=V_latent_variables),
+        Form(rhythm_cat=1, symbol_cat='d', max_elaboration=4, no_tail=True, time_stealable=False,
              latent_variables=i_latent_variables)])
     continuation.children[0].add_children([
-        Form(rhythm_cat=1, symbol_cat='a\'1', max_elaboration=4, latent_variables=iv_latent_variables, ),
-        Form(rhythm_cat=1, symbol_cat='a\'1\'1', max_elaboration=4, latent_variables=i_latent_variables)])
+        Form(rhythm_cat=1, symbol_cat='e', max_elaboration=4, latent_variables=iv_latent_variables, ),
+        Form(rhythm_cat=1, symbol_cat='f', max_elaboration=4, latent_variables=i_latent_variables)])
     continuation.children[1].add_children([
-        Form(rhythm_cat=1, symbol_cat='a\'1\'2', max_elaboration=6,latent_variables=V_latent_variables),
+        Form(rhythm_cat=1, symbol_cat='g', max_elaboration=6,latent_variables=V_latent_variables),
         Form(rhythm_cat=1, symbol_cat='PAC', max_elaboration=2, latent_variables=i_latent_variables, repeat_type=':|',time_stealable=False)])
 
     return sentence
