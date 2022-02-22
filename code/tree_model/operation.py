@@ -282,15 +282,15 @@ class LeftNeighbor(Operation):
                                             scale=melody.transition[1].latent_variables['scale'], step=sign)
         surface_pitches = [note.pitch_cat for note in melody.get_root().surface_to_note_list(part='body')]
         inserted_pitch_not_extreme_in_bar = min(surface_pitches) < left_neighbor_pitch < max(surface_pitches)
-        interval_size_not_big = 1<abs(right_pitch - left_pitch) < 7
+        interval_size_not_big = 0<abs(right_pitch - left_pitch) < 7
         condition = all([
             Operation.exist_time_stealable(melody),
             left_pitch is not None,
             right_pitch is not None,
-            not (right_pitch % 12 == 8 and left_pitch > right_pitch),  # avoid approach raised leading tone from below
+            not (right_pitch % 12 == 8 and left_pitch > right_pitch and melody.transition[0].latent_variables['scale'] == [0, 2, 4, 5, 7, 9, 11]),  # avoid approach raised leading tone from below
             # left_pitch % 12 in melody.transition[0].latent_variables['harmony'],
             right_pitch % 12 in melody.transition[1].latent_variables['harmony'],
-            # inserted_pitch_not_extreme_in_bar, #or melody.transition[0].pitch_cat>0.5,
+            inserted_pitch_not_extreme_in_bar, #or melody.transition[0].pitch_cat>0.5,
             interval_size_not_big,
 
         ])
