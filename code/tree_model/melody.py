@@ -95,6 +95,7 @@ class Melody(Tree):
         self.max_elaboration = max_elaboration
         self.repeat_type = repeat_type
         self.history = []
+        self.stream_history = []
 
     def show(self):
         depth = self.get_depth()
@@ -134,7 +135,7 @@ class Melody(Tree):
 
         return note_list
 
-    def surface_to_stream(self, last_iteration_stream: m21.stream.Measure = None):
+    def surface_to_stream(self):
 
         note_list = self.surface_to_note_list()
         measure = m21.stream.Stream()
@@ -146,31 +147,10 @@ class Melody(Tree):
                 pitch.accidental = None
             m21_note = m21.note.Note(pitch=pitch, quarterLength=note.rhythm_cat)
             m21_note.addLyric(note.source_operation)
+            m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
             measure.append(m21_note)
         if self.repeat_type == ':|':
             measure.rightBarline = m21.bar.Repeat(direction='end')
-
-        # only if you want to show history change
-        color_map = {
-            'LeftNeighbor': 'brown',
-            'RightNeighbor': 'orange',
-            'Neighbor': 'red',
-            'LeftRepeat': 'olive',
-            'RightRepeat': 'lime',
-            'Fill': 'blue',
-            '': 'black',
-        }
-        if last_iteration_stream is not None:
-            for m21_note in (x for x in measure if hasattr(x, 'pitch') and hasattr(x, 'offset')):
-                notes_of_last_iteration = list(last_iteration_stream.getElementsByClass(m21.note.Note))
-                condition = all(
-                    [(m21_note.offset, m21_note.pitch) != (x.offset, x.pitch) for x in notes_of_last_iteration])
-                # if m21_note not in notes_of_last_iteration:
-                m21_note.style.color = color_map[m21_note.lyric]
-                m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
-                if not condition:
-                    m21_note.lyric = ''
-                    m21_note.style.color = 'black'
 
         return measure
 

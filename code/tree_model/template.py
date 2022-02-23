@@ -33,6 +33,7 @@ def pad_melody_templates(melody_templates: List[Melody], similarity_template: Li
         if add_what == 'head':
             previous_bar = _melody_templates[i - 1]
             previous_note = copy.deepcopy(previous_bar.children[-1].transition[1])
+            previous_note = previous_bar.children[-1].transition[1]
             first_note = melody_template.children[0].transition[0]
             new_transition = (previous_note, first_note)
             added_head = Melody(transition=new_transition, part='head')
@@ -43,16 +44,20 @@ def pad_melody_templates(melody_templates: List[Melody], similarity_template: Li
             # print('i: ',i)
 
             next_bar = _melody_templates[i + 1]
-            next_note = copy.deepcopy(next_bar.children[0].transition[0])
-            last_note = copy.deepcopy(melody_template.children[-1].transition[1])
+            #next_note = copy.deepcopy(next_bar.children[0].transition[0])
+            #last_note = copy.deepcopy(melody_template.children[-1].transition[1])
+            next_note = next_bar.children[0].transition[0]
+            last_note = melody_template.children[-1].transition[1]
             # print('pitch_cat of transition:', last_note.pitch_cat, next_note.pitch_cat)
             new_transition = (last_note, next_note)
             melody_template.add_children([Melody(transition=new_transition, part='tail')])
             # print('after padding:', len(melody_template.children))
         elif add_what == 'head_and_tail':
             next_bar = _melody_templates[i + 1]
-            next_note = copy.deepcopy(next_bar.children[0].transition[0])
-            last_note = copy.deepcopy(melody_template.children[-1].transition[1])
+            #next_note = copy.deepcopy(next_bar.children[0].transition[0])
+            #last_note = copy.deepcopy(melody_template.children[-1].transition[1])
+            next_note = next_bar.children[0].transition[0]
+            last_note = melody_template.children[-1].transition[1]
             tail_transition = (last_note, next_note)
             previous_bar = melody_templates[i - 1]
             previous_note = previous_bar.children[-1].transition[1]

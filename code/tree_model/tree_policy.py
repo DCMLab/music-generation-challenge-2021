@@ -147,7 +147,7 @@ class ImitatingPolicy:
     @staticmethod
     def determine_action(melody: Melody, operations: List[Type[Operation]], memory_melody: Melody) -> Action:
         """imitating the memory melody as far as possible"""
-        memory_melody = copy.deepcopy(memory_melody)
+        #memory_melody = copy.deepcopy(memory_melody)
         matching_subtree_pairs=[]
         for history in memory_melody.history:
             matching_subtree_pairs = ImitatingPolicy._matching_subtree_pairs(melody, history)

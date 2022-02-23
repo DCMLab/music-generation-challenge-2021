@@ -1,6 +1,7 @@
 # external libs
 
 import copy
+import music21
 import music21.stream
 from typing import Type, List,Tuple
 # local modules
@@ -37,11 +38,15 @@ class MelodyElaboration:
             print('no action is available, do not perform elaboration')
 
     def elaborate(self, melody: Melody, memory_melody:Melody=None, steps=3, show=True):
-        melody.history = [copy.deepcopy(melody)]
+        #melody.history = [copy.deepcopy(melody)]
+        melody.history = [melody]
+        melody.stream_history = [melody.surface_to_stream()]
         for i in range(steps):
             print('---', 'step', i + 1, '---')
             self.elaborate_one_step(melody, memory_melody,show)
-            melody.history.append(copy.deepcopy(melody))
+            #melody.history.append(copy.deepcopy(melody))
+            melody.history.append(melody)
+            melody.stream_history.append(melody.surface_to_stream())
             if show is True:
                 melody.show()
         melody.show_outer_planar()
@@ -52,7 +57,8 @@ class PieceElaboration:
                  self_similarity_template: List[str] = None):
         self.melody_elaborator = melody_elaborator
         self.tree_templates = tree_templates
-        self.trees = copy.deepcopy(tree_templates)
+        #self.trees = copy.deepcopy(tree_templates)
+        self.trees = tree_templates
         self.self_similarity_template = self_similarity_template
         self.symbol_memory = {}
 
@@ -100,7 +106,15 @@ class PieceElaboration:
     def history_to_stream(self):
         streams = music21.stream.Stream()
         streams.append(music21.metadata.Metadata(title='The elaboration process',composer='Interval tree model'))
-
+        color_map = {
+            'LN': 'brown',
+            'RN': 'orange',
+            'N': 'red',
+            'LR': 'olive',
+            'RR': 'lime',
+            'F': 'blue',
+            '': 'black',
+        }
 
         longest_history_length = max([len(tree.history) for tree in self.trees])
         for i in range(longest_history_length):
@@ -110,11 +124,31 @@ class PieceElaboration:
             stream.append(music21.tempo.MetronomeMark(number=100, referent=1.))
             stream.append(music21.meter.TimeSignature('3/4'))
             if i>0:
-                measures = [tree.history[min(i,len(tree.history)-1)].surface_to_stream(last_iteration_stream=streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[j]) for j,tree in enumerate(self.trees)]
+                #measures = [tree.history[min(i, len(tree.history) - 1)].surface_to_stream(last_iteration_stream=streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[j]) for j,tree in enumerate(self.trees)]
+                measures = [tree.stream_history[min(i, len(tree.history) - 1)] for j, tree in enumerate(self.trees)]
             else:
-                measures = [tree.history[min(i, len(tree.history) - 1)].surface_to_stream() for j, tree in enumerate(self.trees)]
+                #measures = [tree.history[min(i, len(tree.history) - 1)].surface_to_stream() for j, tree in enumerate(self.trees)]
+                measures = [tree.stream_history[min(i, len(tree.history) - 1)] for j, tree in enumerate(self.trees)]
+
+            if i>0:
+                for k,measure in enumerate(measures):
+                    last_iteration_stream = streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[k]
+                    last_iteration_stream.show('text')
+                    for m21_note in (x for x in measure if hasattr(x, 'pitch') and hasattr(x, 'offset')):
+                        notes_of_last_iteration = list(last_iteration_stream.getElementsByClass(music21.note.Note))
+                        print('notes_of_last_iteration: ',notes_of_last_iteration)
+                        condition = all(
+                            [(m21_note.offset, m21_note.pitch) != (x.offset, x.pitch) for x in notes_of_last_iteration])
+
+                        # if m21_note not in notes_of_last_iteration:
+                        m21_note.style.color = color_map[m21_note.lyric]
+                        m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
+                        if not condition:
+                            m21_note.lyric = ''
+                            m21_note.style.color = 'black'
             stream.append(measures)
             streams.append(stream)
+
         return streams
 
 
@@ -131,8 +165,7 @@ if __name__ == '__main__':
                                                                                      myform.to_similarity_template()),
                                         self_similarity_template=myform.to_similarity_template())
     piece_elaborator.elaborate()
-    stream = piece_elaborator.surface_to_stream()
-    stream.show()
+
     stream = piece_elaborator.history_to_stream()
 
     stream.show()
