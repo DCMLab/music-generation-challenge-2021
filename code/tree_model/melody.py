@@ -100,7 +100,8 @@ class Melody(Tree):
         depth = self.get_depth()
         for i in range(depth + 1):
             subtrees = self.get_surface_at_depth(i)
-            print([tuple(map(lambda _: _.__dict__, x.transition)) for x in subtrees])
+            keys_to_inspect = ['pitch_cat','rhythm_cat']
+            print([tuple(map(lambda _: { your_key: _.__dict__[your_key] for your_key in keys_to_inspect }, x.transition)) for x in subtrees])
 
     def surface_to_note_list(self, part='all', depth=None):
         if depth == None:

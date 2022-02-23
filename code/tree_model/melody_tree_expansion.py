@@ -131,7 +131,8 @@ if __name__ == '__main__':
                                                                                      myform.to_similarity_template()),
                                         self_similarity_template=myform.to_similarity_template())
     piece_elaborator.elaborate()
-
+    stream = piece_elaborator.surface_to_stream()
+    stream.show()
     stream = piece_elaborator.history_to_stream()
 
     stream.show()
