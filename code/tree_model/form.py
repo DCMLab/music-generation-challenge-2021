@@ -31,89 +31,68 @@ class Form(Tree):
             if form.symbol_cat == 'HC':
                 if {2, 7, 11}.issubset(form.latent_variables['harmony']):
                     melody = Melody(no_tail=form.no_tail, max_elaboration=4, repeat_type=form.repeat_type)
-
+                    note1 = Note(pitch_cat=12 + 5, rhythm_cat=0.5, latent_variables=latent_variables)
+                    note2 = Note(pitch_cat=12 + 4, rhythm_cat=0.5, latent_variables=latent_variables)
+                    note3 = Note(pitch_cat=12 + 2, rhythm_cat=1.0, latent_variables=latent_variables,time_stealable=False)
+                    note4 = Note(pitch_cat=7, rhythm_cat=1.0, latent_variables=latent_variables,time_stealable=False)
                     melody.add_children([
-                        Melody(
-                            transition=(Note(pitch_cat=12 + 5, rhythm_cat=0.5, latent_variables=latent_variables),
-                                        Note(pitch_cat=12 + 4, rhythm_cat=0.5, latent_variables=latent_variables))),
-                        Melody(
-                            transition=(Note(pitch_cat=12 + 4, rhythm_cat=0.5, latent_variables=latent_variables),
-                                        Note(pitch_cat=12 + 2, rhythm_cat=1.0, latent_variables=latent_variables,
-                                             time_stealable=False))),
-                        Melody(transition=(
-                            Note(pitch_cat=12 + 2, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False),
-                            Note(pitch_cat=7, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False))),
+                        Melody(transition=(note1,note2)),
+                        Melody(transition=(note2,note3)),
+                        Melody(transition=(note3,note4)),
                     ])
                 elif form.latent_variables['harmony'] == [4, 8, 11]:
                     melody = Melody(no_tail=form.no_tail, max_elaboration=4, repeat_type=form.repeat_type)
-
-                    melody.add_children([
-                        Melody(
-                            transition=(Note(pitch_cat=12 + 2, rhythm_cat=0.5,
+                    note1 = Note(pitch_cat=12 + 2, rhythm_cat=0.5,
                                              latent_variables={'harmony': [4, 8, 11],
-                                                               'scale': latent_variables['scale']}),
-                                        Note(pitch_cat=12, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
+                                                               'scale': latent_variables['scale']})
+                    note2 = Note(pitch_cat=12, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
                                                                                              'scale':
                                                                                                  latent_variables[
-                                                                                                     'scale']}))),
-                        Melody(
-                            transition=(Note(pitch_cat=12, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
-                                                                                             'scale':
-                                                                                                 latent_variables[
-                                                                                                     'scale']}),
-                                        Note(pitch_cat=11, rhythm_cat=1.0, latent_variables=latent_variables,
-                                             time_stealable=False))),
-                        Melody(transition=(
-                            Note(pitch_cat=11, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False),
-                            Note(pitch_cat=4, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False))),
+                                                                                                     'scale']})
+                    note3 = Note(pitch_cat=11, rhythm_cat=1.0, latent_variables=latent_variables,
+                                             time_stealable=False)
+                    note4 = Note(pitch_cat=4, rhythm_cat=1.0, latent_variables=latent_variables,
+                                 time_stealable=False)
+                    melody.add_children([
+                        Melody(transition=(note1, note2)),
+                        Melody(transition=(note2, note3)),
+                        Melody(transition=(note3, note4)),
                     ])
                 else:
                     assert False
             elif form.symbol_cat == 'PAC':
                 if form.latent_variables['harmony'] == [0, 4, 7]:
                     melody = Melody(no_tail=form.no_tail, max_elaboration=4, repeat_type=form.repeat_type)
+                    note1 = Note(pitch_cat=12 + 4, rhythm_cat=0.5, latent_variables=latent_variables)
+                    note2 = Note(pitch_cat=12 + 2, rhythm_cat=0.5, latent_variables=latent_variables)
+                    note3 = Note(pitch_cat=12, rhythm_cat=1.0, latent_variables=latent_variables,
+                                             time_stealable=False)
+                    note4 = Note(pitch_cat=0, rhythm_cat=1.0, latent_variables=latent_variables,
+                                 time_stealable=False, )
                     melody.add_children([
-                        Melody(
-                            transition=(Note(pitch_cat=12 + 4, rhythm_cat=0.5, latent_variables=latent_variables),
-                                        Note(pitch_cat=12 + 2, rhythm_cat=0.5, latent_variables=latent_variables))),
-                        Melody(
-                            transition=(Note(pitch_cat=12 + 2, rhythm_cat=0.5, latent_variables=latent_variables),
-                                        Note(pitch_cat=12, rhythm_cat=1.0, latent_variables=latent_variables,
-                                             time_stealable=False))),
-                        Melody(transition=(
-                            Note(pitch_cat=12, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False),
-                            Note(pitch_cat=0, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False, ),), )
+                        Melody(transition=(note1, note2)),
+                        Melody(transition=(note2, note3)),
+                        Melody(transition=(note3, note4)),
                     ])
                 elif form.latent_variables['harmony'] == [0, 4, 9]:
                     melody = Melody(no_tail=form.no_tail, max_elaboration=4, repeat_type=form.repeat_type)
+                    note1 = Note(pitch_cat=12, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
+                                                                                             'scale':
+                                                                                                 latent_variables[
+                                                                                                     'scale']})
+                    note2 = Note(pitch_cat=11, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
+                                                                                             'scale':
+                                                                                                 latent_variables[
+                                                                                                     'scale']})
+                    note3 = Note(pitch_cat=9, rhythm_cat=1.0, latent_variables=latent_variables,
+                                             time_stealable=False)
+                    note4 = Note(pitch_cat=-3, rhythm_cat=1.0, latent_variables=latent_variables,
+                                 time_stealable=False, )
                     melody.add_children([
-                        Melody(
-                            transition=(Note(pitch_cat=12, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
-                                                                                             'scale':
-                                                                                                 latent_variables[
-                                                                                                     'scale']}),
-                                        Note(pitch_cat=11, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
-                                                                                             'scale':
-                                                                                                 latent_variables[
-                                                                                                     'scale']}))),
-                        Melody(
-                            transition=(Note(pitch_cat=11, rhythm_cat=0.5, latent_variables={'harmony': [4, 8, 11],
-                                                                                             'scale':
-                                                                                                 latent_variables[
-                                                                                                     'scale']}),
-                                        Note(pitch_cat=9, rhythm_cat=1.0, latent_variables=latent_variables,
-                                             time_stealable=False))),
-                        Melody(transition=(
-                            Note(pitch_cat=-3, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False),
-                            Note(pitch_cat=-3, rhythm_cat=1.0, latent_variables=latent_variables,
-                                 time_stealable=False, ),), )])
+                        Melody(transition=(note1, note2)),
+                        Melody(transition=(note2, note3)),
+                        Melody(transition=(note3, note4)),
+                    ])
                 else:
                     assert False
             else:
@@ -142,12 +121,17 @@ class Form(Tree):
                 #    V_of_latent_variables = {'harmony':[2,5,7],'scale':latent_variables['scale']}
                 # else:
                 #    V_of_latent_variables = latent_variables
+                notes = [
+                    Note(pitch_cat=sampled_pitches[0], rhythm_cat=sampled_durations[0],
+                         latent_variables=latent_variables),
+                    Note(pitch_cat=sampled_pitches[1], rhythm_cat=sampled_durations[1],
+                         latent_variables=latent_variables),
+                    Note(pitch_cat=sampled_pitches[2], rhythm_cat=sampled_durations[1],
+                         latent_variables=latent_variables, time_stealable=form.time_stealable)
+                ]
                 for i in range(2):
                     transition = (
-                        Note(pitch_cat=sampled_pitches[i], rhythm_cat=sampled_durations[i],
-                             latent_variables=latent_variables),
-                        Note(pitch_cat=sampled_pitches[i + 1], rhythm_cat=sampled_durations[i + 1],
-                             latent_variables=latent_variables, time_stealable=form.time_stealable))
+                        notes[i],notes[i+1])
                     melody.add_children([Melody(transition=transition)])
             symbol_dict[form.symbol_cat] = melody
             print('len(melody.children): ', len(melody.children))

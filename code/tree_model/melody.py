@@ -10,6 +10,7 @@ class Note:
         self.latent_variables = latent_variables
         self.time_stealable = time_stealable
         self.source_operation = source_operation
+        self.source_transition_melody = None
 
 
 class Tree:
@@ -87,6 +88,8 @@ class Melody(Tree):
         super().__init__()
         self.surface = None
         self.transition = transition
+        self.transition[0].source_transition_melody = self
+        self.transition[1].source_transition_melody = self
         self.part = part  # head, body, or tail region of root
         self.no_tail = no_tail
         self.max_elaboration = max_elaboration
@@ -154,7 +157,7 @@ class Melody(Tree):
             'LeftRepeat': 'olive',
             'RightRepeat': 'lime',
             'Fill': 'blue',
-            '':'black',
+            '': 'black',
         }
         if last_iteration_stream is not None:
             for m21_note in (x for x in measure if hasattr(x, 'pitch') and hasattr(x, 'offset')):
@@ -175,6 +178,73 @@ class Melody(Tree):
         durations = [note.rhythm_cat for note in note_list]
         total_duration = sum(durations)
         return total_duration
+
+    def show_outer_planar(self):
+        print('\n outer planar \n')
+        tex_commands = []
+        depth = self.get_depth()
+        note_latex_names = {}
+        note_latex_coordinate = {}
+        processed_notes = []
+        for i in range(depth + 1):
+            print('i: ', i)
+            commands = []
+            pitch_cats = []
+            note_list = self.surface_to_note_list(depth=i)
+            print(note_list)
+            print([note.pitch_cat for note in note_list])
+            for k,note in enumerate(note_list):
+                latex_name = 'note{i}_{k}'.format(i=i,k=k)
+                if note not in note_latex_names.keys():
+                    note_latex_names[note] = latex_name
+                    if False and note.source_transition_melody.parent:
+                        left_parent, right_parent = note.source_transition_melody.parent.transition[0], \
+                                                    note.source_transition_melody.parent.transition[1]
+                        print('note.pitch_cat: ', note.pitch_cat)
+                        print('left_parent.pitch_cat: ', left_parent.pitch_cat)
+                        print('right_parent.pitch_cat: ', right_parent.pitch_cat)
+                        xl,y = note_latex_coordinate[left_parent]
+                        xr, y = note_latex_coordinate[right_parent]
+                        x = 0.5*(xl+xr)
+                    else:
+                        x= k
+                    y = -0.5 * i
+                    note_latex_coordinate[note] = (x,y)
+
+                    commands.append(
+                        '\\node[note node] ({latex_name}) at ({x},{y}) {{${pitch_cat}$}};'.format(latex_name=latex_name,
+                                                                                                  x=x, y=-0.5 * i,
+                                                                                                  pitch_cat=note.pitch_cat))
+            print('commands:' ,commands)
+            print('note_latex_names: ',note_latex_names)
+            tex_commands.extend(commands)
+
+
+            for k, note in enumerate(note_list):
+                print('note.pitch_cat: ',note.pitch_cat)
+                if note.source_transition_melody.parent:
+                    if note in processed_notes:
+                        pass
+                    else:
+                        left_parent,right_parent = note.source_transition_melody.parent.transition[0],note.source_transition_melody.parent.transition[1]
+                        print('left_parent.pitch_cat: ',left_parent.pitch_cat)
+                        print('right_parent.pitch_cat: ',right_parent.pitch_cat)
+                        edge_commands = []
+                        #edge_commands.append(
+                        #    '\draw ({latex_name}) edge[] node[operation] {{}} ({note});'.format(latex_name=note_latex_names[left_parent],note=note_latex_names[note])
+                        #)
+                        #edge_commands.append(
+                        #    '\draw ({latex_name}) edge[] node[operation] {{}} ({note});'.format(
+                        #        latex_name=note_latex_names[right_parent],note=note_latex_names[note])
+                        #)
+                        print('edge_commands: ',edge_commands)
+                        tex_commands.extend(edge_commands)
+                        processed_notes.append(note)
+        print('tex_commands')
+        for _ in tex_commands:
+
+            print(_)
+        # print(tex_commands)
 
 
 scale = [0, 2, 4, 5, 7, 9, 11]

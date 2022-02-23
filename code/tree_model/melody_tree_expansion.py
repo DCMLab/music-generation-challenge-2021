@@ -44,6 +44,7 @@ class MelodyElaboration:
             melody.history.append(copy.deepcopy(melody))
             if show is True:
                 melody.show()
+        melody.show_outer_planar()
 
 
 class PieceElaboration:

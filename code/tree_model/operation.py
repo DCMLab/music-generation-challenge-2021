@@ -50,6 +50,7 @@ class Operation:
         transition = melody.transition
         which_note_to_give_duration = transition[which_duration_to_steal]
         halved_rhythm_cat = which_note_to_give_duration.rhythm_cat / 2
+        #transition[which_duration_to_steal].rhythm_cat = halved_rhythm_cat
         which_note_to_give_duration.rhythm_cat = halved_rhythm_cat
 
         surface = melody.get_root().get_surface()
