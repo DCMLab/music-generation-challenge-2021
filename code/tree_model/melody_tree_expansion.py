@@ -24,7 +24,7 @@ class MelodyElaboration:
         self.mimicking_policy = mimicking_policy
         print('memory: ', melody_template)
 
-    def elaborate_one_step(self, melody: Melody,memory_melody:Melody, show=True):
+    def elaborate_one_step(self, melody: Melody,memory_melody:Melody, t=None, show=True):
         # whether mimicking memory_melody to enforce coherence
         if memory_melody is None:
             selected_action = self.policy.determine_action(melody, self.operations)
@@ -32,7 +32,7 @@ class MelodyElaboration:
             selected_action = self.mimicking_policy.determine_action(melody,self.operations,memory_melody)
 
         if selected_action is not None:
-            selected_action.perform()
+            selected_action.perform(t=t)
             selected_action.show()
         else:
             print('no action is available, do not perform elaboration')
@@ -43,7 +43,7 @@ class MelodyElaboration:
         melody.stream_history = [melody.surface_to_stream()]
         for i in range(steps):
             print('---', 'step', i + 1, '---')
-            self.elaborate_one_step(melody, memory_melody,show)
+            self.elaborate_one_step(melody, memory_melody,t=i,show=show)
             #melody.history.append(copy.deepcopy(melody))
             melody.history.append(melody)
             melody.stream_history.append(melody.surface_to_stream())
@@ -90,7 +90,7 @@ class PieceElaboration:
                     else:
 
                         self.melody_elaborator.elaborate(melody, steps=steps, show=True)
-                    self.symbol_memory.update({current_symbol: melody})
+                    self.symbol_memory.update({current_symbol: copy.deepcopy(melody)})
                     print('writing memory {}\n'.format(current_symbol))
             else:
                 self.melody_elaborator.elaborate(melody, steps=steps, show=True)

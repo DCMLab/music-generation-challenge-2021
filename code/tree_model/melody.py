@@ -18,6 +18,7 @@ class Tree:
         self.children = []
         self.parent = None
         self.memory = None
+        self.t = None
 
     def add_children(self, children):
         self.children += children
@@ -101,8 +102,11 @@ class Melody(Tree):
         depth = self.get_depth()
         for i in range(depth + 1):
             subtrees = self.get_surface_at_depth(i)
-            keys_to_inspect = ['pitch_cat','rhythm_cat']
-            print([tuple(map(lambda _: { your_key: _.__dict__[your_key] for your_key in keys_to_inspect }, x.transition)) for x in subtrees])
+            keys_to_inspect = ['pitch_cat', 'rhythm_cat', 'source_operation']
+            print([tuple(map(lambda _: {your_key: _.__dict__[your_key] for your_key in keys_to_inspect}, x.transition))
+                   for x in subtrees])
+            #for x in subtrees:
+            #    print('x.t: ',x.t)
 
     def surface_to_note_list(self, part='all', depth=None):
         if depth == None:
@@ -174,8 +178,8 @@ class Melody(Tree):
             note_list = self.surface_to_note_list(depth=i)
             print(note_list)
             print([note.pitch_cat for note in note_list])
-            for k,note in enumerate(note_list):
-                latex_name = 'note{i}_{k}'.format(i=i,k=k)
+            for k, note in enumerate(note_list):
+                latex_name = 'note{i}_{k}'.format(i=i, k=k)
                 if note not in note_latex_names.keys():
                     note_latex_names[note] = latex_name
                     if False and note.source_transition_melody.parent:
@@ -184,46 +188,45 @@ class Melody(Tree):
                         print('note.pitch_cat: ', note.pitch_cat)
                         print('left_parent.pitch_cat: ', left_parent.pitch_cat)
                         print('right_parent.pitch_cat: ', right_parent.pitch_cat)
-                        xl,y = note_latex_coordinate[left_parent]
+                        xl, y = note_latex_coordinate[left_parent]
                         xr, y = note_latex_coordinate[right_parent]
-                        x = 0.5*(xl+xr)
+                        x = 0.5 * (xl + xr)
                     else:
-                        x= k
+                        x = k
                     y = -0.5 * i
-                    note_latex_coordinate[note] = (x,y)
+                    note_latex_coordinate[note] = (x, y)
 
                     commands.append(
                         '\\node[note node] ({latex_name}) at ({x},{y}) {{${pitch_cat}$}};'.format(latex_name=latex_name,
                                                                                                   x=x, y=-0.5 * i,
                                                                                                   pitch_cat=note.pitch_cat))
-            print('commands:' ,commands)
-            print('note_latex_names: ',note_latex_names)
+            print('commands:', commands)
+            print('note_latex_names: ', note_latex_names)
             tex_commands.extend(commands)
 
-
             for k, note in enumerate(note_list):
-                print('note.pitch_cat: ',note.pitch_cat)
+                print('note.pitch_cat: ', note.pitch_cat)
                 if note.source_transition_melody.parent:
                     if note in processed_notes:
                         pass
                     else:
-                        left_parent,right_parent = note.source_transition_melody.parent.transition[0],note.source_transition_melody.parent.transition[1]
-                        print('left_parent.pitch_cat: ',left_parent.pitch_cat)
-                        print('right_parent.pitch_cat: ',right_parent.pitch_cat)
+                        left_parent, right_parent = note.source_transition_melody.parent.transition[0], \
+                                                    note.source_transition_melody.parent.transition[1]
+                        print('left_parent.pitch_cat: ', left_parent.pitch_cat)
+                        print('right_parent.pitch_cat: ', right_parent.pitch_cat)
                         edge_commands = []
-                        #edge_commands.append(
+                        # edge_commands.append(
                         #    '\draw ({latex_name}) edge[] node[operation] {{}} ({note});'.format(latex_name=note_latex_names[left_parent],note=note_latex_names[note])
-                        #)
-                        #edge_commands.append(
+                        # )
+                        # edge_commands.append(
                         #    '\draw ({latex_name}) edge[] node[operation] {{}} ({note});'.format(
                         #        latex_name=note_latex_names[right_parent],note=note_latex_names[note])
-                        #)
-                        print('edge_commands: ',edge_commands)
+                        # )
+                        print('edge_commands: ', edge_commands)
                         tex_commands.extend(edge_commands)
                         processed_notes.append(note)
         print('tex_commands')
         for _ in tex_commands:
-
             print(_)
         # print(tex_commands)
 
