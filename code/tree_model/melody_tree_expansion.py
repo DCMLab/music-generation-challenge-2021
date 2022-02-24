@@ -155,7 +155,7 @@ class PieceElaboration:
 
                         else:
                             print('do not color this one')
-                            #m21_note.lyric = ''
+                            m21_note.lyric = ''
                             #m21_note.style.color = 'black'
             stream.append(measures)
             streams.append(stream)
