@@ -117,35 +117,46 @@ class PieceElaboration:
         }
 
         longest_history_length = max([len(tree.history) for tree in self.trees])
+        padded_histories = []
+        for i in range(longest_history_length):
+            padded_history = []
+            for j, tree in enumerate(self.trees):
+                history_i = copy.deepcopy(tree.stream_history[min(i, len(tree.history) - 1)])
+                padded_history.append(history_i)
+            padded_histories.append(padded_history)
+
         for i in range(longest_history_length):
             stream = music21.stream.Part()
             stream.append(music21.metadata.Metadata())
             stream.partName = f'step {i}'
             stream.append(music21.tempo.MetronomeMark(number=100, referent=1.))
             stream.append(music21.meter.TimeSignature('3/4'))
-            if i>0:
-                #measures = [tree.history[min(i, len(tree.history) - 1)].surface_to_stream(last_iteration_stream=streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[j]) for j,tree in enumerate(self.trees)]
-                measures = [tree.stream_history[min(i, len(tree.history) - 1)] for j, tree in enumerate(self.trees)]
-            else:
-                #measures = [tree.history[min(i, len(tree.history) - 1)].surface_to_stream() for j, tree in enumerate(self.trees)]
-                measures = [tree.stream_history[min(i, len(tree.history) - 1)] for j, tree in enumerate(self.trees)]
+            #measures = [tree.stream_history[min(i, len(tree.history) - 1)] for j, tree in enumerate(self.trees)]
+
+            measures = padded_histories[i]
 
             if i>0:
                 for k,measure in enumerate(measures):
                     last_iteration_stream = streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[k]
                     last_iteration_stream.show('text')
+                    notes_of_last_iteration = list(last_iteration_stream.getElementsByClass(music21.note.Note))
+                    print('notes_of_last_iteration: ', notes_of_last_iteration)
+                    print('(i,k): ',(i,k))
                     for m21_note in (x for x in measure if hasattr(x, 'pitch') and hasattr(x, 'offset')):
-                        notes_of_last_iteration = list(last_iteration_stream.getElementsByClass(music21.note.Note))
-                        print('notes_of_last_iteration: ',notes_of_last_iteration)
                         condition = all(
                             [(m21_note.offset, m21_note.pitch) != (x.offset, x.pitch) for x in notes_of_last_iteration])
+                        print('condition: \n',[(m21_note.offset, m21_note.pitch,x.offset, x.pitch) for x in notes_of_last_iteration])
 
                         # if m21_note not in notes_of_last_iteration:
-                        m21_note.style.color = color_map[m21_note.lyric]
-                        m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
-                        if not condition:
-                            m21_note.lyric = ''
-                            m21_note.style.color = 'black'
+                        if condition:
+                            print('do color this one: ',m21_note.lyric)
+                            m21_note.style.color = color_map[m21_note.lyric]
+                            #m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
+
+                        else:
+                            print('do not color this one')
+                            #m21_note.lyric = ''
+                            #m21_note.style.color = 'black'
             stream.append(measures)
             streams.append(stream)
 
