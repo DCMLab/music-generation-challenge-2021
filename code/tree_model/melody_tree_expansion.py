@@ -136,25 +136,21 @@ class PieceElaboration:
             if i > 0:
                 for k, measure in enumerate(measures):
                     last_iteration_stream = \
-                    streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[k]
+                        streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[k]
                     last_iteration_stream.show('text')
                     notes_of_last_iteration = list(last_iteration_stream.getElementsByClass(music21.note.Note))
-                    print('notes_of_last_iteration: ', notes_of_last_iteration)
-                    print('(i,k): ', (i, k))
                     for m21_note in (x for x in measure if hasattr(x, 'pitch') and hasattr(x, 'offset')):
                         condition = all(
                             [(m21_note.offset, m21_note.pitch) != (x.offset, x.pitch) for x in notes_of_last_iteration])
-                        print('condition: \n',
-                              [(m21_note.offset, m21_note.pitch, x.offset, x.pitch) for x in notes_of_last_iteration])
 
                         # if m21_note not in notes_of_last_iteration:
                         if condition:
-                            print('do color this one: ', m21_note.lyric)
+                            # print('do color this one: ', m21_note.lyric)
                             m21_note.style.color = color_map[m21_note.lyric]
                             # m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
 
                         else:
-                            print('do not color this one')
+                            # print('do not color this one')
                             m21_note.lyric = ''
                             # m21_note.style.color = 'black'
             stream.append(measures)
@@ -164,19 +160,19 @@ class PieceElaboration:
 
     def show_outer_planar(self):
         print('\n outer planar \n')
-        tex_commands = []
         depth = max(tree.get_depth() for tree in self.trees)
         note_latex_names = {}
         note_latex_coordinate = {}
         node_creation_commands = []
         edge_creation_commands = []
-        for i in range(0, depth + 1):
+        current_x_coor = 0
+        for i in range(depth + 1):
             print('i: ', i)
             commands = []
             pitch_cats = []
             note_list = sum([tree.surface_to_note_list(depth=i) for tree in self.trees], [])
-            if i == 0:
-                note_list = [note_list[0], note_list[1]]
+            #if i == 0:
+            #    note_list = [note_list[0], note_list[1]]
 
             # note_list = self.surface_to_note_list(depth=i)
             print('note_list: ', note_list)
@@ -191,12 +187,7 @@ class PieceElaboration:
                         if note.source_transition_melody:
                             left_parent, right_parent = note.source_transition_melody.parent.transition[0], \
                                                         note.source_transition_melody.parent.transition[1]
-                            print('note.pitch_cat: ', note.pitch_cat)
-                            print('left_parent.pitch_cat: ', left_parent.pitch_cat)
-                            print('right_parent.pitch_cat: ', right_parent.pitch_cat)
-                            print('note.source_transition_melody.parent: ')
-                            print([x.pitch_cat for x in note.source_transition_melody.parent.transition])
-                            print([x.pitch_cat for x in note.source_transition_melody.transition])
+
                             note.source_transition_melody.show()
                             xl, y = note_latex_coordinate[left_parent]
                             xr, y = note_latex_coordinate[right_parent]
@@ -209,21 +200,22 @@ class PieceElaboration:
                                 '\\draw ({parent}) edge[] node[operation] {{}} ({note});'.format(
                                     parent=note_latex_names[right_parent],
                                     note=note_latex_names[note]))
-                    elif True and i==1 and k>0:
-                        left_sibling = note_list[k-1]
+                    elif i==1:
+                        if k>0:
+                            left_sibling = note_list[k-1]
 
-                        edge_creation_commands.append(
-                            '\\draw ({parent}) edge[] node[operation] {{}} ({note});'.format(
-                                parent=note_latex_names[left_sibling],
-                                note=note_latex_names[note]))
+                            edge_creation_commands.append(
+                                '\\draw ({parent}) edge[] node[operation] {{}} ({note});'.format(
+                                    parent=note_latex_names[left_sibling],
+                                    note=note_latex_names[note]))
                         x = k
-
 
                     else:
                         x = k
-                    y = -0.5 * i
-                    note_latex_coordinate[note] = (x, y)
 
+                    y = -0.5 * i
+
+                    note_latex_coordinate[note] = (x, y)
                     node_creation_commands.append(
                         '\\node[note node] ({latex_name}) at ({x},{y}) {{${pitch_cat}$}};'.format(latex_name=latex_name,
                                                                                                   x=x, y=-0.5 * i,
