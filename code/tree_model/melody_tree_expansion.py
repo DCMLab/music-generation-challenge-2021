@@ -3,7 +3,7 @@
 import copy
 import music21
 import music21.stream
-from typing import Type, List,Tuple
+from typing import Type, List, Tuple
 # local modules
 import tree_policy
 from melody import Melody
@@ -11,25 +11,24 @@ import operation
 import template
 import form
 
-from pc_helpers import interval_list_to_pitch_list,melody_surface_to_pitch_list
-
-
+from pc_helpers import interval_list_to_pitch_list, melody_surface_to_pitch_list
 
 
 class MelodyElaboration:
-    def __init__(self, operations: List[Type[operation.Operation]], policy: Type[tree_policy.Policy], mimicking_policy: Type[tree_policy.ImitatingPolicy],
+    def __init__(self, operations: List[Type[operation.Operation]], policy: Type[tree_policy.Policy],
+                 mimicking_policy: Type[tree_policy.ImitatingPolicy],
                  melody_template: Melody = None, rhythm_template: Melody = None):
         self.operations = operations
         self.policy = policy
         self.mimicking_policy = mimicking_policy
         print('memory: ', melody_template)
 
-    def elaborate_one_step(self, melody: Melody,memory_melody:Melody, t=None, show=True):
+    def elaborate_one_step(self, melody: Melody, memory_melody: Melody, t=None, show=True):
         # whether mimicking memory_melody to enforce coherence
         if memory_melody is None:
             selected_action = self.policy.determine_action(melody, self.operations)
         else:
-            selected_action = self.mimicking_policy.determine_action(melody,self.operations,memory_melody)
+            selected_action = self.mimicking_policy.determine_action(melody, self.operations, memory_melody)
 
         if selected_action is not None:
             selected_action.perform(t=t)
@@ -37,19 +36,18 @@ class MelodyElaboration:
         else:
             print('no action is available, do not perform elaboration')
 
-    def elaborate(self, melody: Melody, memory_melody:Melody=None, steps=3, show=True):
-        #melody.history = [copy.deepcopy(melody)]
+    def elaborate(self, melody: Melody, memory_melody: Melody = None, steps=3, show=True):
+        # melody.history = [copy.deepcopy(melody)]
         melody.history = [melody]
         melody.stream_history = [melody.surface_to_stream()]
         for i in range(steps):
             print('---', 'step', i + 1, '---')
-            self.elaborate_one_step(melody, memory_melody,t=i,show=show)
-            #melody.history.append(copy.deepcopy(melody))
+            self.elaborate_one_step(melody, memory_melody, t=i, show=show)
+            # melody.history.append(copy.deepcopy(melody))
             melody.history.append(melody)
             melody.stream_history.append(melody.surface_to_stream())
             if show is True:
                 melody.show()
-        melody.show_outer_planar()
 
 
 class PieceElaboration:
@@ -57,7 +55,7 @@ class PieceElaboration:
                  self_similarity_template: List[str] = None):
         self.melody_elaborator = melody_elaborator
         self.tree_templates = tree_templates
-        #self.trees = copy.deepcopy(tree_templates)
+        # self.trees = copy.deepcopy(tree_templates)
         self.trees = tree_templates
         self.self_similarity_template = self_similarity_template
         self.symbol_memory = {}
@@ -65,16 +63,16 @@ class PieceElaboration:
     def elaborate(self):
         for i, melody in enumerate(self.trees):
             print('\n******', 'bar', i + 1, '******\n ')
-            n =10
-            steps = min(n,melody.max_elaboration)
+            n = 10
+            steps = min(n, melody.max_elaboration)
             if self.self_similarity_template is not None:
                 current_symbol = self.self_similarity_template[i]
                 if current_symbol in self.symbol_memory.keys():
                     print('loading memory \'{}\'\n'.format(current_symbol))
                     memory_melody = self.symbol_memory[current_symbol]
-                    #self.melody_elaborator.memory_melody = memory_melody
-                    self.melody_elaborator.elaborate(melody, steps=steps, show=True,memory_melody=memory_melody)
-                    #self.melody_elaborator.memory_melody = None
+                    # self.melody_elaborator.memory_melody = memory_melody
+                    self.melody_elaborator.elaborate(melody, steps=steps, show=True, memory_melody=memory_melody)
+                    # self.melody_elaborator.memory_melody = None
                 else:
                     print('current_symbol: ', current_symbol)
                     if '\'' in current_symbol:
@@ -105,7 +103,7 @@ class PieceElaboration:
 
     def history_to_stream(self):
         streams = music21.stream.Stream()
-        streams.append(music21.metadata.Metadata(title='The elaboration process',composer='Interval tree model'))
+        streams.append(music21.metadata.Metadata(title='The elaboration process', composer='Interval tree model'))
         color_map = {
             'LN': 'brown',
             'RN': 'orange',
@@ -131,45 +129,117 @@ class PieceElaboration:
             stream.partName = f'step {i}'
             stream.append(music21.tempo.MetronomeMark(number=100, referent=1.))
             stream.append(music21.meter.TimeSignature('3/4'))
-            #measures = [tree.stream_history[min(i, len(tree.history) - 1)] for j, tree in enumerate(self.trees)]
+            # measures = [tree.stream_history[min(i, len(tree.history) - 1)] for j, tree in enumerate(self.trees)]
 
             measures = padded_histories[i]
 
-            if i>0:
-                for k,measure in enumerate(measures):
-                    last_iteration_stream = streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[k]
+            if i > 0:
+                for k, measure in enumerate(measures):
+                    last_iteration_stream = \
+                    streams.getElementsByClass(music21.stream.Part)[-1].getElementsByClass(music21.stream.Stream)[k]
                     last_iteration_stream.show('text')
                     notes_of_last_iteration = list(last_iteration_stream.getElementsByClass(music21.note.Note))
                     print('notes_of_last_iteration: ', notes_of_last_iteration)
-                    print('(i,k): ',(i,k))
+                    print('(i,k): ', (i, k))
                     for m21_note in (x for x in measure if hasattr(x, 'pitch') and hasattr(x, 'offset')):
                         condition = all(
                             [(m21_note.offset, m21_note.pitch) != (x.offset, x.pitch) for x in notes_of_last_iteration])
-                        print('condition: \n',[(m21_note.offset, m21_note.pitch,x.offset, x.pitch) for x in notes_of_last_iteration])
+                        print('condition: \n',
+                              [(m21_note.offset, m21_note.pitch, x.offset, x.pitch) for x in notes_of_last_iteration])
 
                         # if m21_note not in notes_of_last_iteration:
                         if condition:
-                            print('do color this one: ',m21_note.lyric)
+                            print('do color this one: ', m21_note.lyric)
                             m21_note.style.color = color_map[m21_note.lyric]
-                            #m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
+                            # m21_note.lyric = ''.join([char for char in m21_note.lyric if char.isupper()])
 
                         else:
                             print('do not color this one')
                             m21_note.lyric = ''
-                            #m21_note.style.color = 'black'
+                            # m21_note.style.color = 'black'
             stream.append(measures)
             streams.append(stream)
 
         return streams
 
+    def show_outer_planar(self):
+        print('\n outer planar \n')
+        tex_commands = []
+        depth = max(tree.get_depth() for tree in self.trees)
+        note_latex_names = {}
+        note_latex_coordinate = {}
+        node_creation_commands = []
+        edge_creation_commands = []
+        for i in range(0, depth + 1):
+            print('i: ', i)
+            commands = []
+            pitch_cats = []
+            note_list = sum([tree.surface_to_note_list(depth=i) for tree in self.trees], [])
+            if i == 0:
+                note_list = [note_list[0], note_list[1]]
 
+            # note_list = self.surface_to_note_list(depth=i)
+            print('note_list: ', note_list)
+            print('len(note_list): ', len(note_list))
+            print('note_list_pitch_cat: ', [note.pitch_cat for note in note_list])
+            for k, note in enumerate(note_list):
+                print('k: ', k)
+                latex_name = 'note{i}_{k}'.format(i=i, k=k)
+                if note not in note_latex_names.keys():
+                    note_latex_names[note] = latex_name
+                    if i > 1:
+                        if note.source_transition_melody:
+                            left_parent, right_parent = note.source_transition_melody.parent.transition[0], \
+                                                        note.source_transition_melody.parent.transition[1]
+                            print('note.pitch_cat: ', note.pitch_cat)
+                            print('left_parent.pitch_cat: ', left_parent.pitch_cat)
+                            print('right_parent.pitch_cat: ', right_parent.pitch_cat)
+                            print('note.source_transition_melody.parent: ')
+                            print([x.pitch_cat for x in note.source_transition_melody.parent.transition])
+                            print([x.pitch_cat for x in note.source_transition_melody.transition])
+                            note.source_transition_melody.show()
+                            xl, y = note_latex_coordinate[left_parent]
+                            xr, y = note_latex_coordinate[right_parent]
+                            x = 0.5 * (xl + xr)
+                            edge_creation_commands.append(
+                                '\\draw ({parent}) edge[] node[operation] {{}} ({note});'.format(
+                                    parent=note_latex_names[left_parent],
+                                    note=note_latex_names[note]))
+                            edge_creation_commands.append(
+                                '\\draw ({parent}) edge[] node[operation] {{}} ({note});'.format(
+                                    parent=note_latex_names[right_parent],
+                                    note=note_latex_names[note]))
+                    elif True and i==1 and k>0:
+                        left_sibling = note_list[k-1]
+
+                        edge_creation_commands.append(
+                            '\\draw ({parent}) edge[] node[operation] {{}} ({note});'.format(
+                                parent=note_latex_names[left_sibling],
+                                note=note_latex_names[note]))
+                        x = k
+
+
+                    else:
+                        x = k
+                    y = -0.5 * i
+                    note_latex_coordinate[note] = (x, y)
+
+                    node_creation_commands.append(
+                        '\\node[note node] ({latex_name}) at ({x},{y}) {{${pitch_cat}$}};'.format(latex_name=latex_name,
+                                                                                                  x=x, y=-0.5 * i,
+                                                                                                  pitch_cat=note.pitch_cat))
+        all_commands = node_creation_commands+edge_creation_commands
+        print('all_commands:')
+        print('\n'.join(all_commands))
 
 
 if __name__ == '__main__':
     import random
-    #random.seed(1)
-    elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(), policy=tree_policy.RhythmBalancedTree,mimicking_policy=tree_policy.ImitatingPolicy)
-    myform=form.build_advanced_sentence()
+
+    # random.seed(1)
+    elaborator = MelodyElaboration(operations=operation.Operation.__subclasses__(),
+                                   policy=tree_policy.RhythmBalancedTree, mimicking_policy=tree_policy.ImitatingPolicy)
+    myform = form.build_advanced_sentence()
 
     piece_elaborator = PieceElaboration(elaborator,
                                         tree_templates=template.pad_melody_templates(myform.to_melody_templates(),
@@ -180,3 +250,4 @@ if __name__ == '__main__':
     stream = piece_elaborator.history_to_stream()
 
     stream.show()
+    piece_elaborator.show_outer_planar()
